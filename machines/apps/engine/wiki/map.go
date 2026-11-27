@@ -157,16 +157,28 @@ func (c Corpus) Map(open string) (Map, error) {
 	}
 	m.out.Home.Word, m.out.Home.Line = mapWord, mapLine
 	for i, f := range c.Schema.Floors {
-		m.out.Floors = append(m.out.Floors, MapFloor{Index: i, Name: f.Name, Question: f.Question, LabelParts: partsOf(floorLetter+strconv.Itoa(i), f.Name)})
+		floor := MapFloor{Index: i, Name: f.Name, Question: f.Question, LabelParts: partsOf(floorLetter+strconv.Itoa(i), f.Name)}
+		m.meter.floor(floor)
+		if m.meter.spent() {
+			m.out.Cut++
+			continue
+		}
+		m.out.Floors = append(m.out.Floors, floor)
 	}
 	for _, seat := range c.Schema.Seats {
 		m.seat(seat, m.ordered(bySeat[seat.ID]), open)
 	}
 	m.out.Icons = map[string][]string{}
 	for _, icon := range c.Schema.Icons {
-		if slices.ContainsFunc(m.out.Nodes, func(n MapNode) bool { return n.Icon == icon.Name }) {
-			m.out.Icons[icon.Name] = icon.Rows
+		if !slices.ContainsFunc(m.out.Nodes, func(n MapNode) bool { return n.Icon == icon.Name }) {
+			continue
 		}
+		m.meter.icon(icon)
+		if m.meter.spent() {
+			m.out.Cut++
+			continue
+		}
+		m.out.Icons[icon.Name] = icon.Rows
 	}
 	return m.out, nil
 }
@@ -364,6 +376,10 @@ func (m *mapper) section(p *Page, si int, h *Heading, items []Item, parent strin
 	var words, first []string
 	k := 0
 	for _, it := range items {
+		if m.meter.spent() {
+			m.out.Cut++
+			continue
+		}
 		var item MapNode
 		switch it := it.(type) {
 		case *Block:
@@ -431,7 +447,7 @@ func (m *mapper) group(p *Page, g *Group) MapNode {
 }
 
 func (m *mapper) prose(p *Page, pr *Prose, id string) MapNode {
-	paras := Paragraphs(pr.Markdown, m.server.landsFrom(p.ID))
+	paras := paragraphs(pr.Markdown, &linking{lands: m.server.landsFrom(p.ID), m: newMeter()})
 	first, _ := firstSentenceOf(paras)
 	var texts []string
 	for _, p := range paras {

@@ -187,6 +187,8 @@ type ServedField struct {
 	Name string
 	Text string
 	Refs []ServedRef
+	// value: the entries of its list past MaxCellRefs, counted, none served.
+	More int `json:",omitempty"`
 }
 
 type ServedRef struct {
@@ -242,6 +244,8 @@ type ServedFinding struct {
 	// value: the first level that says it: word for one that needs the
 	// owner or a hard one, line for a remark, card for an ambient one.
 	From Detail
+	// value: Says is cut to MaxSaysBytes.
+	Cut bool `json:",omitempty"`
 }
 
 var (
@@ -375,18 +379,22 @@ func (c Corpus) Serve(id string) (Served, error) {
 	s.index()
 	p := &c.Pages[i]
 	reading := s.reading(p.ID)
-	out := Served{
-		Page: s.head(p), Paragraph: Paragraphs(p.Faces.Paragraph, s.landsFrom(p.ID)),
-		Floor: s.floor(reading.Floor), Icons: map[string][]string{},
-	}
-	out.Lede = lede(out.Page, out.Paragraph)
+	out := Served{Page: s.head(p), Floor: s.floor(reading.Floor), Icons: map[string][]string{}}
 	s.m.head(&out.Page)
-	s.m.paragraphs(out.Paragraph)
+	out.Paragraph = s.paragraphs(p.ID, p.Faces.Paragraph)
+	out.Lede = lede(out.Page, out.Paragraph)
 	s.m.runs(out.Lede.First)
+	if s.m.spent() {
+		out.Lede.First = nil
+		s.cut++
+	}
 	for _, icon := range c.Schema.Icons {
+		s.m.icon(icon)
+		if s.m.spent() {
+			s.cut++
+			continue
+		}
 		out.Icons[icon.Name] = icon.Rows
-		s.m.str(icon.Name)
-		s.m.strs(icon.Rows)
 	}
 	for _, f := range c.Report.Findings {
 		if f.Hard {
@@ -398,11 +406,19 @@ func (c Corpus) Serve(id string) (Served, error) {
 			out.Findings = append(out.Findings, served(f, "", p.Faces.Word))
 		}
 	}
+	var cut int
+	out.Findings, cut = s.m.kept(ranked(out.Findings))
+	s.cut += cut
 	for si, sec := range p.Sections {
 		ss := ServedSection{Label: openingLabel, Icon: "home"}
 		if sec.Heading != nil {
 			ss.Heading, ss.Anchor, ss.Rests = sec.Heading.Text, sec.Heading.Anchor, restsOn(sec.Heading.Text)
 			ss.Label, ss.Icon = ss.Heading, sectionIcon(ss.Rests, sec.Items)
+		}
+		s.m.section(ss)
+		if s.m.spent() {
+			s.cut++
+			continue
 		}
 		if si == 0 && sec.Heading == nil {
 			sec.Items = s.afterParagraph(sec.Items, p.Faces.Paragraph)
@@ -421,12 +437,12 @@ func (c Corpus) Serve(id string) (Served, error) {
 		}
 		out.Sections = append(out.Sections, ss)
 	}
-	out.Cut = s.cut
 	mirror(out.Sections)
 	out.Blocks = blocksOf(out.Sections)
-	out.Findings = ranked(out.Findings)
 	out.Attention = attention(out.Findings, out.Sections)
 	out.NeedsYou = needsYou(out.Attention)
+	out.Attention, cut = s.m.kept(out.Attention)
+	out.Cut = s.cut + cut
 	out.Reading = readingOf(out)
 	return out, nil
 }
@@ -509,6 +525,12 @@ func (s *server) index() {
 	}
 }
 
+// invariant: prose is read on the answer's meter, so it stops at the first
+// paragraph or run past what the answer may still take.
+func (s *server) paragraphs(page, markdown string) []Paragraph {
+	return paragraphs(markdown, &linking{lands: s.landsFrom(page), m: s.m})
+}
+
 func (s *server) landsFrom(page string) Lands {
 	return LandsOn(page, func(id string) bool {
 		_, ok := s.pages[id]
@@ -547,7 +569,9 @@ func (s *server) floor(i int) FloorHead {
 
 func (s *server) head(p *Page) PageHead {
 	r := s.reading(p.ID)
-	h := PageHead{ID: p.ID, Seat: r.Seat, Floor: r.Floor, Word: p.Faces.Word, Line: plainOf(p.Faces.Line), Icon: p.Faces.Icon}
+	word, _ := clip(p.Faces.Word, MaxFaceBytes)
+	line, _ := clip(plainOf(p.Faces.Line), MaxFaceBytes)
+	h := PageHead{ID: p.ID, Seat: r.Seat, Floor: r.Floor, Word: word, Line: line, Icon: p.Faces.Icon}
 	if record, ok := s.c.Records[p.ID]; ok {
 		h.Number, h.Title, h.Decision = record.Number, record.Title, s.record(p.ID)
 	}
@@ -590,7 +614,7 @@ func (s *server) afterParagraph(items []Item, paragraph string) []Item {
 func (s *server) item(p *Page, r Reading, it Item, grouped bool) ServedItem {
 	switch it := it.(type) {
 	case *Prose:
-		paras := Paragraphs(it.Markdown, s.landsFrom(p.ID))
+		paras := s.paragraphs(p.ID, it.Markdown)
 		first, more := firstSentenceOf(paras)
 		return ServedItem{Ranks: openRanks(), Max: DetailCard, Prose: &ServedProse{Paragraphs: paras, First: first, More: more}}
 	case *Group:
@@ -738,7 +762,7 @@ func pick(wide bool, a, b Shown) Shown {
 }
 
 func served(f Finding, at, word string) ServedFinding {
-	return ServedFinding{Rule: f.Rule, Hard: f.Hard, Level: f.Level, Line: f.Line, Says: f.Says, At: at, Word: word, From: fromOf(f)}
+	return ServedFinding{Rule: f.Rule, Hard: f.Hard, Level: f.Level, Line: f.Line, Says: f.Says, At: at, Word: word, From: fromOf(f), Cut: f.Cut}
 }
 
 func (s *server) ref(address string) ServedRef {
@@ -773,7 +797,11 @@ func (s *server) field(name string, v Value) ServedField {
 		out.Refs = []ServedRef{s.ref(v.Text)}
 	case ValueList:
 		var texts []string
-		for _, it := range v.List {
+		for i, it := range v.List {
+			if i == MaxCellRefs {
+				out.More = len(v.List) - MaxCellRefs
+				break
+			}
 			if it.Kind == ValueRef {
 				out.Refs = append(out.Refs, s.ref(it.Text))
 			} else {
@@ -798,11 +826,15 @@ func (s *server) table(v *TableView, rows []string, more int) *ServedTable {
 		if !ok {
 			continue
 		}
+		if s.m.spent() {
+			break
+		}
 		row := ServedRow{Address: address, Word: cmp.Or(b.Faces.Word, b.ID), Icon: cmp.Or(b.Faces.Icon, kind.Icon, b.Kind)}
 		r := s.readings[address]
 		for _, col := range v.Columns {
 			row.Cells = append(row.Cells, s.cell(col, b, r))
 		}
+		s.m.row(row)
 		out.Rows = append(out.Rows, row)
 	}
 	out.Count, out.More = len(out.Rows)+more, more

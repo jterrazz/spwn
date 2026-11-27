@@ -2,6 +2,7 @@ package wiki
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"unicode"
@@ -39,6 +40,9 @@ type compiler struct {
 	anchors  map[string]int
 	intro    bool
 	findings []Finding
+	// value: the headings past MaxSections, read as prose, and the first.
+	folded   int
+	foldedAt At
 }
 
 func Compile(id, source string, schema Schema) Page {
@@ -114,6 +118,9 @@ func (c *compiler) run() {
 		i++
 	}
 	c.flush()
+	if c.folded > 0 {
+		c.refuse("S31", "", c.foldedAt, fmt.Sprintf("the page keeps its first %d sections: %d more headings are read as the prose of the last", MaxSections, c.folded))
+	}
 	if c.group != nil {
 		c.refuse("H40", c.group.ID, c.group.At, groupName(c.group)+" is never closed: end it with </Group>")
 		c.group.Span.To = c.x.at(max(0, len(c.x.src)-1)).Line
@@ -218,6 +225,13 @@ func (c *compiler) heading(n int, line string) bool {
 		return true
 	}
 	if level != 2 && level != 3 {
+		return false
+	}
+	if len(c.page.Sections) >= MaxSections {
+		if c.folded == 0 {
+			c.foldedAt = At{Line: n, Col: 1}
+		}
+		c.folded++
 		return false
 	}
 	c.flush()
@@ -399,9 +413,29 @@ func (c *compiler) block(t tag, span Span) *Block {
 	case b.ID != "":
 		b.Address = c.page.ID + "#" + b.ID
 	}
+	switch kind.ID {
+	case "table":
+		c.keepFirst(b, "columns", MaxTableColumns, "columns")
+	case "figure":
+		c.keepFirst(b, "parts", MaxTableRows, "parts")
+	}
 	b.Faces = facesOf(kind, b)
 	b.View = viewOf(kind.ID, b.Props)
 	return b
+}
+
+// invariant: a list a block declares past its limit keeps its first n
+// entries; the rest is dropped before anything reads it, and one S31 says
+// how many.
+func (c *compiler) keepFirst(b *Block, field string, n int, what string) {
+	for i := range b.Props {
+		v := &b.Props[i].Value
+		if b.Props[i].Name != field || v.Kind != ValueList || len(v.List) <= n {
+			continue
+		}
+		c.refuse("S31", b.ID, b.At, fmt.Sprintf("%s %q keeps its first %d %s, and drops %d more", b.Kind, b.ID, n, what, len(v.List)-n))
+		v.List = slices.Clone(v.List[:n])
+	}
 }
 
 func facesOf(kind Kind, b *Block) BlockFaces {

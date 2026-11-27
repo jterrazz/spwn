@@ -3872,6 +3872,7 @@ export type WikiServedDecision = {
 };
 
 export type WikiServedField = {
+    More?: number;
     Name: string;
     Refs: WikiServedRef[] | null;
     Text: string;
@@ -3889,6 +3890,7 @@ export type WikiServedFigure = {
 
 export type WikiServedFinding = {
     At: string;
+    Cut?: boolean;
     From: 'word' | 'line' | 'card' | 'full';
     Hard: boolean;
     Level: '' | 'ambient' | 'needs-you' | 'remark';

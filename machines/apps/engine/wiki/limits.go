@@ -17,6 +17,28 @@ const (
 	// figure drawn from what it shows is served with; past it the rest is
 	// counted (S31), so a page of tables over a page of blocks stays linear.
 	MaxTableRows = 200
+	// value: the most columns a table keeps: the widest table of the
+	// fixture corpus has 4, so 24 leaves a legitimate page six times room;
+	// past it the rest is dropped at the compile and counted (S31), so a
+	// table's cells are at most MaxTableRows times MaxTableColumns.
+	MaxTableColumns = 24
+	// value: the most entries of one list a field or a cell is served with;
+	// past it the rest is counted in the field's More.
+	MaxCellRefs = 20
+	// value: the most sections a page keeps, its opening included: the
+	// fixture corpus's pages hold 8 at most; a heading past it is read as
+	// the prose of the last section kept, and one S31 counts them.
+	MaxSections = 200
+	// value: the most bytes a finding's Says keeps of what it quotes: the
+	// fixture corpus's longest says 190; past it Says is cut on a
+	// character's boundary and marked Cut, so a finding quoting a hostile
+	// key or value weighs this at most.
+	MaxSaysBytes = 320
+	// value: the most bytes of a page's word and line its head is served
+	// with, the one part of wiki.read the meter never cuts: a word and a
+	// line of the fixture corpus are under 300; past it each is cut on a
+	// character's boundary.
+	MaxFaceBytes = 4 << 10
 	// value: the most bytes of JSON one answer of wiki.read or wiki.map is
 	// built to: past it, the items of a page, or the nodes of a map, are
 	// left out from the first that does not fit, and counted.
@@ -75,7 +97,7 @@ func capped(findings []Finding, total map[ruleOn]int) []Finding {
 		if n := seen[on]; n <= maxFindings {
 			out = append(out, f)
 		} else if n == maxFindings+1 {
-			f.Block = ""
+			f.Block, f.Cut = "", false
 			f.Says = fmt.Sprintf("and %d more like it on this page", total[on]-maxFindings)
 			out = append(out, f)
 		}

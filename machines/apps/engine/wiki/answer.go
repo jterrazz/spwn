@@ -43,25 +43,20 @@ func (m *meter) runs(runs []Run) {
 	}
 }
 
-func (m *meter) paragraphs(paras []Paragraph) {
-	for _, p := range paras {
-		m.object(3)
-		m.runs(p.Runs)
-		for _, c := range p.Cells {
-			m.runs(c)
-		}
-	}
+// value: a section's own bytes; its items are measured as they are built.
+func (m *meter) section(s ServedSection) {
+	m.object(7)
+	m.strs([]string{s.Heading, s.Anchor, s.Label, s.Icon})
 }
 
-// value: an item's own bytes; a group's kids are measured as they are
-// built, each on its own.
+// value: an item's own bytes; a group's kids, a prose's paragraphs and a
+// table's rows are measured as they are built, each on its own.
 func (m *meter) item(it ServedItem) {
 	m.object(5)
 	switch {
 	case it.Prose != nil:
 		m.object(4)
 		m.str(it.Prose.ID)
-		m.paragraphs(it.Prose.Paragraphs)
 		m.runs(it.Prose.First)
 	case it.Group != nil:
 		g := it.Group
@@ -93,14 +88,6 @@ func (m *meter) block(b *ServedBlock) {
 		m.object(9)
 		m.strs([]string{t.Of, t.Title, t.Where, t.Mirrors, t.In.Address, t.In.Word})
 		m.strs(t.Columns)
-		for _, r := range t.Rows {
-			if m.spent() {
-				return
-			}
-			m.object(4)
-			m.strs([]string{r.Address, r.Word, r.Icon})
-			m.fields(r.Cells)
-		}
 	}
 	if f := b.Figure; f != nil {
 		m.object(7)
@@ -115,12 +102,20 @@ func (m *meter) block(b *ServedBlock) {
 	}
 }
 
+// value: a table's row, measured as the table builds it, so a table stops
+// at the first row that does not fit; its block counts none of its rows.
+func (m *meter) row(r ServedRow) {
+	m.object(4)
+	m.strs([]string{r.Address, r.Word, r.Icon})
+	m.fields(r.Cells)
+}
+
 func (m *meter) fields(fields []ServedField) {
 	for _, f := range fields {
 		if m.spent() {
 			return
 		}
-		m.object(3)
+		m.object(4)
 		m.str(f.Name)
 		m.str(f.Text)
 		for _, r := range f.Refs {
@@ -139,9 +134,25 @@ func (m *meter) findings(findings []ServedFinding) {
 		if m.spent() {
 			return
 		}
-		m.object(8)
-		m.strs([]string{f.Rule, f.Says, f.At, f.Word})
+		m.finding(f)
 	}
+}
+
+func (m *meter) finding(f ServedFinding) {
+	m.object(9)
+	m.strs([]string{f.Rule, f.Says, f.At, f.Word})
+}
+
+// value: the prefix of findings the answer has room for, each measured as
+// it is kept, and how many are left out.
+func (m *meter) kept(findings []ServedFinding) (kept []ServedFinding, cut int) {
+	for i, f := range findings {
+		m.finding(f)
+		if m.spent() {
+			return findings[:i], len(findings) - i
+		}
+	}
+	return findings, 0
 }
 
 func (m *meter) head(h *PageHead) {
@@ -157,6 +168,17 @@ func (m *meter) decision(d *ServedDecision) {
 	m.strs([]string{d.Page, d.Number, d.Title, d.Status, d.Date, d.Decides})
 	m.strs(d.AmendedBy)
 	m.strs(d.Amends)
+}
+
+func (m *meter) icon(i Icon) {
+	m.str(i.Name)
+	m.strs(i.Rows)
+}
+
+func (m *meter) floor(f MapFloor) {
+	m.object(4)
+	m.strs([]string{f.Name, f.Question})
+	m.strs(f.LabelParts)
 }
 
 // value: a node's own bytes, its id counted twice, as its parent's kids

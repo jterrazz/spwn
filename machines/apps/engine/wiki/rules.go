@@ -4,7 +4,9 @@ import (
 	"cmp"
 	"slices"
 	"strconv"
+	"strings"
 	"sync"
+	"unicode/utf8"
 )
 
 type Level string
@@ -42,7 +44,23 @@ func finding(rule, page, block string, at At, says string) Finding {
 	if !ok {
 		panic("wiki: no rule " + rule)
 	}
-	return Finding{Rule: rule, Hard: level == "", Level: level, Page: page, Block: block, Line: at.Line, Col: at.Col, Says: says}
+	f := Finding{Rule: rule, Hard: level == "", Level: level, Page: page, Block: block, Line: at.Line, Col: at.Col}
+	f.Says, f.Cut = clip(says, MaxSaysBytes)
+	return f
+}
+
+// value: s cut to its first n bytes, on a character's boundary when one is
+// within a character's width, copied so it holds nothing of s; and whether
+// it was cut.
+func clip(s string, n int) (string, bool) {
+	if len(s) <= n {
+		return s, false
+	}
+	end := n
+	for end > n-utf8.UTFMax && !utf8.RuneStart(s[end]) {
+		end--
+	}
+	return strings.Clone(s[:end]), true
 }
 
 func Rules() []string {

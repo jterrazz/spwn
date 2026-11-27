@@ -1,6 +1,7 @@
 package wiki_test
 
 import (
+	"encoding/json"
 	"reflect"
 	"slices"
 	"strconv"
@@ -400,6 +401,7 @@ func FuzzServe(f *testing.F) {
 	f.Add("# Home\n\n<Note id=\"a\" says=\"one.\" then=\"two.\" />\n", "{says} {then} {says} {then} {says}", "{id}")
 	f.Add("# H"+silentText+"\n\nA [x](a"+silentText+"b).\n\n<Note id=\"a\" says=\""+silentText+"\" />\n", "{says}", "{says}")
 	f.Add("<Note/>", "0", "\x10")
+	f.Add("# W\n\n<Note id=\"a\" says=\"x\" />\n\n<Table id=\"t\" of=\"note\" in={ref(\"blueprint/home\")} columns={"+columns("says", 5000)+"} />\n\n"+strings.Repeat("## a\n\n", 5000), "{says}", "{says}")
 	f.Fuzz(func(t *testing.T, source, word, line string) {
 		corpus, err := readAll(map[string][]byte{"wiki.yaml": []byte(noteSchema(word, line)), "blueprint/home.md": []byte(source)})
 		if err != nil {
@@ -424,6 +426,11 @@ func FuzzServe(f *testing.F) {
 		for _, it := range everyItem(s) {
 			if !risesToItsMost(it.Ranks, it.Max) {
 				t.Fatalf("%s: ranks %v over max %q", itemName(it), it.Ranks, it.Max)
+			}
+		}
+		for what, answer := range map[string]any{"wiki.read": s, "wiki.map": m} {
+			if body, _ := json.Marshal(answer); len(body) > wiki.MaxAnswerBytes+answerSlack {
+				t.Fatalf("%s answers %d bytes; want %d at most", what, len(body), wiki.MaxAnswerBytes+answerSlack)
 			}
 		}
 		for i := 1; i < len(s.Reading); i++ {

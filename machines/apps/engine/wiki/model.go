@@ -305,4 +305,7 @@ type Finding struct {
 	Line  int    `json:"line"`
 	Col   int    `json:"col"`
 	Says  string `json:"says"`
+	// value: Says was past MaxSaysBytes and is its first bytes, cut on a
+	// character's boundary.
+	Cut bool `json:"cut,omitempty"`
 }

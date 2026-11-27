@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type Schema struct {
@@ -167,7 +168,9 @@ func fields(specs ...string) []Field {
 
 // invariant: the engine's kinds, SPEC-v1 §5: eight content kinds and five
 // structural ones, their enums r8's (SPEC-primitives, "The Kind schemas").
-func builtinKinds() map[string]Kind {
+// The table is built once, as a serve looks a kind up for each block and
+// each row it builds; no caller writes to it.
+var builtinKinds = sync.OnceValue(func() map[string]Kind {
 	return map[string]Kind{
 		"term": {ID: "term", Fields: fields("means:sentence!", "not:sentence", "code:anchor", "retired:date", "replaced_by:ref"),
 			Faces: FaceTemplates{Word: "{id}", Line: "{means}"}},
@@ -196,7 +199,7 @@ func builtinKinds() map[string]Kind {
 		"lens": {ID: "lens", Structural: true, Fields: fields("of:text", "from:text"),
 			Faces: FaceTemplates{Word: "{id}"}},
 	}
-}
+})
 
 // value: a component's levels, lowest first: the folders of
 // machines/apps/engine/ui/.

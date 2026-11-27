@@ -122,6 +122,29 @@ func TestNoAnswerOfTheFixtureCorpusIsCut(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	for _, f := range c.Report.Findings {
+		if f.Rule == "S31" || f.Cut {
+			t.Errorf("%s: %s %q; a page of the fixture hits no limit", f.Page, f.Rule, f.Says)
+		}
+	}
+	for _, p := range c.Pages {
+		s, _ := c.Serve(p.ID)
+		for _, it := range everyItem(s) {
+			if b := it.Block; b != nil {
+				fields := b.Fields
+				if b.Table != nil {
+					for _, r := range b.Table.Rows {
+						fields = append(fields, r.Cells...)
+					}
+				}
+				for _, f := range fields {
+					if f.More != 0 {
+						t.Errorf("%s: field %s serves %d entries fewer than it holds; want all", b.Address, f.Name, f.More)
+					}
+				}
+			}
+		}
+	}
 	for _, p := range c.Pages {
 		s, err := c.Serve(p.ID)
 		if err != nil {

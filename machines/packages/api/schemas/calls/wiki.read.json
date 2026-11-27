@@ -502,6 +502,9 @@
     "wiki.ServedField": {
       "additionalProperties": false,
       "properties": {
+        "More": {
+          "type": "integer"
+        },
         "Name": {
           "type": "string"
         },
@@ -572,6 +575,9 @@
       "properties": {
         "At": {
           "type": "string"
+        },
+        "Cut": {
+          "type": "boolean"
         },
         "From": {
           "enum": [

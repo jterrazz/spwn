@@ -99,10 +99,27 @@ func Paragraphs(markdown string, lands Lands) []Paragraph {
 
 // value: how a prose's links are read: where its page links land, and,
 // when set, refused, told each link target no Kind serves, in reading
-// order, so the check judges the very links a reader is served.
+// order, so the check judges the very links a reader is served; and, when
+// set, the meter its paragraphs and runs are measured on as they are read,
+// reading stopping once it is spent.
 type linking struct {
 	lands   Lands
 	refused func(target string)
+	m       *meter
+}
+
+func (l *linking) spent() bool { return l != nil && l.m != nil && l.m.spent() }
+
+func (l *linking) run(r Run) {
+	if l != nil && l.m != nil {
+		l.m.runs([]Run{r})
+	}
+}
+
+func (l *linking) paragraph() {
+	if l != nil && l.m != nil {
+		l.m.object(3)
+	}
 }
 
 func paragraphs(markdown string, links *linking) []Paragraph {
@@ -114,12 +131,15 @@ func paragraphs(markdown string, links *linking) []Paragraph {
 	var form ProseForm
 	var lines []string
 	flush := func() {
-		if len(lines) > 0 {
+		if len(lines) > 0 && !links.spent() {
+			links.paragraph()
 			out = append(out, Paragraph{Form: form, Runs: runs(strings.Join(lines, " "), links)})
 		}
 		lines = nil
 	}
-	for _, raw := range strings.Split(markdown, "\n") {
+	for rest := markdown; rest != "" && !links.spent(); {
+		var raw string
+		raw, rest, _ = strings.Cut(rest, "\n")
 		line := strings.TrimSpace(raw)
 		switch {
 		case line == "":
@@ -133,8 +153,14 @@ func paragraphs(markdown string, links *linking) []Paragraph {
 				continue
 			}
 			p := Paragraph{Form: FormRow}
-			for _, cell := range strings.Split(strings.Trim(line, "|"), "|") {
+			links.paragraph()
+			for cells := strings.Trim(line, "|"); !links.spent(); {
+				cell, after, more := strings.Cut(cells, "|")
 				p.Cells = append(p.Cells, runs(strings.TrimSpace(cell), links))
+				if !more {
+					break
+				}
+				cells = after
 			}
 			out = append(out, p)
 		case strings.HasPrefix(line, "- ") || strings.HasPrefix(line, "* "):
@@ -187,9 +213,12 @@ func runs(text string, links *linking) []Run {
 	var plain strings.Builder
 	emit := func(s Run) {
 		if plain.Len() > 0 {
-			out = append(out, Run{Text: plain.String()})
+			r := Run{Text: plain.String()}
+			links.run(r)
+			out = append(out, r)
 			plain.Reset()
 		}
+		links.run(s)
 		out = append(out, s)
 	}
 	// invariant: the next "](" and the next ")" after it are each found
@@ -213,7 +242,7 @@ func runs(text string, links *linking) []Run {
 		}
 		return mid, end
 	}
-	for i := 0; i < len(text); {
+	for i := 0; i < len(text) && !links.spent(); {
 		rest := text[i:]
 		switch {
 		case strings.HasPrefix(rest, "**"):
@@ -256,7 +285,9 @@ func runs(text string, links *linking) []Run {
 		i++
 	}
 	if plain.Len() > 0 {
-		out = append(out, Run{Text: plain.String()})
+		r := Run{Text: plain.String()}
+		links.run(r)
+		out = append(out, r)
 	}
 	return out
 }
