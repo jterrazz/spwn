@@ -63,6 +63,26 @@ describe('StateMark', () => {
         expect(result.html.text).toContain('title="running"');
     });
 
+    test('a word with no room is cut after its last whole word, and stays whole for the reader and as its title', async () => {
+        // Given - a failure said in a cell 120 px wide, and the same with the room it needs
+        const narrow = await component.render(
+            <div style={{ display: 'flex', width: 120 }}>
+                <StateMark fit="words" tone="bad" word="1 machine not created" />
+            </div>,
+        );
+        const wide = await component.render(
+            <div style={{ display: 'flex', width: 400 }}>
+                <StateMark fit="words" tone="bad" word="1 machine not created" />
+            </div>,
+        );
+
+        // Then - the narrow one ends on a whole word and its `…`, read whole; the wide one is drawn as is
+        expect(narrow.html.text).toContain('title="1 machine not created">1 machine not…</span>');
+        expect(narrow.tree.text).toBe('- text: 1 machine not created');
+        expect(wide.tree.text).toBe('- text: 1 machine not created');
+        expect(wide.html.text).not.toContain('title=');
+    });
+
     test('a state other than calm draws its word once, and hides its mark from the reader', async () => {
         // Given - a machine down, a machine stopped, and one whose word is written before its mark
         const down = await component.render(<StateMark tone="bad" word="down" />);
