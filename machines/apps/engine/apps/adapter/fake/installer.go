@@ -193,10 +193,18 @@ func (f *Installer) runKeys(ctx context.Context, verb string, keys []string, app
 	if err := f.Ready(ctx); err != nil {
 		return err
 	}
+	held, err := f.applyKeys(verb, keys, apply)
+	if err != nil {
+		return err
+	}
+	return wait(ctx, held)
+}
+
+func (f *Installer) applyKeys(verb string, keys []string, apply func(s *world.Manager, key string)) (bool, error) {
 	f.w.Lock()
+	defer f.w.Unlock()
 	if f.w.Fails("Installer." + verb) {
-		f.w.Unlock()
-		return errScripted
+		return false, errScripted
 	}
 	held := f.w.Holds("Installer." + verb)
 	for n, k := range keys {
@@ -208,8 +216,7 @@ func (f *Installer) runKeys(ctx context.Context, verb string, keys []string, app
 			land(f.w, f.mac, f.manager(), k)
 		}
 	}
-	f.w.Unlock()
-	return wait(ctx, held)
+	return held, nil
 }
 
 func (f *Installer) allows(verb string) bool {
@@ -494,14 +501,15 @@ func BundlerOf(w *world.World, mac string) *Bundler { return &Bundler{w: w, mac:
 func (b *Bundler) Name() string { return "the bundle" }
 
 func (b *Bundler) Bundle(ctx context.Context, lines []string, update bool, _ contract.Logs) error {
-	b.w.Lock()
-	if b.w.Fails("Bundler.Bundle") {
-		b.w.Unlock()
-		return errScripted
-	}
-	held := b.w.Holds("Bundler.Bundle")
-	err := b.apply(lines, update, held)
-	b.w.Unlock()
+	held, err := func() (bool, error) {
+		b.w.Lock()
+		defer b.w.Unlock()
+		if b.w.Fails("Bundler.Bundle") {
+			return false, errScripted
+		}
+		held := b.w.Holds("Bundler.Bundle")
+		return held, b.apply(lines, update, held)
+	}()
 	if err != nil {
 		return err
 	}

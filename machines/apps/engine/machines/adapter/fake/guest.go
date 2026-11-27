@@ -137,9 +137,11 @@ func (g *Guests) answering(vm string) (*world.Guest, bool) {
 }
 
 func (g *Guests) Dial(_ context.Context, t contract.GuestTarget) (contract.Guest, error) {
-	g.w.Lock()
-	refused, noRoute := g.w.Fails("Guest.Dial"), g.w.Fails("Guest.NoRoute")
-	g.w.Unlock()
+	refused, noRoute := func() (bool, bool) {
+		g.w.Lock()
+		defer g.w.Unlock()
+		return g.w.Fails("Guest.Dial"), g.w.Fails("Guest.NoRoute")
+	}()
 	if refused {
 		return nil, ErrRefused
 	}

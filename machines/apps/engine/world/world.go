@@ -690,8 +690,9 @@ func (m *Mac) GiveTurn() { m.turn = false }
 func (w *World) Fails(call string) bool {
 	// invariant: a scripted fault fails its call and is spent; one with no
 	// count fails every call. A scripted panic panics there instead, spent
-	// as a fault is, as the fake's own code would on a bug: its deferred
-	// unlocks run as the panic unwinds.
+	// as a fault is, as the fake's own code would on a bug: every fake
+	// calls Fails under a deferred unlock of the world, so the break's
+	// report finds the world free as the panic unwinds.
 	for i, f := range w.Script {
 		if f.Call != call || f.Hold {
 			continue

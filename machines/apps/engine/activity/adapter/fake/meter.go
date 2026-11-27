@@ -46,9 +46,11 @@ func (m *Meter) Sample(ctx context.Context) (activity.Sample, error) {
 	if err := ctx.Err(); err != nil {
 		return activity.Sample{}, err
 	}
-	m.w.Lock()
-	silent := m.w.Fails("Meter.Sample")
-	m.w.Unlock()
+	silent := func() bool {
+		m.w.Lock()
+		defer m.w.Unlock()
+		return m.w.Fails("Meter.Sample")
+	}()
 	if silent {
 		return activity.Sample{}, ErrSilent
 	}

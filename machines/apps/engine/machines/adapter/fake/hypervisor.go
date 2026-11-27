@@ -469,24 +469,28 @@ func (r *run) VM() string  { return r.vm }
 func (r *run) PID() int    { return r.pid }
 func (r *run) Holder() int { return r.pid }
 
+func (r *run) readEnd() {
+	r.h.w.Lock()
+	defer r.h.w.Unlock()
+	v, ok := r.h.thisMac().VMs[r.vm]
+	switch {
+	case ok && v.PID == r.pid:
+	case ok && v.Ended != nil && r.h.w.Fails("Hypervisor.Ended"):
+		r.end, v.Ended = &machines.RunEnd{Reason: machines.Unknown, ExitCode: -1}, nil
+	case ok && v.Ended != nil:
+		end := *v.Ended
+		end.LastLines = machines.LastLines(console(v, machines.ConsoleWindow))
+		r.end, v.Ended = &end, nil
+	default:
+		r.end = &machines.RunEnd{Reason: machines.Unknown, ExitCode: -1}
+	}
+}
+
 func (r *run) Ended() <-chan machines.RunEnd {
 	r.once.Lock()
 	defer r.once.Unlock()
 	if r.end == nil {
-		r.h.w.Lock()
-		v, ok := r.h.thisMac().VMs[r.vm]
-		switch {
-		case ok && v.PID == r.pid:
-		case ok && v.Ended != nil && r.h.w.Fails("Hypervisor.Ended"):
-			r.end, v.Ended = &machines.RunEnd{Reason: machines.Unknown, ExitCode: -1}, nil
-		case ok && v.Ended != nil:
-			end := *v.Ended
-			end.LastLines = machines.LastLines(console(v, machines.ConsoleWindow))
-			r.end, v.Ended = &end, nil
-		default:
-			r.end = &machines.RunEnd{Reason: machines.Unknown, ExitCode: -1}
-		}
-		r.h.w.Unlock()
+		r.readEnd()
 	}
 	ch := make(chan machines.RunEnd, 1)
 	if r.end != nil {

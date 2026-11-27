@@ -1157,11 +1157,13 @@ func (m *worldMac) serveLocked() *remotefake.Dialer {
 type worldDialer struct{ r *worldRun }
 
 func (d worldDialer) Dial(ctx context.Context, mac string) (remotecontract.Endpoint, error) {
-	d.r.w.Lock()
-	slice, ok := d.r.w.Macs[mac]
-	reach := ok && !slice.Offline && !slice.Locked && slice.Engine != nil && !d.r.w.Now.Before(slice.Back)
-	bare := reach && d.r.w.Fails("EndpointDialer.Dial")
-	d.r.w.Unlock()
+	reach, bare := func() (bool, bool) {
+		d.r.w.Lock()
+		defer d.r.w.Unlock()
+		slice, ok := d.r.w.Macs[mac]
+		reach := ok && !slice.Offline && !slice.Locked && slice.Engine != nil && !d.r.w.Now.Before(slice.Back)
+		return reach, reach && d.r.w.Fails("EndpointDialer.Dial")
+	}()
 	if !reach || d.r.far == nil {
 		return nil, fail.New(fail.Unreachable, call.Unreachable, mac, nil)
 	}
@@ -1631,14 +1633,16 @@ func (g worldGuests) hostKey(t contract.GuestTarget) error {
 }
 
 func (g worldGuest) Exec(ctx context.Context, cmd contract.GuestCommand) (contract.GuestResult, error) {
-	g.r.w.Lock()
-	slice, ok := g.r.w.Macs[g.vm]
-	ok = ok && slice.Self != nil
-	if !ok {
-		slice, ok = madeSlice(g.r.w, g.vm)
-	}
-	ok = ok && (cmd.Line != unix.Guest || !g.r.w.Fails("Guest.Serve"))
-	g.r.w.Unlock()
+	slice, ok := func() (*world.Mac, bool) {
+		g.r.w.Lock()
+		defer g.r.w.Unlock()
+		slice, ok := g.r.w.Macs[g.vm]
+		ok = ok && slice.Self != nil
+		if !ok {
+			slice, ok = madeSlice(g.r.w, g.vm)
+		}
+		return slice, ok && (cmd.Line != unix.Guest || !g.r.w.Fails("Guest.Serve"))
+	}()
 	if cmd.Line != unix.Guest || !ok || g.r.far == nil || cmd.Stdin == nil {
 		return g.Guest.Exec(ctx, cmd)
 	}
