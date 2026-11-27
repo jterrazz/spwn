@@ -25,13 +25,17 @@ func (b *swapBeforeCreate) EnsureImageWithContext(context.Context, string, strin
 type startsThenRemoves struct {
 	*imageStepBackend
 	removed chan string
+	started bool
 }
 
 func (b *startsThenRemoves) EnsureImageWithContext(context.Context, string, string, []byte, map[string][]byte, io.Writer) (bool, error) {
 	return true, nil
 }
 
-func (b *startsThenRemoves) Start(context.Context, string) error { return nil }
+func (b *startsThenRemoves) Start(context.Context, string) error {
+	b.started = true
+	return nil
+}
 
 func (b *startsThenRemoves) Remove(_ context.Context, id string) error {
 	b.removed <- id
@@ -42,10 +46,8 @@ func TestSpawn_ABindSourceSwappedWhileTheContainerStartsRemovesIt(t *testing.T) 
 	isolateSpawn(t)
 	b := &startsThenRemoves{imageStepBackend: newImageStepBackend(), removed: make(chan string, 1)}
 	changed := errors.New("kn changed while starting")
-	calls := 0
 	recheck := func() error {
-		calls++
-		if calls == 2 {
+		if b.started {
 			return changed
 		}
 		return nil
