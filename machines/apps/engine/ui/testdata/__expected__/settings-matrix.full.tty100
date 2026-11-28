@@ -1,47 +1,50 @@
-32 settings on 4 machines · 20 need a look · infra is a server: not checked
+33 settings on 4 machines · 20 need a look · infra is a server: not checked
 
 Needs a look
-  ◐ This Mac  git-shortcuts   changed since 2 d ago
+  ◐ This Mac  git-shortcuts      changed since 2 d ago
     → station settings diff git-shortcuts
-  ◐ This Mac  authorized-key  changed since 2 d ago
-    → station settings diff authorized-key
-  ◐ This Mac  ssh-key         changed since 2 d ago                → station settings diff ssh-key
-  ◐ This Mac  tart-launcher   changed since 2 d ago
-    → station settings diff tart-launcher
-  ◐ This Mac  firewall        off
+  ◐ This Mac  tmux-dotfiles      changed since 2 d ago
+    → station settings diff tmux-dotfiles
+  ◐ This Mac  spotlight-exclude  changed since 2 d ago
+    → station settings diff spotlight-exclude
+  ◐ This Mac  dock-spacer        changed since 2 d ago
+    → station settings diff dock-spacer
+  ◐ This Mac  firewall           off
     → System Settings > Network > Firewall
-  ◐ This Mac  screen-lock     locks after 10 min · expected 5 min  → System Settings > Lock Screen
-  ◐ mac-mini  git-shortcuts   changed since 2 d ago
+  ◐ This Mac  screen-lock        locks after 10 min · expected 5 min
+    → System Settings > Lock Screen
+  ◐ mac-mini  git-shortcuts      changed since 2 d ago
     → station settings diff git-shortcuts --on mac-mini
-  ◐ mac-mini  authorized-key  changed since 2 d ago
-    → station settings diff authorized-key --on mac-mini
-  ◐ mac-mini  ssh-key         changed since 2 d ago
-    → station settings diff ssh-key --on mac-mini
-  ◐ mac-mini  tart-launcher   changed since 2 d ago
-    → station settings diff tart-launcher --on mac-mini
-  ◐ mac-mini  firewall        off
+  ◐ mac-mini  tmux-dotfiles      changed since 2 d ago
+    → station settings diff tmux-dotfiles --on mac-mini
+  ◐ mac-mini  spotlight-exclude  changed since 2 d ago
+    → station settings diff spotlight-exclude --on mac-mini
+  ◐ mac-mini  dock-spacer        changed since 2 d ago
+    → station settings diff dock-spacer --on mac-mini
+  ◐ mac-mini  firewall           off
     → System Settings > Network > Firewall
-  ◐ mac-mini  screen-lock     locks after 10 min · expected 5 min  → System Settings > Lock Screen
-  ◐ linux-1   git-shortcuts   changed since 2 d ago
+  ◐ mac-mini  screen-lock        locks after 10 min · expected 5 min
+    → System Settings > Lock Screen
+  ◐ linux-1   git-shortcuts      changed since 2 d ago
     → station settings diff git-shortcuts --on linux-1
-  ◐ linux-1   authorized-key  changed since 2 d ago
-    → station settings diff authorized-key --on linux-1
-  ◐ linux-1   ssh-key         changed since 2 d ago
-    → station settings diff ssh-key --on linux-1
-  ◐ linux-1   tart-launcher   changed since 2 d ago
-    → station settings diff tart-launcher --on linux-1
-  ◐ api       git-shortcuts   changed since 2 d ago                → station machines start api
-  ◐ api       authorized-key  changed since 2 d ago                → station machines start api
-  ◐ api       ssh-key         changed since 2 d ago                → station machines start api
-  ◐ api       tart-launcher   changed since 2 d ago                → station machines start api
+  ◐ linux-1   tmux-dotfiles      changed since 2 d ago
+    → station settings diff tmux-dotfiles --on linux-1
+  ◐ linux-1   spotlight-exclude  changed since 2 d ago
+    → station settings diff spotlight-exclude --on linux-1
+  ◐ linux-1   dock-spacer        changed since 2 d ago
+    → station settings diff dock-spacer --on linux-1
+  ◐ api       git-shortcuts      changed since 2 d ago                → station machines start api
+  ◐ api       tmux-dotfiles      changed since 2 d ago                → station machines start api
+  ◐ api       spotlight-exclude  changed since 2 d ago                → station machines start api
+  ◐ api       dock-spacer        changed since 2 d ago                → station machines start api
 Machines  ● 3  ○ 1  – 1 · This Mac, mac-mini, linux-1, api, infra
 Set by Machines
-                    This Mac  mac-mini  linux-1  api     OK
-  ◐ git-shortcuts   ◐         ◐         ◐        ◐       0/4
-  ◐ authorized-key  ◐         ◐         ◐        ◐       0/4
-  ◐ ssh-key         ◐         ◐         ◐        ◐       0/4
-  ◐ tart-launcher   ◐         ◐         ◐        ◐       0/4
-  ○ 14 more         ○ 4/11    ○ 4/11    ○ 4/11   ○ 4/11  16/44
+                       This Mac  mac-mini  linux-1  api     OK
+  ◐ git-shortcuts      ◐         ◐         ◐        ◐       0/4
+  ◐ tmux-dotfiles      ◐         ◐         ◐        ◐       0/4
+  ◐ spotlight-exclude  ◐         ◐         ◐        ◐       0/4
+  ◐ dock-spacer        ◐         ◐         ◐        ◐       0/4
+  ○ 15 more            ○ 4/12    ○ 4/12    ○ 4/12   ○ 4/12  16/48
 Always-on Mac
                 This Mac  mac-mini  linux-1  api  OK
   ○ 5 settings  ○         ○         –        –    –

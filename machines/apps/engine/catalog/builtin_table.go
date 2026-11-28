@@ -3232,6 +3232,8 @@ func builtinCatalog() (Catalog, error) {
 							Formula: "rtk"}}},
 				Provides: []string{
 					"rtk"},
+				Then: []string{
+					"rtk-claude-hook"},
 				Disk: Disk{
 					Paths: []Stored{
 						{
@@ -4321,6 +4323,22 @@ func builtinCatalog() (Catalog, error) {
 					{
 						Path:  "~/.hushlogin",
 						Level: "settings"}}},
+			{
+				Name:        "rtk-claude-hook",
+				Description: "Claude Code's Bash commands go through rtk, by the hook rtk's own init writes",
+				Category:    "Terminal",
+				Kinds: []MachineKind{
+					"mac",
+					"linux",
+					"macos"},
+				Requires: "rtk",
+				Effect: Dotfiles{
+					Files: []Copy{
+						{
+							From: "rtk/claude-settings.json",
+							To:   "~/.claude/settings.json"}},
+					Mode: "merge"},
+				Reversible: true},
 			{
 				Name:        "starship-dotfiles",
 				Description: "The Starship prompt settings",
@@ -7873,6 +7891,8 @@ func builtinCatalog() (Catalog, error) {
 					Replaces:    "raw dev commands (token-heavy output)",
 					Provides: []string{
 						"rtk"},
+					Then: []string{
+						"rtk-claude-hook"},
 					Methods: []MethodSpec{
 						{
 							Selector: Selector{
@@ -9002,6 +9022,28 @@ func builtinCatalog() (Catalog, error) {
 							Level: "settings"}}},
 				Folder: "terminal",
 				File:   "packages/terminal/hushlogin.yaml",
+				Origin: "built-in"},
+			{
+				Package: Package{
+					Package:     "station.package/v1",
+					Kind:        "setting",
+					Name:        "rtk-claude-hook",
+					Description: "Claude Code's Bash commands go through rtk, by the hook rtk's own init writes",
+					Requires: []string{
+						"rtk"},
+					Reversible: true,
+					Methods: []MethodSpec{
+						{
+							Selector: Selector{
+								OS: "any"},
+							File: &FileMethod{
+								Copy: []Copy{
+									{
+										From: "rtk/claude-settings.json",
+										To:   "~/.claude/settings.json"}},
+								Mode: "merge"}}}},
+				Folder: "terminal",
+				File:   "packages/terminal/rtk-claude-hook.yaml",
 				Origin: "built-in"},
 			{
 				Package: Package{

@@ -1,0 +1,31 @@
+description: rtk's Claude Code hook lands in a fresh home, the one entry rtk's init writes
+fixture: ../__fixtures__/rtk/
+env: two-macs
+runs:
+    - command: 'settings apply rtk-claude-hook'
+      exit: 0
+      stdout: |
+          ●	rtk-claude-hook	~/.claude/settings.json: merged
+    - command: '--version >/dev/null; /bin/cat .claude/settings.json; /bin/ls -l .claude/settings.json | /usr/bin/cut -c1-10'
+      exit: 0
+      stdout: |
+          {
+            "hooks": {
+              "PreToolUse": [
+                {
+                  "matcher": "Bash",
+                  "hooks": [
+                    {
+                      "type": "command",
+                      "command": "rtk hook claude"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          -rw-------
+    - command: 'settings rtk-claude-hook | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ●	rtk-claude-hook	applied · ~/.claude/settings.json

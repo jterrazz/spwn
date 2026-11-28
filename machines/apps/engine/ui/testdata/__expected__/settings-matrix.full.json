@@ -29,7 +29,7 @@
           "row": {
             "id": "summary/settings",
             "mark": "ok",
-            "label": "32 settings on 4 machines",
+            "label": "33 settings on 4 machines",
             "cells": [
               {
                 "kind": "list",
@@ -95,14 +95,14 @@
         },
         {
           "row": {
-            "id": "macbook-pro/authorized-key",
+            "id": "macbook-pro/tmux-dotfiles",
             "mark": "attention",
             "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
                 "kind": "text",
-                "text": "authorized-key"
+                "text": "tmux-dotfiles"
               },
               {
                 "kind": "text",
@@ -111,20 +111,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff authorized-key"
+              "command": "station settings diff tmux-dotfiles"
             }
           }
         },
         {
           "row": {
-            "id": "macbook-pro/ssh-key",
+            "id": "macbook-pro/spotlight-exclude",
             "mark": "attention",
             "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
                 "kind": "text",
-                "text": "ssh-key"
+                "text": "spotlight-exclude"
               },
               {
                 "kind": "text",
@@ -133,20 +133,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff ssh-key"
+              "command": "station settings diff spotlight-exclude"
             }
           }
         },
         {
           "row": {
-            "id": "macbook-pro/tart-launcher",
+            "id": "macbook-pro/dock-spacer",
             "mark": "attention",
             "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
                 "kind": "text",
-                "text": "tart-launcher"
+                "text": "dock-spacer"
               },
               {
                 "kind": "text",
@@ -155,7 +155,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff tart-launcher"
+              "command": "station settings diff dock-spacer"
             }
           }
         },
@@ -243,14 +243,14 @@
         },
         {
           "row": {
-            "id": "mac-mini/authorized-key",
+            "id": "mac-mini/tmux-dotfiles",
             "mark": "attention",
             "label": "mac-mini",
             "short": "mac-mini",
             "cells": [
               {
                 "kind": "text",
-                "text": "authorized-key"
+                "text": "tmux-dotfiles"
               },
               {
                 "kind": "text",
@@ -259,20 +259,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff authorized-key --on mac-mini"
+              "command": "station settings diff tmux-dotfiles --on mac-mini"
             }
           }
         },
         {
           "row": {
-            "id": "mac-mini/ssh-key",
+            "id": "mac-mini/spotlight-exclude",
             "mark": "attention",
             "label": "mac-mini",
             "short": "mac-mini",
             "cells": [
               {
                 "kind": "text",
-                "text": "ssh-key"
+                "text": "spotlight-exclude"
               },
               {
                 "kind": "text",
@@ -281,20 +281,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff ssh-key --on mac-mini"
+              "command": "station settings diff spotlight-exclude --on mac-mini"
             }
           }
         },
         {
           "row": {
-            "id": "mac-mini/tart-launcher",
+            "id": "mac-mini/dock-spacer",
             "mark": "attention",
             "label": "mac-mini",
             "short": "mac-mini",
             "cells": [
               {
                 "kind": "text",
-                "text": "tart-launcher"
+                "text": "dock-spacer"
               },
               {
                 "kind": "text",
@@ -303,7 +303,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff tart-launcher --on mac-mini"
+              "command": "station settings diff dock-spacer --on mac-mini"
             }
           }
         },
@@ -391,14 +391,14 @@
         },
         {
           "row": {
-            "id": "linux-1/authorized-key",
+            "id": "linux-1/tmux-dotfiles",
             "mark": "attention",
             "label": "linux-1",
             "short": "linux-1",
             "cells": [
               {
                 "kind": "text",
-                "text": "authorized-key"
+                "text": "tmux-dotfiles"
               },
               {
                 "kind": "text",
@@ -407,20 +407,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff authorized-key --on linux-1"
+              "command": "station settings diff tmux-dotfiles --on linux-1"
             }
           }
         },
         {
           "row": {
-            "id": "linux-1/ssh-key",
+            "id": "linux-1/spotlight-exclude",
             "mark": "attention",
             "label": "linux-1",
             "short": "linux-1",
             "cells": [
               {
                 "kind": "text",
-                "text": "ssh-key"
+                "text": "spotlight-exclude"
               },
               {
                 "kind": "text",
@@ -429,20 +429,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff ssh-key --on linux-1"
+              "command": "station settings diff spotlight-exclude --on linux-1"
             }
           }
         },
         {
           "row": {
-            "id": "linux-1/tart-launcher",
+            "id": "linux-1/dock-spacer",
             "mark": "attention",
             "label": "linux-1",
             "short": "linux-1",
             "cells": [
               {
                 "kind": "text",
-                "text": "tart-launcher"
+                "text": "dock-spacer"
               },
               {
                 "kind": "text",
@@ -451,7 +451,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff tart-launcher --on linux-1"
+              "command": "station settings diff dock-spacer --on linux-1"
             }
           }
         },
@@ -479,14 +479,14 @@
         },
         {
           "row": {
-            "id": "api/authorized-key",
+            "id": "api/tmux-dotfiles",
             "mark": "attention",
             "label": "api",
             "short": "api",
             "cells": [
               {
                 "kind": "text",
-                "text": "authorized-key"
+                "text": "tmux-dotfiles"
               },
               {
                 "kind": "text",
@@ -501,14 +501,14 @@
         },
         {
           "row": {
-            "id": "api/ssh-key",
+            "id": "api/spotlight-exclude",
             "mark": "attention",
             "label": "api",
             "short": "api",
             "cells": [
               {
                 "kind": "text",
-                "text": "ssh-key"
+                "text": "spotlight-exclude"
               },
               {
                 "kind": "text",
@@ -523,14 +523,14 @@
         },
         {
           "row": {
-            "id": "api/tart-launcher",
+            "id": "api/dock-spacer",
             "mark": "attention",
             "label": "api",
             "short": "api",
             "cells": [
               {
                 "kind": "text",
-                "text": "tart-launcher"
+                "text": "dock-spacer"
               },
               {
                 "kind": "text",
@@ -777,9 +777,9 @@
         },
         {
           "row": {
-            "id": "authorized-key",
+            "id": "tmux-dotfiles",
             "mark": "attention",
-            "label": "authorized-key",
+            "label": "tmux-dotfiles",
             "cells": [
               {
                 "kind": "text",
@@ -807,9 +807,9 @@
         },
         {
           "row": {
-            "id": "ssh-key",
+            "id": "spotlight-exclude",
             "mark": "attention",
-            "label": "ssh-key",
+            "label": "spotlight-exclude",
             "cells": [
               {
                 "kind": "text",
@@ -837,9 +837,9 @@
         },
         {
           "row": {
-            "id": "tart-launcher",
+            "id": "dock-spacer",
             "mark": "attention",
-            "label": "tart-launcher",
+            "label": "dock-spacer",
             "cells": [
               {
                 "kind": "text",
@@ -869,31 +869,31 @@
           "row": {
             "id": "folded",
             "mark": "absent",
-            "label": "14 more",
+            "label": "15 more",
             "cells": [
               {
                 "kind": "text",
-                "text": "4/11",
+                "text": "4/12",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "4/11",
+                "text": "4/12",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "4/11",
+                "text": "4/12",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "4/11",
+                "text": "4/12",
                 "label": "absent"
               },
               {
                 "kind": "text",
-                "text": "16/44"
+                "text": "16/48"
               }
             ]
           }
@@ -1126,6 +1126,7 @@
         "git-shortcuts",
         "ghostty-dotfiles",
         "hushlogin",
+        "rtk-claude-hook",
         "starship-dotfiles",
         "tmux-dotfiles",
         "authorized-key",
@@ -1158,6 +1159,7 @@
         "git-shortcuts",
         "ghostty-dotfiles",
         "hushlogin",
+        "rtk-claude-hook",
         "starship-dotfiles",
         "tmux-dotfiles",
         "authorized-key",

@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "15 set by Machines here"
+                    "text": "16 set by Machines here"
                   },
                   {
                     "kind": "text",
@@ -91,9 +91,9 @@
         },
         {
           "row": {
-            "id": "authorized-key",
+            "id": "tmux-dotfiles",
             "mark": "attention",
-            "label": "authorized-key",
+            "label": "tmux-dotfiles",
             "cells": [
               {
                 "kind": "text",
@@ -102,15 +102,15 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff authorized-key"
+              "command": "station settings diff tmux-dotfiles"
             }
           }
         },
         {
           "row": {
-            "id": "ssh-key",
+            "id": "spotlight-exclude",
             "mark": "attention",
-            "label": "ssh-key",
+            "label": "spotlight-exclude",
             "cells": [
               {
                 "kind": "text",
@@ -119,15 +119,15 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff ssh-key"
+              "command": "station settings diff spotlight-exclude"
             }
           }
         },
         {
           "row": {
-            "id": "tart-launcher",
+            "id": "dock-spacer",
             "mark": "attention",
-            "label": "tart-launcher",
+            "label": "dock-spacer",
             "cells": [
               {
                 "kind": "text",
@@ -136,7 +136,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff tart-launcher"
+              "command": "station settings diff dock-spacer"
             }
           }
         },
@@ -234,9 +234,9 @@
         },
         {
           "row": {
-            "id": "authorized-key",
+            "id": "tmux-dotfiles",
             "mark": "attention",
-            "label": "authorized-key",
+            "label": "tmux-dotfiles",
             "cells": [
               {
                 "kind": "text",
@@ -245,15 +245,15 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff authorized-key"
+              "command": "station settings diff tmux-dotfiles"
             }
           }
         },
         {
           "row": {
-            "id": "ssh-key",
+            "id": "spotlight-exclude",
             "mark": "attention",
-            "label": "ssh-key",
+            "label": "spotlight-exclude",
             "cells": [
               {
                 "kind": "text",
@@ -262,15 +262,15 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff ssh-key"
+              "command": "station settings diff spotlight-exclude"
             }
           }
         },
         {
           "row": {
-            "id": "tart-launcher",
+            "id": "dock-spacer",
             "mark": "attention",
-            "label": "tart-launcher",
+            "label": "dock-spacer",
             "cells": [
               {
                 "kind": "text",
@@ -279,7 +279,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff tart-launcher"
+              "command": "station settings diff dock-spacer"
             }
           }
         },
@@ -301,9 +301,9 @@
         },
         {
           "row": {
-            "id": "dns",
+            "id": "authorized-key",
             "mark": "absent",
-            "label": "dns",
+            "label": "authorized-key",
             "cells": [
               {
                 "kind": "text",
@@ -311,15 +311,15 @@
               }
             ],
             "hint": {
-              "command": "station settings apply dns"
+              "command": "station settings apply authorized-key"
             }
           }
         },
         {
           "row": {
-            "id": "zed-dotfiles",
+            "id": "ssh-key",
             "mark": "absent",
-            "label": "zed-dotfiles",
+            "label": "ssh-key",
             "cells": [
               {
                 "kind": "text",
@@ -327,15 +327,15 @@
               }
             ],
             "hint": {
-              "command": "station settings apply zed-dotfiles"
+              "command": "station settings apply ssh-key"
             }
           }
         },
         {
           "row": {
-            "id": "tailscale-cli",
+            "id": "tart-launcher",
             "mark": "absent",
-            "label": "tailscale-cli",
+            "label": "tart-launcher",
             "cells": [
               {
                 "kind": "text",
@@ -343,7 +343,7 @@
               }
             ],
             "hint": {
-              "command": "station settings apply tailscale-cli"
+              "command": "station settings apply tart-launcher"
             }
           }
         },
@@ -371,9 +371,9 @@
         },
         {
           "row": {
-            "id": "tmux-dotfiles",
+            "id": "starship-dotfiles",
             "mark": "ok",
-            "label": "tmux-dotfiles",
+            "label": "starship-dotfiles",
             "cells": [
               {
                 "kind": "list",
@@ -384,7 +384,7 @@
                   },
                   {
                     "kind": "text",
-                    "text": "~/.tmux-dotfiles"
+                    "text": "~/.starship-dotfiles"
                   }
                 ]
               }
@@ -393,9 +393,9 @@
         },
         {
           "row": {
-            "id": "spotlight-exclude",
+            "id": "github-login",
             "mark": "ok",
-            "label": "spotlight-exclude",
+            "label": "github-login",
             "cells": [
               {
                 "kind": "list",
@@ -406,7 +406,7 @@
                   },
                   {
                     "kind": "text",
-                    "text": "~/.spotlight-exclude"
+                    "text": "~/.github-login"
                   }
                 ]
               }
@@ -415,9 +415,9 @@
         },
         {
           "row": {
-            "id": "dock-spacer",
+            "id": "dock-reset",
             "mark": "ok",
-            "label": "dock-spacer",
+            "label": "dock-reset",
             "cells": [
               {
                 "kind": "list",
@@ -428,7 +428,7 @@
                   },
                   {
                     "kind": "text",
-                    "text": "~/.dock-spacer"
+                    "text": "~/.dock-reset"
                   }
                 ]
               }
@@ -450,9 +450,9 @@
         },
         {
           "row": {
-            "id": "git-signing",
+            "id": "dns",
             "mark": "off-here",
-            "label": "git-signing",
+            "label": "dns",
             "cells": [
               {
                 "kind": "text",
@@ -463,9 +463,22 @@
         },
         {
           "row": {
-            "id": "backup-exclusions",
+            "id": "zed-dotfiles",
             "mark": "off-here",
-            "label": "backup-exclusions",
+            "label": "zed-dotfiles",
+            "cells": [
+              {
+                "kind": "text",
+                "text": "off here"
+              }
+            ]
+          }
+        },
+        {
+          "row": {
+            "id": "tailscale-cli",
+            "mark": "off-here",
+            "label": "tailscale-cli",
             "cells": [
               {
                 "kind": "text",
@@ -490,7 +503,7 @@
         },
         {
           "mark": "off-here",
-          "n": 3
+          "n": 4
         }
       ],
       "pipe_counts": true

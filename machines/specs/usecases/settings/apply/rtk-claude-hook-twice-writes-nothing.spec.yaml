@@ -1,0 +1,18 @@
+description: rtk's Claude Code hook applied again writes nothing and adds no second entry
+fixture: ../__fixtures__/rtk/
+env: two-macs
+runs:
+    - command: 'settings apply rtk-claude-hook'
+      exit: 0
+      stdout: |
+          ●	rtk-claude-hook	~/.claude/settings.json: merged
+    - command: '--version >/dev/null; /bin/ls -i .claude/settings.json > before; /bin/cp .claude/settings.json copy'
+      exit: 0
+    - command: 'settings apply rtk-claude-hook'
+      exit: 0
+      stdout: |
+          ●	rtk-claude-hook	~/.claude/settings.json: as Machines wrote it: nothing written
+    - command: '--version >/dev/null; /bin/ls -i .claude/settings.json | /usr/bin/cmp - before && /usr/bin/cmp .claude/settings.json copy && echo same'
+      exit: 0
+      stdout: |
+          same

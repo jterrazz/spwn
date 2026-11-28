@@ -12,7 +12,7 @@ runs:
     - command: 'settings --all | /usr/bin/grep -e "^#" -e "	dock-spacer	" -e "	hushlogin	"'
       exit: 0
       stdout: |
-          # Set by Machines	1 ●	15 ○	1 ⊘
+          # Set by Machines	1 ●	16 ○	1 ⊘
           ●	dock-spacer	applied
           ⊘	hushlogin	off here
           # Checked	8 ●	1 ◐
@@ -20,7 +20,7 @@ runs:
     - command: 'settings --on linux-1 --all | /usr/bin/grep -e "^#" -e "	dns	" -e "	tart-launcher	"'
       exit: 0
       stdout: |
-          # Set by Machines	7 ○
+          # Set by Machines	8 ○
           # Checked
           # Not for this machine
           –	dns	not for this machine · Mac only

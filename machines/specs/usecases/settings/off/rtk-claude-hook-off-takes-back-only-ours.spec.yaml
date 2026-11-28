@@ -1,0 +1,20 @@
+description: off takes back rtk's Claude Code hook alone, the owner's file byte for byte
+fixture: ../__fixtures__/rtk/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p .claude; printf ''{\n  "theme": "dark",\n  "hooks": {\n    "PreToolUse": [\n      {\n        "matcher": "Edit",\n        "hooks": [\n          {\n            "type": "command",\n            "command": "lint"\n          }\n        ]\n      }\n    ]\n  }\n}\n'' > .claude/settings.json; /bin/cp .claude/settings.json mine'
+      exit: 0
+    - command: 'settings apply rtk-claude-hook'
+      exit: 0
+      stdout: |
+          ●	rtk-claude-hook	~/.claude/settings.json: merged
+    - command: 'settings off rtk-claude-hook --yes'
+      exit: 0
+      stdout: |
+          ●	rtk-claude-hook	~/.claude/settings.json: taken back
+    - command: '--version >/dev/null; /usr/bin/cmp .claude/settings.json mine && echo same'
+      exit: 0
+      stdout: |
+          same
+      files:
+          .local/state/station/merged.json: absent

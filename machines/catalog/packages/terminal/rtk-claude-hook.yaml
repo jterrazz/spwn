@@ -1,0 +1,13 @@
+package: station.package/v1
+kind: setting
+name: rtk-claude-hook
+description: Claude Code's Bash commands go through rtk, by the hook rtk's own init writes
+reversible: true
+requires: [rtk]
+methods:
+    - os: any
+      file:
+          copy:
+              - from: rtk/claude-settings.json
+                to: ~/.claude/settings.json
+          mode: merge

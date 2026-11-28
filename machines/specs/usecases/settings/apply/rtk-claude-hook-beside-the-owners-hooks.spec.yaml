@@ -1,0 +1,48 @@
+description: rtk's Claude Code hook is appended beside the owner's keys and hooks, in his order
+fixture: ../__fixtures__/rtk/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p .claude; printf ''{\n  "theme": "dark",\n  "hooks": {\n    "Stop": [\n      {\n        "hooks": [\n          {\n            "type": "command",\n            "command": "say done"\n          }\n        ]\n      }\n    ],\n    "PreToolUse": [\n      {\n        "matcher": "Edit",\n        "hooks": [\n          {\n            "type": "command",\n            "command": "lint"\n          }\n        ]\n      }\n    ]\n  }\n}\n'' > .claude/settings.json'
+      exit: 0
+    - command: 'settings apply rtk-claude-hook'
+      exit: 0
+      stdout: |
+          ●	rtk-claude-hook	~/.claude/settings.json: merged
+    - command: '--version >/dev/null; /bin/cat .claude/settings.json'
+      exit: 0
+      stdout: |
+          {
+            "theme": "dark",
+            "hooks": {
+              "Stop": [
+                {
+                  "hooks": [
+                    {
+                      "type": "command",
+                      "command": "say done"
+                    }
+                  ]
+                }
+              ],
+              "PreToolUse": [
+                {
+                  "matcher": "Edit",
+                  "hooks": [
+                    {
+                      "type": "command",
+                      "command": "lint"
+                    }
+                  ]
+                },
+                {
+                  "matcher": "Bash",
+                  "hooks": [
+                    {
+                      "type": "command",
+                      "command": "rtk hook claude"
+                    }
+                  ]
+                }
+              ]
+            }
+          }

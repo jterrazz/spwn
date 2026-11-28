@@ -1,0 +1,12 @@
+description: rtk's Claude Code hook is refused and nothing written where rtk is not installed
+env: two-macs
+runs:
+    - command: 'settings apply rtk-claude-hook'
+      exit: 1
+      stdout: |
+          ✗	rtk-claude-hook	failed: rtk-claude-hook is written only where rtk is installed, and here it is not: nothing written; station apps install rtk
+      stderr: |
+          Error: 1 of 1 settings failed
+          Hint: re-run it: station settings apply rtk-claude-hook
+      files:
+          .claude: absent

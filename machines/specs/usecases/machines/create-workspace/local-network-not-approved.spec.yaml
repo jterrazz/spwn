@@ -27,7 +27,7 @@ runs:
           	On linux-2:
           	Activity	? not measured
           	Apps	● 1 ok · ○ 76 not installed
-          	Settings	set by Machines · ○ 0 of 7
+          	Settings	set by Machines · ○ 0 of 8
           	Disk	● 0 B free · 0 B can rebuild
           	Ports	Public 0 · Private 0
           	Accounts	● 0

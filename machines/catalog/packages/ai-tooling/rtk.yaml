@@ -4,6 +4,7 @@ name: rtk
 description: Token-optimized CLI proxy for agents
 replaces: raw dev commands (token-heavy output)
 provides: [rtk]
+then: [rtk-claude-hook]
 methods:
     - os: macos
       brew: rtk

@@ -1,4 +1,4 @@
-32 settings on 4 machines
+33 settings on 4 machines
 
 Needs a look
   ◌ This Mac
@@ -24,10 +24,10 @@ Needs a look
 Machines  ◌ 5 · This Mac, mac-mini, linux-1, api, infra
 Set by Machines
   ◌ git-shortcuts
-  ◌ authorized-key
-  ◌ ssh-key
-  ◌ tart-launcher
-  ◌ 14 more
+  ◌ tmux-dotfiles
+  ◌ spotlight-exclude
+  ◌ dock-spacer
+  ◌ 15 more
 Always-on Mac
   ◌ 5 settings
 Checked

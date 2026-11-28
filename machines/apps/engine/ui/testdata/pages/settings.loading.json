@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "18 set by Machines here"
+                    "text": "19 set by Machines here"
                   },
                   {
                     "kind": "text",
@@ -106,6 +106,16 @@
             "id": "hushlogin",
             "mark": "pending",
             "label": "hushlogin",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "rtk-claude-hook",
+            "mark": "pending",
+            "label": "rtk-claude-hook",
             "detail": {
               "kind": "pending"
             }
@@ -255,7 +265,7 @@
       "counts": [
         {
           "mark": "pending",
-          "n": 18
+          "n": 19
         }
       ],
       "pipe_counts": true

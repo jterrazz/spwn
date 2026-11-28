@@ -1,47 +1,50 @@
-[38;2;76;79;105m32 settings on 4 machines[m[38;2;76;79;105m · [m[38;2;76;79;105m20 need a look[m[38;2;76;79;105m · [m[38;2;76;79;105minfra is a server: not checked[m
+[38;2;76;79;105m33 settings on 4 machines[m[38;2;76;79;105m · [m[38;2;76;79;105m20 need a look[m[38;2;76;79;105m · [m[38;2;76;79;105minfra is a server: not checked[m
 
 [1;38;2;76;79;105mNeeds a look[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mThis Mac[m  [38;2;76;79;105mgit-shortcuts[m   [38;2;76;79;105mchanged since 2 d ago[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mThis Mac[m  [38;2;76;79;105mgit-shortcuts[m      [38;2;76;79;105mchanged since 2 d ago[m
     [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff git-shortcuts[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mThis Mac[m  [38;2;76;79;105mauthorized-key[m  [38;2;76;79;105mchanged since 2 d ago[m
-    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff authorized-key[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mThis Mac[m  [38;2;76;79;105mssh-key[m         [38;2;76;79;105mchanged since 2 d ago[m                [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff ssh-key[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mThis Mac[m  [38;2;76;79;105mtart-launcher[m   [38;2;76;79;105mchanged since 2 d ago[m
-    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff tart-launcher[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mThis Mac[m  [38;2;76;79;105mfirewall[m        [38;2;76;79;105moff[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mThis Mac[m  [38;2;76;79;105mtmux-dotfiles[m      [38;2;76;79;105mchanged since 2 d ago[m
+    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff tmux-dotfiles[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mThis Mac[m  [38;2;76;79;105mspotlight-exclude[m  [38;2;76;79;105mchanged since 2 d ago[m
+    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff spotlight-exclude[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mThis Mac[m  [38;2;76;79;105mdock-spacer[m        [38;2;76;79;105mchanged since 2 d ago[m
+    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff dock-spacer[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mThis Mac[m  [38;2;76;79;105mfirewall[m           [38;2;76;79;105moff[m
     [38;2;108;111;133m→ [m[38;2;76;79;105mSystem Settings > Network > Firewall[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mThis Mac[m  [38;2;76;79;105mscreen-lock[m     [38;2;76;79;105mlocks after 10 min · expected 5 min[m  [38;2;108;111;133m→ [m[38;2;76;79;105mSystem Settings > Lock Screen[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mmac-mini[m  [38;2;76;79;105mgit-shortcuts[m   [38;2;76;79;105mchanged since 2 d ago[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mThis Mac[m  [38;2;76;79;105mscreen-lock[m        [38;2;76;79;105mlocks after 10 min · expected 5 min[m
+    [38;2;108;111;133m→ [m[38;2;76;79;105mSystem Settings > Lock Screen[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mmac-mini[m  [38;2;76;79;105mgit-shortcuts[m      [38;2;76;79;105mchanged since 2 d ago[m
     [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff git-shortcuts --on mac-mini[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mmac-mini[m  [38;2;76;79;105mauthorized-key[m  [38;2;76;79;105mchanged since 2 d ago[m
-    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff authorized-key --on mac-mini[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mmac-mini[m  [38;2;76;79;105mssh-key[m         [38;2;76;79;105mchanged since 2 d ago[m
-    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff ssh-key --on mac-mini[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mmac-mini[m  [38;2;76;79;105mtart-launcher[m   [38;2;76;79;105mchanged since 2 d ago[m
-    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff tart-launcher --on mac-mini[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mmac-mini[m  [38;2;76;79;105mfirewall[m        [38;2;76;79;105moff[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mmac-mini[m  [38;2;76;79;105mtmux-dotfiles[m      [38;2;76;79;105mchanged since 2 d ago[m
+    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff tmux-dotfiles --on mac-mini[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mmac-mini[m  [38;2;76;79;105mspotlight-exclude[m  [38;2;76;79;105mchanged since 2 d ago[m
+    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff spotlight-exclude --on mac-mini[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mmac-mini[m  [38;2;76;79;105mdock-spacer[m        [38;2;76;79;105mchanged since 2 d ago[m
+    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff dock-spacer --on mac-mini[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mmac-mini[m  [38;2;76;79;105mfirewall[m           [38;2;76;79;105moff[m
     [38;2;108;111;133m→ [m[38;2;76;79;105mSystem Settings > Network > Firewall[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mmac-mini[m  [38;2;76;79;105mscreen-lock[m     [38;2;76;79;105mlocks after 10 min · expected 5 min[m  [38;2;108;111;133m→ [m[38;2;76;79;105mSystem Settings > Lock Screen[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mlinux-1[m   [38;2;76;79;105mgit-shortcuts[m   [38;2;76;79;105mchanged since 2 d ago[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mmac-mini[m  [38;2;76;79;105mscreen-lock[m        [38;2;76;79;105mlocks after 10 min · expected 5 min[m
+    [38;2;108;111;133m→ [m[38;2;76;79;105mSystem Settings > Lock Screen[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mlinux-1[m   [38;2;76;79;105mgit-shortcuts[m      [38;2;76;79;105mchanged since 2 d ago[m
     [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff git-shortcuts --on linux-1[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mlinux-1[m   [38;2;76;79;105mauthorized-key[m  [38;2;76;79;105mchanged since 2 d ago[m
-    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff authorized-key --on linux-1[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mlinux-1[m   [38;2;76;79;105mssh-key[m         [38;2;76;79;105mchanged since 2 d ago[m
-    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff ssh-key --on linux-1[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mlinux-1[m   [38;2;76;79;105mtart-launcher[m   [38;2;76;79;105mchanged since 2 d ago[m
-    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff tart-launcher --on linux-1[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mapi[m       [38;2;76;79;105mgit-shortcuts[m   [38;2;76;79;105mchanged since 2 d ago[m                [38;2;108;111;133m→ [m[38;2;76;79;105mstation machines start api[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mapi[m       [38;2;76;79;105mauthorized-key[m  [38;2;76;79;105mchanged since 2 d ago[m                [38;2;108;111;133m→ [m[38;2;76;79;105mstation machines start api[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mapi[m       [38;2;76;79;105mssh-key[m         [38;2;76;79;105mchanged since 2 d ago[m                [38;2;108;111;133m→ [m[38;2;76;79;105mstation machines start api[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mapi[m       [38;2;76;79;105mtart-launcher[m   [38;2;76;79;105mchanged since 2 d ago[m                [38;2;108;111;133m→ [m[38;2;76;79;105mstation machines start api[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mlinux-1[m   [38;2;76;79;105mtmux-dotfiles[m      [38;2;76;79;105mchanged since 2 d ago[m
+    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff tmux-dotfiles --on linux-1[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mlinux-1[m   [38;2;76;79;105mspotlight-exclude[m  [38;2;76;79;105mchanged since 2 d ago[m
+    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff spotlight-exclude --on linux-1[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mlinux-1[m   [38;2;76;79;105mdock-spacer[m        [38;2;76;79;105mchanged since 2 d ago[m
+    [38;2;108;111;133m→ [m[38;2;76;79;105mstation settings diff dock-spacer --on linux-1[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mapi[m       [38;2;76;79;105mgit-shortcuts[m      [38;2;76;79;105mchanged since 2 d ago[m                [38;2;108;111;133m→ [m[38;2;76;79;105mstation machines start api[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mapi[m       [38;2;76;79;105mtmux-dotfiles[m      [38;2;76;79;105mchanged since 2 d ago[m                [38;2;108;111;133m→ [m[38;2;76;79;105mstation machines start api[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mapi[m       [38;2;76;79;105mspotlight-exclude[m  [38;2;76;79;105mchanged since 2 d ago[m                [38;2;108;111;133m→ [m[38;2;76;79;105mstation machines start api[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mapi[m       [38;2;76;79;105mdock-spacer[m        [38;2;76;79;105mchanged since 2 d ago[m                [38;2;108;111;133m→ [m[38;2;76;79;105mstation machines start api[m
 [1;38;2;76;79;105mMachines[m  [38;2;64;160;43m●[m [38;2;76;79;105m3[m  [38;2;108;111;133m○[m [38;2;76;79;105m1[m  [38;2;156;160;176m–[m [38;2;76;79;105m1[m[38;2;108;111;133m · This Mac, mac-mini, linux-1, api, infra[m
 [1;38;2;76;79;105mSet by Machines[m
-[38;2;108;111;133m                    This Mac  mac-mini  linux-1  api     OK[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mgit-shortcuts[m   [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m        [38;2;223;142;29m◐[m       [38;2;76;79;105m0/4[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mauthorized-key[m  [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m        [38;2;223;142;29m◐[m       [38;2;76;79;105m0/4[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mssh-key[m         [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m        [38;2;223;142;29m◐[m       [38;2;76;79;105m0/4[m
-  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mtart-launcher[m   [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m        [38;2;223;142;29m◐[m       [38;2;76;79;105m0/4[m
-  [38;2;156;160;176m[m[38;2;108;111;133m○[m [1;38;2;76;79;105m14 more[m         [38;2;108;111;133m○[m[38;2;76;79;105m 4/11[m    [38;2;108;111;133m○[m[38;2;76;79;105m 4/11[m    [38;2;108;111;133m○[m[38;2;76;79;105m 4/11[m   [38;2;108;111;133m○[m[38;2;76;79;105m 4/11[m  [38;2;76;79;105m16/44[m
+[38;2;108;111;133m                       This Mac  mac-mini  linux-1  api     OK[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mgit-shortcuts[m      [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m        [38;2;223;142;29m◐[m       [38;2;76;79;105m0/4[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mtmux-dotfiles[m      [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m        [38;2;223;142;29m◐[m       [38;2;76;79;105m0/4[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mspotlight-exclude[m  [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m        [38;2;223;142;29m◐[m       [38;2;76;79;105m0/4[m
+  [38;2;156;160;176m[m[38;2;223;142;29m◐[m [1;38;2;76;79;105mdock-spacer[m        [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m         [38;2;223;142;29m◐[m        [38;2;223;142;29m◐[m       [38;2;76;79;105m0/4[m
+  [38;2;156;160;176m[m[38;2;108;111;133m○[m [1;38;2;76;79;105m15 more[m            [38;2;108;111;133m○[m[38;2;76;79;105m 4/12[m    [38;2;108;111;133m○[m[38;2;76;79;105m 4/12[m    [38;2;108;111;133m○[m[38;2;76;79;105m 4/12[m   [38;2;108;111;133m○[m[38;2;76;79;105m 4/12[m  [38;2;76;79;105m16/48[m
 [1;38;2;76;79;105mAlways-on Mac[m
 [38;2;108;111;133m                This Mac  mac-mini  linux-1  api  OK[m
   [38;2;156;160;176m[m[38;2;108;111;133m○[m [1;38;2;76;79;105m5 settings[m  [38;2;108;111;133m○[m         [38;2;108;111;133m○[m         [38;2;156;160;176m–[m        [38;2;156;160;176m–[m    [38;2;156;160;176m–[m
