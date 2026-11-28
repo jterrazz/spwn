@@ -81,6 +81,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 - **tgrep**: Trigram-indexed grep for large codebases
 - **vite**: Frontend bundler and dev server
 - **yazi**: Terminal file manager
+- **zstd**: Fast lossless compression, the zstd command
 
 ### Git
 

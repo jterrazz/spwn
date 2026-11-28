@@ -1561,6 +1561,31 @@ func builtinCatalog() (Catalog, error) {
 							Delete: []string{
 								"{state}/yazi/*"}}}}},
 			{
+				Name:        "zstd",
+				Kind:        "app",
+				AppKind:     "app",
+				Description: "Fast lossless compression, the zstd command",
+				Category:    "Command line",
+				Installs: []LivesOn{
+					{
+						Kinds: []MachineKind{
+							"mac"},
+						Install: BrewInstall{
+							Formula: "zstd"}},
+					{
+						Kinds: []MachineKind{
+							"linux"},
+						Install: AptInstall{
+							Packages: []string{
+								"zstd"}}},
+					{
+						Kinds: []MachineKind{
+							"macos"},
+						Install: BrewInstall{
+							Formula: "zstd"}}},
+				Provides: []string{
+					"zstd"}},
+			{
 				Name:        "gh",
 				Kind:        "app",
 				AppKind:     "app",
@@ -6229,6 +6254,30 @@ func builtinCatalog() (Catalog, error) {
 									"{state}/yazi/*"}}}}},
 				Folder: "command-line",
 				File:   "packages/command-line/yazi.yaml",
+				Origin: "built-in"},
+			{
+				Package: Package{
+					Package:     "station.package/v1",
+					Kind:        "app",
+					Name:        "zstd",
+					Description: "Fast lossless compression, the zstd command",
+					Provides: []string{
+						"zstd"},
+					Methods: []MethodSpec{
+						{
+							Selector: Selector{
+								OS: "macos"},
+							Brew: "zstd"},
+						{
+							Selector: Selector{
+								Family: "debian"},
+							Needs: []Need{
+								"sudo"},
+							Apt: &AptMethod{
+								Packages: []string{
+									"zstd"}}}}},
+				Folder: "command-line",
+				File:   "packages/command-line/zstd.yaml",
 				Origin: "built-in"},
 			{
 				Package: Package{

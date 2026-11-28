@@ -34,3 +34,4 @@ tmux tmux
 uv uv
 yazi yazi
 zoxide zoxide
+zstd zstd

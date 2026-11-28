@@ -24,7 +24,7 @@ runs:
             ◐ ~/.tart is misplaced  station disk move ~/.tart
             3 more: station overview --all
           Activity    memory 12.4 of 16 GB · 388 GB free
-          Apps        ● 7 ok · ◐ 2 updates · ○ 104 not installed
+          Apps        ● 7 ok · ◐ 2 updates · ○ 105 not installed
           Settings    set by Machines · ○ 0 of 17 · checked
                       ● 8 of 9
           Disk        ◐ 388 GB free · 34.8 GB can rebuild
@@ -42,15 +42,15 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · 113 apps for this Mac · 2 updates
-            104 not installed
+          This Mac · 114 apps for this Mac · 2 updates
+            105 not installed
 
           Updates
             ◐ node  22.11.0 → 24.11.0  mise  update available
               → station apps update node
             ◐ gh    2.97.0 → 2.98.0    brew  update available
               → station apps update gh
-          Not installed  ○ 104 · cocoapods, homebrew, mas, pnpm, …
+          Not installed  ○ 105 · cocoapods, homebrew, mas, pnpm, …
           OK             ● 7 · github-release, mise, go, ghostty, …
           Not for this machine  14 apps live on other machines
 
@@ -97,7 +97,7 @@ runs:
           Needs you
             ◐ ~/go is misplaced  station disk move ~/go --on mac-mini
           Activity    memory 26 of 64 GB · 1.6 TB free
-          Apps        ● 1 ok · ○ 112 not installed
+          Apps        ● 1 ok · ○ 113 not installed
           Settings    set by Machines · ○ 0 of 17 · checked
                       ● 9 of 9
           Disk        ◐ 1.6 TB free · 1.1 GB can rebuild
