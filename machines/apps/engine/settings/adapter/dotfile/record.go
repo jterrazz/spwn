@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"io/fs"
 	"path"
+	"regexp"
 	"slices"
 	"strings"
 
+	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
 )
 
@@ -75,13 +77,28 @@ func (r *record) drop(setting, file string) {
 	r.Files = slices.DeleteFunc(r.Files, func(w written) bool { return w.Setting == setting && w.Path == file })
 }
 
+// value: the bound of the record, past which it is no record Machines wrote.
+const maxRecord = 1 << 20
+
 func (a *Applier) read() (record, error) {
-	data, err := a.files.ReadFile(a.o.Record)
+	info, err := a.files.Stat(a.o.Record)
 	if errors.Is(err, fs.ErrNotExist) {
 		return record{}, nil
 	}
 	if err != nil {
 		return record{}, &store.UnreadableError{Path: a.o.Record, Cause: err}
+	}
+	if info.Size() > maxRecord {
+		return record{}, a.untrusted(errors.New("it is past 1 MiB"))
+	}
+	data, err := a.files.ReadFile(a.o.Record)
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+		return record{}, nil
+	case err != nil:
+		return record{}, &store.UnreadableError{Path: a.o.Record, Cause: err}
+	case len(data) > maxRecord:
+		return record{}, a.untrusted(errors.New("it is past 1 MiB"))
 	}
 	var r record
 	if err := json.Unmarshal(data, &r); err != nil {
@@ -90,7 +107,69 @@ func (a *Applier) read() (record, error) {
 	if err := store.Current(r.V, recordVersion); err != nil {
 		return record{}, &store.UnreadableError{Path: a.o.Record, Cause: err}
 	}
+	if err := r.trusted(); err != nil {
+		return record{}, a.untrusted(err)
+	}
 	return r, nil
+}
+
+func (a *Applier) untrusted(why error) error {
+	return &store.UnreadableError{Path: a.o.Record, Cause: fmt.Errorf("%w: Machines takes nothing back by a record it cannot trust; mend the entry, or delete the file and off takes back nothing", why)}
+}
+
+// value: a JSON pointer as a merge writes one: each key under `/`, its
+// `~` escaped as `~0` or `~1` alone.
+var pointer = regexp.MustCompile(`^(/([^~/]|~[01])*)+$`)
+
+var digest = regexp.MustCompile(`^sha256:[0-9a-f]{64}$`)
+
+// invariant: a record is trusted whole or not at all: each file names its
+// setting and a path a setting may write, its block's digest and each
+// folder are of the form Machines writes, and each entry is of a kind it
+// writes, at a pointer below the file's top, with a digest exactly when
+// it is a value or an element. One entry that is not refuses every
+// take-back, so off never deletes by half a record it cannot read.
+func (r record) trusted() error {
+	for _, w := range r.Files {
+		switch {
+		case w.Setting == "":
+			return fmt.Errorf("an entry for %s names no setting", w.Path)
+		case catalog.Confined(w.Path, catalog.WriteFile) != "":
+			return fmt.Errorf("the entry of %s names a file no setting writes: %s", w.Setting, catalog.Confined(w.Path, catalog.WriteFile))
+		case w.Block != "" && !digest.MatchString(w.Block):
+			return fmt.Errorf("the entry of %s for %s holds the block digest %q, of no form Machines writes", w.Setting, w.Path, w.Block)
+		}
+		for _, dir := range w.Folders {
+			if !path.IsAbs(dir) || path.Clean(dir) != dir {
+				return fmt.Errorf("the entry of %s for %s names the folder %q, no path Machines makes", w.Setting, w.Path, dir)
+			}
+		}
+		for i, e := range w.Values {
+			if problem := e.untrusted(); problem != "" {
+				return fmt.Errorf("value %d of %s for %s %s", i+1, w.Path, w.Setting, problem)
+			}
+		}
+	}
+	return nil
+}
+
+func (e entry) untrusted() string {
+	if !pointer.MatchString(e.Pointer) {
+		return fmt.Sprintf("is at %q, no JSON pointer below the file's top", e.Pointer)
+	}
+	switch e.Kind {
+	case kindValue, kindElement:
+		if !digest.MatchString(e.Digest) {
+			return fmt.Sprintf("holds the digest %q, of no form Machines writes", e.Digest)
+		}
+	case kindObject, kindArray:
+		if e.Digest != "" {
+			return "is a made " + string(e.Kind) + " with a digest, which Machines never writes"
+		}
+	default:
+		return fmt.Sprintf("is of the kind %q, none Machines writes", e.Kind)
+	}
+	return ""
 }
 
 // invariant: a record with no file left is no record: its file is removed.

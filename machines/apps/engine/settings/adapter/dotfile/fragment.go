@@ -13,13 +13,28 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/settings"
 )
 
-func (a *Applier) fragment(c catalog.Copy) (*node, error) {
-	data, err := fs.ReadFile(a.o.Ours, c.From)
+// invariant: a fragment, the file it goes into and the record are each
+// measured before they are read, and once more as read: one past its
+// bound is refused unread.
+func (a *Applier) ours(from, refusal string) ([]byte, error) {
+	info, err := fs.Stat(a.o.Ours, from)
 	if err != nil {
 		return nil, err
 	}
-	if len(data) > maxFragment {
-		return nil, fmt.Errorf("the fragment %s is past 256 KiB: none that large is merged", c.From)
+	if info.Size() > maxFragment {
+		return nil, fmt.Errorf("the fragment %s is past 256 KiB: %s", from, refusal)
+	}
+	data, err := fs.ReadFile(a.o.Ours, from)
+	if err == nil && len(data) > maxFragment {
+		return nil, fmt.Errorf("the fragment %s is past 256 KiB: %s", from, refusal)
+	}
+	return data, err
+}
+
+func (a *Applier) fragment(c catalog.Copy) (*node, error) {
+	data, err := a.ours(c.From, "none that large is merged")
+	if err != nil {
+		return nil, err
 	}
 	frag, err := parse(data)
 	switch {
@@ -168,7 +183,7 @@ func (a *Applier) undoMerge(r *record, setting string, c catalog.Copy) ([]settin
 	kept := takeBack(tree, w.Values)
 	step := settings.ChangeStep{Label: c.To, State: catalog.StateOK, Detail: "taken back"}
 	switch out := encoded(tree, data, true); {
-	case w.Made && len(tree.keys) == 0:
+	case w.Made && len(tree.keys) == 0 && a.direct(c.To):
 		if err := a.unmake(w, at); err != nil {
 			return nil, err
 		}
@@ -203,14 +218,12 @@ func keptSteps(to string, pointers []string) []settings.ChangeStep {
 func blockID(setting string) string { return "station setting:" + setting }
 
 func (a *Applier) blockBody(c catalog.Copy) (string, error) {
-	data, err := fs.ReadFile(a.o.Ours, c.From)
+	data, err := a.ours(c.From, "no block that large is written")
 	if err != nil {
 		return "", err
 	}
 	text := string(data)
 	switch {
-	case len(data) > maxFragment:
-		return "", fmt.Errorf("the fragment %s is past 256 KiB: no block that large is written", c.From)
 	case !utf8.Valid(data) || bytes.IndexByte(data, 0) >= 0:
 		return "", fmt.Errorf("the fragment %s is not text", c.From)
 	case strings.TrimSpace(text) == "":
@@ -325,7 +338,7 @@ func (a *Applier) undoBlock(r *record, setting string, c catalog.Copy) ([]settin
 	}
 	after, _ := textblock.Remove(text, id)
 	step := settings.ChangeStep{Label: label, State: catalog.StateOK, Detail: "removed"}
-	if w.Made && after == "" {
+	if w.Made && after == "" && a.direct(c.To) {
 		err = a.unmake(w, at)
 	} else {
 		err = a.files.Replace(at, []byte(after), 0o600)

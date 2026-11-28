@@ -343,6 +343,15 @@ func (a *Applier) target(to string, mode catalog.WriteMode) (at string, data []b
 	case catalog.Confined("~/"+rest, mode) != "":
 		return "", nil, false, fmt.Errorf("%s leads through its links to ~/%s: %s", to, rest, catalog.Confined("~/"+rest, mode))
 	}
+	info, err := a.files.Stat(at)
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+		return at, nil, false, nil
+	case err != nil:
+		return "", nil, false, err
+	case info.Size() > maxTarget:
+		return "", nil, false, fmt.Errorf("%s is past 1 MiB: Machines writes no fragment into a file that large", to)
+	}
 	data, err = a.files.ReadFile(at)
 	if errors.Is(err, fs.ErrNotExist) {
 		return at, nil, false, nil
@@ -380,13 +389,30 @@ func (a *Applier) land(w *written, at string, data []byte, there bool) error {
 	return nil
 }
 
+// value: whether the file a setting names is itself no link, so the record
+// may say Machines made it: Machines makes no file through a link.
+func (a *Applier) direct(to string) bool {
+	_, err := a.files.Readlink(expand(a.o.Home, to))
+	return err != nil
+}
+
 // value: a file Machines made, and the folders it made for it, removed
 // once nothing of the owner's is in them.
 func (a *Applier) unmake(w written, at string) error {
+	// invariant: the record says which folders Machines made, and only one
+	// that holds the file, inside the real home and not the home itself, is
+	// taken at its word: any other the record names is left.
+	home, err := a.real(a.o.Home)
+	if err != nil {
+		return err
+	}
 	if err := a.files.Remove(at); err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
 	}
 	for _, dir := range w.Folders {
+		if !strings.HasPrefix(at, dir+"/") || !strings.HasPrefix(dir, home+"/") {
+			continue
+		}
 		if entries, err := a.files.ReadDir(dir); err == nil && len(entries) == 0 {
 			if err := a.files.Remove(dir); err != nil {
 				return err
