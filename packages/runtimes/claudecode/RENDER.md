@@ -40,7 +40,7 @@ No separate `world/physics.md`, `world/faculties.md`, `world/AGENTS.md`, `world/
 | `agents/<name>/.claude/settings.json`      | Claude Code settings: permissions, hooks, model pin              |
 | `agents/<name>/.claude/skills/<skill>/...` | User-authored and tool-shipped skills                            |
 
-User-authored skills (`spwn/skills/...`) and tool-shipped skills (`SKILL.md` files from each resolved `tool.Tool`) are emitted by the renderer into each agent's `.claude/skills/<skill>/` tree. Claude Code discovers them through its native skill walker; no `/world/skills` directory or spawn-time symlink is involved.
+User-authored skills (`skills/...`) and tool-shipped skills (`SKILL.md` files from each resolved `tool.Tool`) are emitted by the renderer into each agent's `.claude/skills/<skill>/` tree. Claude Code discovers them through its native skill walker; no `/world/skills` directory or spawn-time symlink is involved.
 
 ## What this adapter does NOT touch
 

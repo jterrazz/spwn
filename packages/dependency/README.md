@@ -4,12 +4,12 @@ Parser for `tool.yaml` dependency manifests + the project lockfile.
 
 ## Role
 
-Every Spwn dependency, whether shipped in the built-in catalog or authored under `spwn/tools/<name>/` in a user project, is described by a single `tool.yaml`. This package is the shared parser: it reads one of those manifests via an abstract `Resolver` (host filesystem or `go:embed`), turns it into a typed `Schema`, and classifies the ref (`spwn:<name>`, `github:<owner>/<repo>`, `skill/<name>`, `tool/<name>`, or `hook/<name>`). It also owns `spwn.lock`, the line-oriented text file pinning each dep's version. No Docker, no image building: just parsing + ref classification.
+Every Spwn dependency, whether shipped in the built-in catalog or authored under `tools/<name>/` in a user project, is described by a single `tool.yaml`. This package is the shared parser: it reads one of those manifests via an abstract `Resolver` (host filesystem or `go:embed`), turns it into a typed `Schema`, and classifies the ref (`spwn:<name>`, `github:<owner>/<repo>`, `skill/<name>`, `tool/<name>`, or `hook/<name>`). It also owns `spwn.lock`, the line-oriented text file pinning each dep's version. No Docker, no image building: just parsing + ref classification.
 
 ## Key types
 
 - `Schema`: on-disk shape of `tool.yaml` (name, version, dependencies, install spec, files, verify).
-- `Parse(Resolver, ParseOptions)`, returning `*Parsed`: the single entry point. `FSResolver` reads an `fs.FS`: the embedded catalog, or a project tool's folder through a root opened at it inside the project's root (`platform.FSUnder`); a `files:` source that leaves the tool's folder is refused by its name (`ErrLeavesTheTool`) before anything is read, and a link inside the tool's folder to elsewhere, in the project or outside it, by the root (`platform.ErrLink`); `LoadTool` refuses a tool's folder, `spwn/` or `spwn/tools/` that is itself a link.
+- `Parse(Resolver, ParseOptions)`, returning `*Parsed`: the single entry point. `FSResolver` reads an `fs.FS`: the embedded catalog, or a project tool's folder through a root opened at it inside the project's root (`platform.FSUnder`); a `files:` source that leaves the tool's folder is refused by its name (`ErrLeavesTheTool`) before anything is read, and a link inside the tool's folder to elsewhere, in the project or outside it, by the root (`platform.ErrLink`); `LoadTool` refuses a tool's folder, `spwn/` or `tools/` that is itself a link.
 - `Ref`, `ParseRef(string)` returning a `Ref`: classify a ref as `KindSpwnBuiltin`, `KindRegistry`, `KindLocalSkill`, `KindLocalTool`, `KindLocalHook`, or `KindInvalid` (bare names, unknown schemes).
 - `SplitVersion`, `Canonical`: strip and normalise `@version` suffixes.
 - `ResolveTool` / `ResolveSkill`: check whether a ref resolves to a real on-disk target.

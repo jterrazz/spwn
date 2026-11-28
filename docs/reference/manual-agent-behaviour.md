@@ -49,7 +49,7 @@ its role in the world, and the agent.yaml composition?
 ```bash
 mkdir -p $TMP/agentqa/s01 && cd $TMP/agentqa/s01
 station project create p && cd p
-cat > spwn/agents/neo/SOUL.md <<'EOF'
+cat > agents/neo/SOUL.md <<'EOF'
 # Neo, Oracle of /workspaces/
 
 You are Neo. You speak in short, measured lines. You always prefix observations
@@ -549,7 +549,7 @@ the tool whose `verify` failed.
 ### Scenario 26: Claude Code auto-discovers `/world/skills/<name>/SKILL.md`
 
 **Setup:** use `spwn:matrix` (ships `world-exploration`, `self-reflection`)
-or install `skill:myskill` after writing `spwn/skills/myskill.md` with proper
+or install `skill:myskill` after writing `skills/myskill.md` with proper
 frontmatter.
 
 **Prompts:**
@@ -581,7 +581,7 @@ skill's frontmatter.
 **Setup:** author a skill WITHOUT frontmatter:
 
 ```bash
-cat > spwn/skills/silent-skill.md <<'EOF'
+cat > skills/silent-skill.md <<'EOF'
 # silent skill
 
 no frontmatter.
@@ -641,7 +641,7 @@ rebuild + new spawn).
 **Setup:**
 
 ```bash
-cat > spwn/agents/neo/playbooks/migrate-db.md <<'EOF'
+cat > agents/neo/playbooks/migrate-db.md <<'EOF'
 ---
 name: migrate-db
 description: Zero-downtime database migration procedure.
@@ -701,7 +701,7 @@ auto-indexed in the CLAUDE.md preamble.
 1. `spwn up`.
 2. Ask the agent: `write a new playbook at /agents/neo/playbooks/today.md
 with frontmatter name: today description: Today's plan. and body "test".`
-3. `spwn down`. On host: `cat spwn/agents/neo/playbooks/today.md`.
+3. `spwn down`. On host: `cat agents/neo/playbooks/today.md`.
 4. `spwn up` again.
 5. Ask: `list your indexed playbooks`.
 
@@ -729,7 +729,7 @@ with the agent home as cwd) and performs it.
 ## Group F: Hooks (36-38)
 
 > **Note (2026-04-22):** Host-side `hook:<name>` lifecycle hooks were
-> retired. Runtime hooks now live in `spwn/hooks.yaml` and are
+> retired. Runtime hooks now live in `hooks.yaml` and are
 > translated by the transpile layer into each runtime's native hook
 > config (Claude Code writes `.claude/settings.json`, Codex
 > `.codex/hooks.json`). The scenarios below have been rewritten to
@@ -737,7 +737,7 @@ with the agent home as cwd) and performs it.
 
 ### Scenario 36: SessionStart hook fires when the agent session begins
 
-**Setup:** replace the scaffolded `spwn/hooks.yaml` sample with one
+**Setup:** replace the scaffolded `hooks.yaml` sample with one
 that writes a side-effect file so we can observe firing:
 
 ```yaml
@@ -960,7 +960,7 @@ into each spawn.
 
 **Lifecycle:** `spwn down`.
 
-**On host:** `cat spwn/agents/neo/journal/2026-04-19_test.md`.
+**On host:** `cat agents/neo/journal/2026-04-19_test.md`.
 
 **Expect:** content synced to host tree.
 
@@ -983,7 +983,7 @@ Then `spwn up`, and ask agent to read it: agent sees it (SyncIn).
 
 **On host:**
 
-- `.scratch-should-disappear.txt` should NOT be in `spwn/agents/neo/`.
+- `.scratch-should-disappear.txt` should NOT be in `agents/neo/`.
 - `playbooks/should-survive.md` should exist.
 
 **Expect:** only the allowlisted dirs (playbooks + journal) sync out; other
@@ -1079,7 +1079,7 @@ description: [not a string but a list
    until a second cycle.
 4. Anything that fails: capture the exact prompt+response+container state
    so an engineer can reproduce. The `spwn world logs <id>` + host-side
-   `ls spwn/agents/<name>/` are usually enough.
+   `ls agents/<name>/` are usually enough.
 
 ### Total coverage
 

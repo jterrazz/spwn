@@ -26,10 +26,10 @@ spwn agent talk curie "reproduce the results in notebooks/exp-042.qmd and flag a
 What happened:
 
 - `spwn install python --agent curie` adds `spwn:python` to
-  `spwn/agents/curie/agent.yaml#dependencies:` **and** pins it in
+  `agents/curie/agent.yaml#dependencies:` **and** pins it in
   `spwn.lock`. Same for `spwn:qmd`.
 - `spwn install skill/paper-reading --agent curie` scaffolds
-  `spwn/skills/paper-reading.md` (empty; fill it in) and attaches the
+  `skills/paper-reading.md` (empty; fill it in) and attaches the
   `skill/paper-reading` ref to the agent. At build time the skill is
   staged to `/world/skills/paper-reading/SKILL.md` inside the image;
   at spawn time Claude Code picks it up through its native
@@ -42,7 +42,7 @@ What happened:
   the workspace mounted.
 
 **Iteration knobs.** Edit `SOUL.md` to change the voice. Add more
-skills under `spwn/skills/`, each one a plain markdown file. Swap
+skills under `skills/`, each one a plain markdown file. Swap
 the runtime in `agent.yaml#runtime.backend` when the Codex adapter
 lands.
 
@@ -73,7 +73,7 @@ What happened:
 - The next teammate runs `spwn up` and is talking to the same neo you
   were: same tools, same `SOUL.md`, same playbooks.
 
-**What's persistent, what's not.** `spwn/agents/<name>/` is the mind:
+**What's persistent, what's not.** `agents/<name>/` is the mind:
 commit it. `~/.spwn/` holds per-machine credentials and daemon
 state; never commit that. Sessions and journal entries written
 inside a running container sync back out on graceful `spwn down`;
@@ -98,7 +98,7 @@ station agents delete neo-migration --confirm=neo-migration
 
 What happened:
 
-- `fork` copies `spwn/agents/neo/` to `spwn/agents/neo-migration/`
+- `fork` copies `agents/neo/` to `agents/neo-migration/`
   (manifest, `SOUL.md`, playbooks, journal) and adds a single-agent
   world for the clone.
 - `spwn up --agent neo-migration` boots the fork into its own

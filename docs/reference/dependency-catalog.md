@@ -30,7 +30,7 @@ Status: 🟢 working · 🟡 installed but rough · 🔴 planned.
 Four lines minimum:
 
 ```yaml
-# spwn/tools/my-thing/tool.yaml
+# tools/my-thing/tool.yaml
 name: my-thing
 install:
     packages: [curl]

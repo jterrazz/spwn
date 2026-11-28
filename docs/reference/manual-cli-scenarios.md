@@ -62,11 +62,11 @@ cd p && station project plan                 # → exit 0
 ```bash
 cd $TMP/s03
 station project create --from matrix && cd matrix  # the catalog's example
-ls spwn/agents/neo                           # → neo is present
+ls agents/neo                           # → neo is present
 station project plan                                   # → exit 0
 ```
 
-**Asserts:** create zero · `spwn/agents/neo/` exists · plan zero.
+**Asserts:** create zero · `agents/neo/` exists · plan zero.
 
 #### 4. `station project create --from startup`, multi-agent
 
@@ -139,7 +139,7 @@ station project plan                                   # → exit != 0
 
 ```bash
 station project create p && cd p
-# flip "spwn:unix" to "spwn:does-not-exist-zz" in spwn/agents/neo/agent.yaml
+# flip "spwn:unix" to "spwn:does-not-exist-zz" in agents/neo/agent.yaml
 station project plan                                   # → exit != 0
 ```
 
@@ -153,7 +153,7 @@ station project plan                                   # → exit != 0
 
 ```bash
 station project create p && cd p && station agents create bob
-ls spwn/agents/bob                           # → agent.yaml, SOUL.md, AGENTS.md, playbooks/, journal/
+ls agents/bob                           # → agent.yaml, SOUL.md, AGENTS.md, playbooks/, journal/
 ```
 
 **Asserts:** `new` zero · `agent.yaml` + `SOUL.md` both present.
@@ -226,7 +226,7 @@ station agents does-not-exist            # → exit != 0
 
 ```bash
 station project create p && cd p
-station skills create daily-standup          # → writes spwn/skills/daily-standup.md
+station skills create daily-standup          # → writes skills/daily-standup.md
 station skills                               # → exit 0
 station skills delete daily-standup --confirm=daily-standup  # → exit 0; file gone
 ```
@@ -239,7 +239,7 @@ station skills delete daily-standup --confirm=daily-standup  # → exit 0; file 
 
 ```bash
 station project create p && cd p && spwn install python
-grep python spwn/agents/neo/agent.yaml       # → present
+grep python agents/neo/agent.yaml       # → present
 grep python spwn.lock                        # → present
 ```
 
@@ -268,7 +268,7 @@ grep does-not-exist-xyz spwn.lock            # → not present
 #### 25. **[Bug fix regression guard]** `spwn install skill:nonexistent --agent Y` is refused
 
 Before the fix: silently succeeded, added a broken ref. Now: fails fast with
-`skill:<name> not found at spwn/skills/<name>.md; create it first with
+`skill:<name> not found at skills/<name>.md; create it first with
 \`station skills create <name>\``.
 
 ```bash
@@ -281,7 +281,7 @@ spwn install skill:does-not-exist --agent neo
 
 ```bash
 station project create p && cd p && spwn install node               # → becomes spwn:node
-grep "spwn:node\|node" spwn/agents/neo/agent.yaml   # → present
+grep "spwn:node\|node" agents/neo/agent.yaml   # → present
 ```
 
 #### 27. `spwn install github:...` (planned feature path)
@@ -293,7 +293,7 @@ spwn install github:jterrazz/does-not-exist  # → rc ≤ 1 (clean error OR plan
 #### 28. Local refs refused without `--agent`
 
 ```bash
-station project create p && cd p && echo "# test" > spwn/skills/myskill.md
+station project create p && cd p && echo "# test" > skills/myskill.md
 spwn install skill:myskill                   # → exit != 0 (no --agent)
 ```
 
@@ -334,13 +334,13 @@ spwn down
 #### 32. **[Hour-2 regression guard]** `spwn world inspect` shows project-rooted home
 
 Pre-fix: `Agent home: ~/.spwn/agents/neo → /agents/neo`. Post-fix: the project's
-`spwn/agents/neo/` path. Scenario regex-matches `/tmp/qa-50/sNN/spwn/agents/` in
+`agents/neo/` path. Scenario regex-matches `/tmp/qa-50/sNN/agents/` in
 the inspect output.
 
 ```bash
 station project create --from matrix && cd matrix && spwn up
 spwn world inspect $(docker ps --format '{{.Names}}' --filter name=world-)
-# → output includes ".../spwn/agents/<name>" path
+# → output includes ".../agents/<name>" path
 ```
 
 #### 33. `spwn world list --json` is valid JSON
@@ -439,7 +439,7 @@ station project create p && cd p && station agents create $(printf 'x%.0s' {1..8
 
 ```bash
 station project create p && cd p
-# rewrite spwn/agents/neo/agent.yaml with dependencies: []
+# rewrite agents/neo/agent.yaml with dependencies: []
 station project plan                                   # → exit 0
 ```
 

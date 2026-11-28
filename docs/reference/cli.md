@@ -102,7 +102,7 @@ spwn agent neo                # spawn the world that contains neo and open a ses
 spwn down [name]              # stop every world (or one)
 
 # ── Agents ───────────────────────────────────────────────────────
-station agents create neo     # create a blank agent in ./spwn/agents/
+station agents create neo     # create a blank agent in ./agents/
 station agents                # list project agents
 station agents neo            # inspect composition, memory, history
 station agents fork neo --as neo-v2  # clone memory + composition

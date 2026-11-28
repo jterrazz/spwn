@@ -4,7 +4,7 @@ The Spwn transpiler: provider-neutral source in, runtime-specific file tree out.
 
 ## Role
 
-Spwn is a transpiler the same way `tsc` is: you author a portable source language (`spwn.yaml` + `spwn/agents/*` + skills + hooks), and the transpiler emits files a concrete runtime (Claude Code today, Codex tomorrow) understands. You never write a `.js` file by hand for TypeScript; you should never write a `CLAUDE.md` by hand for spwn.
+Spwn is a transpiler the same way `tsc` is: you author a portable source language (`spwn.yaml` + `agents/*` + skills + hooks), and the transpiler emits files a concrete runtime (Claude Code today, Codex tomorrow) understands. You never write a `.js` file by hand for TypeScript; you should never write a `CLAUDE.md` by hand for spwn.
 
 The transpile phase is a **pure function**: `Input → *Tree`. No disk writes, no Docker. A `Tree` is a sorted, in-memory `path → bytes` map: same input, same bytes, deterministic for golden tests. Materialisation (writing the tree into a container or onto disk) is the compile phase, owned by `packages/compile`. Runtime-specific renderers live in `packages/runtimes/<runtime>/render.go`: thin layout adapters that read content from `worldbook/` (Spwn's opinionated world defaults) and place files at runtime-specific paths.
 

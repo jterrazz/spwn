@@ -23,8 +23,8 @@ container. Before you write your first automation, scaffold the
 project end-to-end:
 
 ```bash
-station project create site && cd site # creates ./site: spwn.yaml + spwn/agents/
-station agents create editor     # creates spwn/agents/editor/
+station project create site && cd site # creates ./site: spwn.yaml + agents/
+station agents create editor     # creates agents/editor/
 station project plan         # confirm the tree is valid
 spwn up                      # bring up the world (architect spawns containers)
 ```
@@ -102,12 +102,12 @@ automations:
                 include_hidden: <bool> # default: false; recursive only
         agent: <name> # must be in worlds.<world>.agents
         prompt: <inline text> # XOR with command:
-        command: command/<name> # XOR with prompt:; resolves to spwn/commands/<name>.md
+        command: command/<name> # XOR with prompt:; resolves to commands/<name>.md
         catchup: collapse | skip # cron only; default collapse
 ```
 
 **Body:** exactly one of `prompt:` (inline string) or `command:` (a
-`command/<name>` ref pointing at `spwn/commands/<name>.md`).
+`command/<name>` ref pointing at `commands/<name>.md`).
 Reusing a slash-command file means the same prompt can be invoked
 three ways: by the agent via `/morning-brief`, manually via
 `spwn agent talk`, or automatically via the cron.
@@ -340,7 +340,7 @@ worlds:
 
 ### Reusable command body
 
-`spwn/commands/process-inbox.md`:
+`commands/process-inbox.md`:
 
 ```markdown
 You're processing a new inbox arrival.
@@ -366,7 +366,7 @@ automations:
 
 The agent can also invoke the same prompt manually via
 `/process-inbox` inside its conversation, or you can run it once via
-`spwn agent talk curator "$(cat spwn/commands/process-inbox.md)"`.
+`spwn agent talk curator "$(cat commands/process-inbox.md)"`.
 
 ### Hourly tool-cache refresh
 
@@ -397,7 +397,7 @@ with `spwn up` or `spwn up brain`. Auto-spawn-when-cold is on
 the roadmap but not in v1; a fire against a stopped world records a
 failed receipt and the next fire retries.
 
-### `command file not found at spwn/commands/<name>.md`
+### `command file not found at commands/<name>.md`
 
 Either the file is missing on disk, or the ref is misspelled in
 `spwn.yaml`. `station project plan` catches both before runtime.

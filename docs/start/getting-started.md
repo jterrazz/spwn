@@ -57,7 +57,7 @@ Four ideas to hold in your head before you dive in:
 An agent **is** a composition of blocks, declared in one file:
 
 ```yaml
-# spwn/agents/neo/agent.yaml
+# agents/neo/agent.yaml
 name: neo
 runtime:
     backend: 'spwn:claude-code'
@@ -65,10 +65,10 @@ runtime:
 dependencies:
     - 'spwn:unix' # catalog: shell + coreutils
     - 'spwn:python' # catalog: python 3 + pip
-    - 'skill/code-review' # local:   ./spwn/skills/code-review.md
-    - 'tool/greet' # local:   ./spwn/tools/greet/
-    - 'hook/welcome' # local:   ./spwn/hooks/welcome.yaml
-    - 'command/refactor' # local:   ./spwn/commands/refactor.md
+    - 'skill/code-review' # local:   ./skills/code-review.md
+    - 'tool/greet' # local:   ./tools/greet/
+    - 'hook/welcome' # local:   ./hooks/welcome.yaml
+    - 'command/refactor' # local:   ./commands/refactor.md
 ```
 
 **Every dependency declares its source and type explicitly.** Two source-prefixed schemes (`spwn:`, `github:`) plus four local path-style forms (`skill/`, `tool/`, `hook/`, `command/`):
@@ -77,17 +77,17 @@ dependencies:
 | ----------------------- | --------------------------------------------- |
 | `spwn:<name>`           | Built-in catalog dep compiled into the binary |
 | `github:<owner>/<repo>` | Community registry _(planned)_                |
-| `skill/<name>`          | `./spwn/skills/<name>.md`                     |
-| `tool/<name>`           | `./spwn/tools/<name>/` (with `tool.yaml`)     |
-| `hook/<name>`           | `./spwn/hooks/<name>.yaml`                    |
-| `command/<name>`        | `./spwn/commands/<name>.md`                   |
+| `skill/<name>`          | `./skills/<name>.md`                     |
+| `tool/<name>`           | `./tools/<name>/` (with `tool.yaml`)     |
+| `hook/<name>`           | `./hooks/<name>.yaml`                    |
+| `command/<name>`        | `./commands/<name>.md`                   |
 
 Add one with `spwn install <ref> --agent neo`: the ref lands in `agent.yaml` and pins in `spwn.lock`. Browse the full [dependency catalog](../reference/dependency-catalog.md).
 
 The rest of the agent directory sits next to the manifest. Identity and memory live as plain files:
 
 ```text
-spwn/agents/neo/
+agents/neo/
 ├── agent.yaml       # composition (the file above)
 ├── SOUL.md          # identity (who the agent is)
 ├── AGENTS.md        # boot-time prompt (what it should do)
@@ -118,7 +118,7 @@ worlds:
     matrix:
         agents: [neo]
         workspaces: [.] # host paths mounted under /workspaces/. Use `name=path` to name them.
-        knowledge: ./spwn/knowledge # optional; bind into /world/knowledge/. Omit for no mount.
+        knowledge: ./knowledge # optional; bind into /world/knowledge/. Omit for no mount.
 ```
 
 `spwn up` materialises every world in the manifest; `spwn down` tears them down. A single agent can appear in many worlds; each world keeps its own runtime state (sessions, inbox, shared scratchpad), separate from the agent's long-lived memory on disk. Destroying a world doesn't destroy the agent.
@@ -131,10 +131,10 @@ Think of Spwn the way you think of `tsc` or `babel`. You write in one clean, pro
    YOUR REPO             BUILD                ARTIFACT
   ───────────          ─────────             ──────────────────────────
    spwn.yaml                                ┌──▶  Docker image
-   spwn/agents/         apply, up           │     (push, pull, run anywhere)
-   spwn/skills/    ──▶  transpile     ──▶  ─┤
-   spwn/tools/          + compile           │
-   spwn/hooks/                              └──▶  runtime-native tree
+   agents/         apply, up           │     (push, pull, run anywhere)
+   skills/    ──▶  transpile     ──▶  ─┤
+   tools/          + compile           │
+   hooks/                              └──▶  runtime-native tree
                                                   (claude-code, codex; no Docker)
 ```
 

@@ -12,7 +12,7 @@ The domain has three abstractions, each owning exactly one concern:
 | **Backend** | Where worlds run                                                                  | `packages/container`: Docker; container labels are the source of truth for world state                                            |
 | **Mind**    | How an agent persists across worlds                                               | `packages/agent`: two markdown layers (`playbooks/`, `journal/`) on the host filesystem plus a single `SOUL.md` at the agent root |
 
-Knowledge is **world-scoped**, not held in the Mind: declare a host path via `worlds.<name>.knowledge` in `spwn.yaml` (default `./spwn/knowledge`) and it is bind-mounted into `/world/knowledge/`. Omit the key and the world's agents are never told a knowledge base exists.
+Knowledge is **world-scoped**, not held in the Mind: declare a host path via `worlds.<name>.knowledge` in `spwn.yaml` (default `./knowledge`) and it is bind-mounted into `/world/knowledge/`. Omit the key and the world's agents are never told a knowledge base exists.
 
 ## Vocabulary
 
@@ -22,7 +22,7 @@ The words of Agents (agent, team, project, harness, Mind, role, skill, automatio
 - **Dependency**: the distribution unit. A `spwn.yaml` manifest (catalog or GitHub repo) shipping any combination of tools, skills, hooks, and agents. Installed via `spwn install`, pinned in `spwn.lock`. What an agent is given is becoming `apps:` ([ADR-022](../decisions/022-an-agent-is-given-apps-its-machine-is-the-wall.md)).
 - **Architect**: the always-on orchestration daemon, connected to all channels. Creates and destroys worlds; self-manages via spwn.
 
-Two more terms of the file formats stay here, since only [Primitives](../reference/primitives.md) uses them: **composition** (an agent's active dependencies, one `dependencies:` list in `agent.yaml`) and **soul** (`spwn/agents/<name>/SOUL.md`).
+Two more terms of the file formats stay here, since only [Primitives](../reference/primitives.md) uses them: **composition** (an agent's active dependencies, one `dependencies:` list in `agent.yaml`) and **soul** (`agents/<name>/SOUL.md`).
 
 ## IDs
 

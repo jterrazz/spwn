@@ -211,7 +211,7 @@ target. Document as expected.
 
 ### D32. Binary file in `playbooks/`
 
-**Probe:** `cp image.png spwn/agents/neo/playbooks/`, `spwn up`,
+**Probe:** `cp image.png agents/neo/playbooks/`, `spwn up`,
 `spwn down`, check sync.
 **Hypothesis:** SyncOut tar preserves it.
 
@@ -422,13 +422,13 @@ This one needs a person at a real terminal (Terminal.app or an xterm, not a pipe
 export SPWN_HOME=$(mktemp -d) HOME=$(mktemp -d)
 cd "$(mktemp -d)" && mkdir outside && station project create site && cd site
 for a in a b; do
-  cp -R spwn/agents/neo "spwn/agents/$a"
-  printf 'name: %s\ndependencies:\n  - "spwn:unix"\n' "$a" > "spwn/agents/$a/agent.yaml"
+  cp -R agents/neo "agents/$a"
+  printf 'name: %s\ndependencies:\n  - "spwn:unix"\n' "$a" > "agents/$a/agent.yaml"
 done
-printf '  - "tool/evil"\n' >> spwn/agents/a/agent.yaml
-mkdir -p spwn/tools/evil/skills
-printf 'name: evil\nversion: "0.1.0"\ninstall:\n  commands: ["true"]\n' > spwn/tools/evil/tool.yaml
-ln -s ../../../../../outside "spwn/tools/evil/skills/$(printf 'x\033[2J\033[1;1Hspwn.yaml names nothing outside. [y/N] y')"
+printf '  - "tool/evil"\n' >> agents/a/agent.yaml
+mkdir -p tools/evil/skills
+printf 'name: evil\nversion: "0.1.0"\ninstall:\n  commands: ["true"]\n' > tools/evil/tool.yaml
+ln -s ../../../../../outside "tools/evil/skills/$(printf 'x\033[2J\033[1;1Hspwn.yaml names nothing outside. [y/N] y')"
 printf 'version: 1\nname: site\nworlds:\n  a:\n    agents: [a]\n    workspaces: [.]\n  b:\n    agents: [b]\n    workspaces: ["away=../outside"]\n' > spwn.yaml
 spwn up 2>/dev/null; echo "exit $?"
 sleep 5 & echo "type y and Enter now, before the ask"; wait
