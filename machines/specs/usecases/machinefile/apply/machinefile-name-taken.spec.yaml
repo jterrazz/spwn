@@ -38,6 +38,7 @@ runs:
           lives on	every machine
           category	Command line
           what	Fast find alternative
+          agent	Find files by name, .gitignore respected: fd <pattern> [path]; fd -e <extension> by extension
     - command: 'world edit macbook-pro downloads/laptop.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1

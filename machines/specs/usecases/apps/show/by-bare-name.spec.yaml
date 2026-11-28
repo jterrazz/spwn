@@ -11,3 +11,4 @@ runs:
           lives on	every machine
           category	Command line
           what	Command-line JSON processor
+          agent	Read or reshape JSON: jq '.key' <file>, or <command> | jq -r '.items[].name'

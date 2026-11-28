@@ -19,6 +19,7 @@ runs:
             lives on  every machine
             category  Git
             what      GitHub CLI for repository management
+            agent     Anything on GitHub from the shell, signed in: gh pr create, gh pr view, gh issue list, >
             brings    github-login
             keeps     {cache}/gh
             keeps     {state}/gh
@@ -38,6 +39,7 @@ runs:
           lives on	every machine
           category	Git
           what	GitHub CLI for repository management
+          agent	Anything on GitHub from the shell, signed in: gh pr create, gh pr view, gh issue list, gh run view, gh api <path>
           brings	github-login
           keeps	{cache}/gh
           keeps	{state}/gh

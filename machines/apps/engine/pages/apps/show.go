@@ -9,7 +9,8 @@ import (
 
 func Show(r apps.Report, lives bool, thisMac page.Context) page.Page {
 	// invariant: an app's detail (SPEC §5.3): its state, method, version,
-	// where it lives, its category, what it brings and what it keeps on disk.
+	// where it lives, its category, its agent line, what it brings and what
+	// it keeps on disk.
 	t := r.App
 	row := Row(r)
 	if !lives {
@@ -24,6 +25,9 @@ func Show(r apps.Report, lives bool, thisMac page.Context) page.Page {
 	}
 	if t.Description != "" {
 		facts = append(facts, fact("what", page.Text(t.Description)))
+	}
+	if t.Agent != "" {
+		facts = append(facts, fact("agent", page.Text(t.Agent)))
 	}
 	if len(t.Then) > 0 {
 		facts = append(facts, fact("brings", page.Text(strings.Join(t.Then, ", "))))
