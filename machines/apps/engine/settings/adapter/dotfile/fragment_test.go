@@ -957,3 +957,83 @@ func TestTheIndentIsTheFilesOwn(t *testing.T) {
 		}
 	}
 }
+
+func TestAFragmentsNextVersionOverTheOwnersEditKeepsHisValuesAndIsWrittenOnce(t *testing.T) {
+	r := rand.New(rand.NewPCG(7, 2026)) //nolint:gosec // value: a seeded generator, so a failing case is found again by its number.
+	ran := 0
+	for i := range 400 {
+		mine := object(r)
+		original, _ := laidOut(mine, i%6)
+		v1, _ := json.Marshal(object(r))
+		b := newBench(t, catalog.WriteMerge, string(v1), ".x.json")
+		b.write(original, 0o600)
+		if _, err := b.applier.Apply(t.Context(), b.setting, nil); err != nil {
+			if strings.Contains(err.Error(), "writes no value") {
+				continue
+			}
+			t.Fatalf("case %d: Apply: %v", i, err)
+		}
+		var tree map[string]any
+		_ = json.Unmarshal([]byte(b.read()), &tree)
+		e := edited(rand.New(rand.NewPCG(uint64(i), 13)), tree, "u"+strconv.Itoa(i)) //nolint:gosec // value: seeded by the case.
+		text, _ := json.MarshalIndent(tree, "", "  ")
+		b.write(string(text)+"\n", 0o600)
+		v2, _ := json.Marshal(object(r))
+		b.ours["pkg/fragment.json"] = &fstest.MapFile{Data: v2}
+		if _, err := b.applier.Apply(t.Context(), b.setting, nil); err != nil {
+			if strings.Contains(err.Error(), "writes no value") {
+				continue
+			}
+			t.Fatalf("case %d: v1 %s then v2 %s: Apply: %v", i, v1, v2, err)
+		}
+		ran++
+		if !e.survives(b.tree(), false) {
+			t.Fatalf("case %d: v1 %s, v2 %s: the owner's edit %+v did not survive:\n%s\nfrom\n%s", i, v1, v2, e, b.read(), text)
+		}
+		merged := b.read()
+		first, err := b.files.Stat(b.file)
+		if err != nil {
+			t.Fatal(err)
+		}
+		record, _ := os.ReadFile(b.record)
+		b.apply()
+		if again := b.read(); again != merged {
+			t.Fatalf("case %d: v1 %s, v2 %s: a second apply of v2 changed\n%s\ninto\n%s", i, v1, v2, merged, again)
+		}
+		if again, _ := b.files.Stat(b.file); !again.ModTime().Equal(first.ModTime()) {
+			t.Fatalf("case %d: v1 %s, v2 %s: a second apply of v2 wrote the file again", i, v1, v2)
+		}
+		if after, _ := os.ReadFile(b.record); !bytes.Equal(record, after) {
+			t.Fatalf("case %d: v1 %s, v2 %s: a second apply of v2 moved the record", i, v1, v2)
+		}
+		b.off()
+		if !e.survives(b.tree(), true) {
+			t.Fatalf("case %d: v1 %s, v2 %s: off after v2 over the owner's edit %+v left\n%s", i, v1, v2, e, b.read())
+		}
+	}
+	if ran < 100 {
+		t.Fatalf("only %d of 400 cases ran to the end", ran)
+	}
+}
+
+func TestAFragmentGoingToItsNextVersionAndBackLeavesTheFileOfTheFirstAndOffTheOwners(t *testing.T) {
+	const owner = "{\n  \"a\": 1,\n  \"b\": {\n    \"own\": true\n  }\n}\n"
+	b := newBench(t, catalog.WriteMerge, `{"b": {"c": 1, "gone": "x"}, "d": [1], "e": "one"}`, ".x.json")
+	b.write(owner, 0o600)
+	b.apply()
+	first := b.tree()
+	b.ours["pkg/fragment.json"] = &fstest.MapFile{Data: []byte(`{"b": {"c": 2, "new": 3}, "d": [1], "e": {"two": 2}, "f": true}`)}
+	b.apply()
+	if reflect.DeepEqual(b.tree(), first) {
+		t.Fatalf("v2 left the file as v1 wrote it:\n%s", b.read())
+	}
+	b.ours["pkg/fragment.json"] = &fstest.MapFile{Data: []byte(`{"b": {"c": 1, "gone": "x"}, "d": [1], "e": "one"}`)}
+	b.apply()
+	if got := b.tree(); !reflect.DeepEqual(got, first) {
+		t.Errorf("v1 again left\n%s\nnot the file of the first v1\n%v", b.read(), first)
+	}
+	b.off()
+	if got := b.read(); !reflect.DeepEqual(tokens(t, got), tokens(t, owner)) {
+		t.Errorf("off left\n%s\nnot the owner's keys\n%s", got, owner)
+	}
+}
