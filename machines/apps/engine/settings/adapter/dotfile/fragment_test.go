@@ -436,6 +436,101 @@ func TestAFileKeepsItsModeAndItsLink(t *testing.T) {
 	}
 }
 
+func (b *bench) link(to, at string) {
+	b.t.Helper()
+	at = filepath.Join(b.home, at)
+	if err := os.MkdirAll(filepath.Dir(at), 0o750); err != nil {
+		b.t.Fatal(err)
+	}
+	if err := b.files.Symlink(to, at); err != nil {
+		b.t.Fatal(err)
+	}
+}
+
+func (b *bench) put(at, text string) string {
+	b.t.Helper()
+	if !filepath.IsAbs(at) {
+		at = filepath.Join(b.home, at)
+	}
+	if err := os.MkdirAll(filepath.Dir(at), 0o750); err != nil {
+		b.t.Fatal(err)
+	}
+	if err := os.WriteFile(at, []byte(text), 0o600); err != nil {
+		b.t.Fatal(err)
+	}
+	return at
+}
+
+func TestAWriteLandsInTheFileTheLinksReallyName(t *testing.T) {
+	b := newBench(t, catalog.WriteMerge, `{"a": 1}`, ".claude/settings.json")
+	shared := b.put("V/shared/s.json", "{}\n")
+	if err := os.MkdirAll(filepath.Join(b.home, "V", "c"), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	b.link(filepath.Join(b.home, "V", "c"), ".claude")
+	b.link("../shared/s.json", "V/c/settings.json")
+	b.apply()
+	if data, _ := os.ReadFile(shared); string(data) != "{\n  \"a\": 1\n}\n" {
+		t.Errorf("the real file holds %q", data)
+	}
+	if _, err := b.files.Stat(filepath.Join(b.home, "shared")); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("a file was made where the links read lexically lead: %v", err)
+	}
+	if to, err := b.files.Readlink(filepath.Join(b.home, "V", "c", "settings.json")); err != nil || to != "../shared/s.json" {
+		t.Errorf("the link is now %q, %v", to, err)
+	}
+	b.off()
+	if data, _ := os.ReadFile(shared); string(data) != "{}\n" {
+		t.Errorf("off left %q in the real file", data)
+	}
+}
+
+func TestALinkOutOfTheHomeIsRefused(t *testing.T) {
+	outside := t.TempDir()
+	for name, link := range map[string]func(b *bench){
+		"the file":   func(b *bench) { b.link(b.put(filepath.Join(outside, "x.json"), "{}\n"), ".x.json") },
+		"its folder": func(b *bench) { b.put(filepath.Join(outside, "x.json"), "{}\n"); b.link(outside, ".cfg") },
+		"a relative link climbing out": func(b *bench) {
+			b.put(filepath.Join(outside, "x.json"), "{}\n")
+			rel, _ := filepath.Rel(b.home, filepath.Join(outside, "x.json"))
+			b.link(rel, ".x.json")
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			to := ".x.json"
+			if name == "its folder" {
+				to = ".cfg/x.json"
+			}
+			b := newBench(t, catalog.WriteMerge, `{"a": 1}`, to)
+			link(b)
+			if _, err := b.applier.Apply(t.Context(), b.setting, nil); err == nil || !strings.Contains(err.Error(), "outside your home") {
+				t.Errorf("Apply: %v; want the link out of the home refused", err)
+			}
+			if data, _ := os.ReadFile(filepath.Join(outside, "x.json")); string(data) != "{}\n" {
+				t.Errorf("the file out of the home holds %q", data)
+			}
+		})
+	}
+}
+
+func TestADanglingLinkIsRefusedAndNothingIsMadeThroughIt(t *testing.T) {
+	for name, c := range map[string]struct{ link, at, to string }{
+		"the file":   {"gone/x.json", ".x.json", ".x.json"},
+		"its folder": {"gone", ".cfg", ".cfg/x.json"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			b := newBench(t, catalog.WriteMerge, `{"a": 1}`, c.to)
+			b.link(c.link, c.at)
+			if _, err := b.applier.Apply(t.Context(), b.setting, nil); err == nil || !strings.Contains(err.Error(), "dangling") {
+				t.Errorf("Apply: %v; want the dangling link refused", err)
+			}
+			if _, err := b.files.Stat(filepath.Join(b.home, "gone")); !errors.Is(err, fs.ErrNotExist) {
+				t.Errorf("something was made through the dangling link: %v", err)
+			}
+		})
+	}
+}
+
 func TestTheBoundsAreHeld(t *testing.T) {
 	deep := strings.Repeat(`{"a":`, 33) + "1" + strings.Repeat("}", 33)
 	for name, c := range map[string]struct{ fragment, file, want string }{

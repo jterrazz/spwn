@@ -81,7 +81,7 @@ func (a *Applier) seeMerge(c catalog.Copy, old []entry) (seen, error) {
 	if err != nil {
 		return seen{}, err
 	}
-	_, data, there, err := a.target(c.To)
+	_, data, there, err := a.target(c.To, catalog.WriteMerge)
 	if err != nil {
 		return seen{}, err
 	}
@@ -123,7 +123,7 @@ func (a *Applier) applyMerge(r *record, setting string, c catalog.Copy) ([]setti
 	if err != nil {
 		return nil, err
 	}
-	at, data, there, err := a.target(c.To)
+	at, data, there, err := a.target(c.To, catalog.WriteMerge)
 	if err != nil {
 		return nil, err
 	}
@@ -149,7 +149,7 @@ func (a *Applier) applyMerge(r *record, setting string, c catalog.Copy) ([]setti
 }
 
 func (a *Applier) undoMerge(r *record, setting string, c catalog.Copy) ([]settings.ChangeStep, error) {
-	at, data, there, err := a.target(c.To)
+	at, data, there, err := a.target(c.To, catalog.WriteMerge)
 	if err != nil {
 		return nil, err
 	}
@@ -239,7 +239,7 @@ func (a *Applier) seeBlock(setting string, c catalog.Copy) (seen, error) {
 	if err != nil {
 		return seen{}, err
 	}
-	_, data, _, err := a.target(c.To)
+	_, data, _, err := a.target(c.To, catalog.WriteBlock)
 	if err != nil {
 		return seen{}, err
 	}
@@ -269,7 +269,7 @@ func (a *Applier) applyBlock(r *record, setting string, c catalog.Copy) ([]setti
 	if err != nil {
 		return nil, err
 	}
-	at, data, there, err := a.target(c.To)
+	at, data, there, err := a.target(c.To, catalog.WriteBlock)
 	if err != nil {
 		return nil, err
 	}
@@ -301,7 +301,7 @@ func (a *Applier) undoBlock(r *record, setting string, c catalog.Copy) ([]settin
 	if err != nil {
 		return nil, err
 	}
-	at, data, there, err := a.target(c.To)
+	at, data, there, err := a.target(c.To, catalog.WriteBlock)
 	if err != nil || !there {
 		r.drop(setting, c.To)
 		return nil, err

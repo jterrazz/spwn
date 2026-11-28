@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io/fs"
 	"path"
 	"slices"
@@ -273,32 +274,74 @@ func (a *Applier) takeBack(r *record, setting string, mode catalog.WriteMode, c 
 	return a.undoBlock(r, setting, c)
 }
 
-// value: the file a path names, through its links, as a write lands in it.
-func (a *Applier) resolve(p string) (string, error) {
-	for range 32 {
-		to, link := a.link(p)
-		if !link {
-			return p, nil
+// value: how many links a path is followed through before it is refused,
+// the kernel's own bound on a path.
+const linkHops = 32
+
+// value: the marker, after a link's own parts, that what the link names
+// must be there.
+const named = "\x00"
+
+func (a *Applier) real(p string) (string, error) {
+	// invariant: the real path p names: each part of it read from the root
+	// down, a link replaced by what it names (`..` in it climbs from the
+	// real folder, never the lexical one), at most linkHops links in all;
+	// a link that names nothing is refused, and a part not there yet, past
+	// every link, is taken as named.
+	todo := strings.Split(p, "/")
+	at, hops := "/", 0
+	for len(todo) > 0 {
+		part := todo[0]
+		todo = todo[1:]
+		switch part {
+		case "", ".":
+			continue
+		case "..":
+			at = path.Dir(at)
+			continue
+		case named:
+			if _, err := a.files.Stat(at); errors.Is(err, fs.ErrNotExist) {
+				return "", fmt.Errorf("%s: a dangling link: what it names, %s, is not there, and Machines makes nothing through it", p, at)
+			}
+			continue
 		}
-		if !path.IsAbs(to) {
-			to = path.Join(path.Dir(p), to)
+		next := path.Join(at, part)
+		to, err := a.files.Readlink(next)
+		if err != nil {
+			at = next
+			continue
 		}
-		p = to
+		hops++
+		if hops > linkHops {
+			return "", fmt.Errorf("%s: more than %d links", p, linkHops)
+		}
+		if path.IsAbs(to) {
+			at = "/"
+		}
+		todo = append(append(strings.Split(to, "/"), named), todo...)
 	}
-	return "", errors.New(p + ": too many links")
+	return at, nil
 }
 
-// value: where a link points; a path Readlink refuses is no link (a file,
-// or nothing yet), and the write lands at it.
-func (a *Applier) link(p string) (string, bool) {
-	to, err := a.files.Readlink(p)
-	return to, err == nil
-}
-
-// value: the file's bytes, nil and false when it is not there yet.
-func (a *Applier) target(to string) (at string, data []byte, there bool, err error) {
-	if at, err = a.resolve(expand(a.o.Home, to)); err != nil {
+// value: the real path of a setting's file, and its bytes, nil and false
+// when it is not there yet.
+func (a *Applier) target(to string, mode catalog.WriteMode) (at string, data []byte, there bool, err error) {
+	// invariant: a fragment lands in the file its links really name, and
+	// only inside the real home and out of what Confined keeps it from:
+	// a link out of either is refused, never followed.
+	home, err := a.real(a.o.Home)
+	if err != nil {
 		return "", nil, false, err
+	}
+	if at, err = a.real(expand(a.o.Home, to)); err != nil {
+		return "", nil, false, err
+	}
+	rest, inside := strings.CutPrefix(at, home+"/")
+	switch {
+	case !inside:
+		return "", nil, false, fmt.Errorf("%s leads through its links to %s, outside your home: Machines writes nothing there", to, at)
+	case catalog.Confined("~/"+rest, mode) != "":
+		return "", nil, false, fmt.Errorf("%s leads through its links to ~/%s: %s", to, rest, catalog.Confined("~/"+rest, mode))
 	}
 	data, err = a.files.ReadFile(at)
 	if errors.Is(err, fs.ErrNotExist) {
@@ -311,8 +354,12 @@ func (a *Applier) target(to string) (at string, data []byte, there bool, err err
 // 0600 with the folders it lacks, which are recorded with it, so off takes
 // them back only once they are empty.
 func (a *Applier) land(w *written, at string, data []byte, there bool) error {
+	home, err := a.real(a.o.Home)
+	if err != nil {
+		return err
+	}
 	var made []string
-	for dir := path.Dir(at); dir != "/" && dir != "." && dir != a.o.Home; dir = path.Dir(dir) {
+	for dir := path.Dir(at); dir != "/" && dir != "." && dir != home; dir = path.Dir(dir) {
 		if _, err := a.files.Stat(dir); err == nil {
 			break
 		}
