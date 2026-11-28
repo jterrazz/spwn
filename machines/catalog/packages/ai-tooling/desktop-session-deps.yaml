@@ -1,0 +1,10 @@
+package: station.package/v1
+kind: app
+name: desktop-session-deps
+description: The virtual screen, the window manager and the session and accessibility buses a desktop session runs on Linux, installed and not started
+methods:
+    # outside: agent-desktop 1.3.1 on Ubuntu 24.04 arm64: without a window manager its window list fails with `native_window_unproven`; the AT-SPI registry starts by itself on first use, and a session bus is all it needs.
+    - family: debian
+      machine: [workspace, server]
+      needs: [sudo]
+      apt: { packages: [xvfb, at-spi2-core, dbus-user-session, matchbox-window-manager] }

@@ -132,7 +132,8 @@ Modern replacements are on every machine; prefer them over the defaults:
 - **agent-browser**: Browser automation CLI for AI agents
 - **agent-desktop**: Desktop automation CLI for AI agents, which needs the macOS Accessibility approval that Machines names and never grants
 - **browser-use**: AI agent library for browser automation
-- **desktop-session**: A virtual screen, a window manager and the accessibility bus, so an ssh shell of a Linux VM can drive a graphical app
+- **desktop-session**: A virtual screen and its window manager kept running for the user of a Linux VM, from its start and with no login, so every process of that user, a non-interactive ssh command included, finds the display and the session bus
+- **desktop-session-deps**: The virtual screen, the window manager and the session and accessibility buses a desktop session runs on Linux, installed and not started
 - **inferrs**: TurboQuant LLM inference server
 - **markitdown**: Convert files to Markdown for LLMs
 - **mcp2cli**: Any MCP server exposed as command-line subcommands

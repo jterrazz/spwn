@@ -2940,7 +2940,23 @@ func builtinCatalog() (Catalog, error) {
 				Name:        "desktop-session",
 				Kind:        "app",
 				AppKind:     "app",
-				Description: "A virtual screen, a window manager and the accessibility bus, so an ssh shell of a Linux VM can drive a graphical app",
+				Description: "A virtual screen and its window manager kept running for the user of a Linux VM, from its start and with no login, so every process of that user, a non-interactive ssh command included, finds the display and the session bus",
+				Category:    "AI Tooling",
+				Installs: []LivesOn{
+					{
+						Kinds: []MachineKind{
+							"linux"},
+						Install: ShellInstall{
+							Line:  "set -eu\nexport XDG_RUNTIME_DIR=/run/user/$(id -u)\nsudo -n loginctl enable-linger \"$(id -un)\"\ni=0\nuntil [ -S \"$XDG_RUNTIME_DIR/systemd/private\" ]; do\n  i=$((i+1))\n  [ \"$i\" -le 100 ] || { echo \"the user manager of $(id -un) did not start\" >&2; exit 1; }\n  sleep 0.1\ndone\nunits=$HOME/.config/systemd/user\nmkdir -p \"$units\" \"$HOME/.config/environment.d\"\ncat > \"$units/station-xvfb.service\" <<'UNIT'\n[Unit]\nDescription=Xvfb, the virtual screen :99 of the desktop session\nWants=station-matchbox.service\n\n[Service]\nExecStart=/usr/bin/Xvfb :99 -screen 0 1280x800x24\nRestart=on-failure\n\n[Install]\nWantedBy=default.target\nUNIT\ncat > \"$units/station-matchbox.service\" <<'UNIT'\n[Unit]\nDescription=matchbox, the window manager of the desktop session\nBindsTo=station-xvfb.service\nAfter=station-xvfb.service\n\n[Service]\nEnvironment=DISPLAY=:99\nExecStartPre=/usr/bin/timeout 10 /bin/sh -c 'until [ -S /tmp/.X11-unix/X99 ]; do sleep 0.1; done'\nExecStart=/usr/bin/matchbox-window-manager\nRestart=on-failure\n\n[Install]\nWantedBy=default.target\nUNIT\necho DISPLAY=:99 > \"$HOME/.config/environment.d/60-station-desktop-session.conf\"\nsystemctl --user daemon-reload\nsystemctl --user enable --now station-xvfb.service station-matchbox.service\nfor rc in .zshenv .bashrc; do\n  f=$HOME/$rc\n  if ! grep -qxF '# >>> station:desktop-session >>>' \"$f\" 2>/dev/null; then\n    { printf '%s\\n' '# >>> station:desktop-session >>>' 'export DISPLAY=:99' 'export DBUS_SESSION_BUS_ADDRESS=\"${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/$UID/bus}\"' '# <<< station:desktop-session <<<'; cat \"$f\" 2>/dev/null || true; } > \"$f.station\"\n    mv \"$f.station\" \"$f\"\n  fi\ndone\n",
+							Check: "test -e \"/var/lib/systemd/linger/$(/usr/bin/id -un)\" && test -L \"$HOME/.config/systemd/user/default.target.wants/station-xvfb.service\" && test -L \"$HOME/.config/systemd/user/default.target.wants/station-matchbox.service\" && /usr/bin/grep -qxF '# >>> station:desktop-session >>>' \"$HOME/.zshenv\"\n",
+							Undo:  "export XDG_RUNTIME_DIR=/run/user/$(id -u)\nsystemctl --user disable --now station-matchbox.service station-xvfb.service\nrm -f \"$HOME/.config/systemd/user/station-xvfb.service\" \"$HOME/.config/systemd/user/station-matchbox.service\" \"$HOME/.config/environment.d/60-station-desktop-session.conf\"\nsystemctl --user daemon-reload\nfor rc in .zshenv .bashrc; do\n  [ -f \"$HOME/$rc\" ] && sed -i '/^# >>> station:desktop-session >>>$/,/^# <<< station:desktop-session <<<$/d' \"$HOME/$rc\"\ndone\nsudo -n loginctl disable-linger \"$(id -un)\"\n"}}},
+				Requires: []string{
+					"desktop-session-deps"}},
+			{
+				Name:        "desktop-session-deps",
+				Kind:        "app",
+				AppKind:     "app",
+				Description: "The virtual screen, the window manager and the session and accessibility buses a desktop session runs on Linux, installed and not started",
 				Category:    "AI Tooling",
 				Installs: []LivesOn{
 					{
@@ -7720,7 +7736,31 @@ func builtinCatalog() (Catalog, error) {
 					Package:     "station.package/v1",
 					Kind:        "app",
 					Name:        "desktop-session",
-					Description: "A virtual screen, a window manager and the accessibility bus, so an ssh shell of a Linux VM can drive a graphical app",
+					Description: "A virtual screen and its window manager kept running for the user of a Linux VM, from its start and with no login, so every process of that user, a non-interactive ssh command included, finds the display and the session bus",
+					Requires: []string{
+						"desktop-session-deps"},
+					Methods: []MethodSpec{
+						{
+							Selector: Selector{
+								Family: "debian",
+								Machine: Roles{
+									"workspace",
+									"server"}},
+							Needs: []Need{
+								"sudo"},
+							Script: &ScriptMethod{
+								Check: "test -e \"/var/lib/systemd/linger/$(/usr/bin/id -un)\" && test -L \"$HOME/.config/systemd/user/default.target.wants/station-xvfb.service\" && test -L \"$HOME/.config/systemd/user/default.target.wants/station-matchbox.service\" && /usr/bin/grep -qxF '# >>> station:desktop-session >>>' \"$HOME/.zshenv\"\n",
+								Run:   "set -eu\nexport XDG_RUNTIME_DIR=/run/user/$(id -u)\nsudo -n loginctl enable-linger \"$(id -un)\"\ni=0\nuntil [ -S \"$XDG_RUNTIME_DIR/systemd/private\" ]; do\n  i=$((i+1))\n  [ \"$i\" -le 100 ] || { echo \"the user manager of $(id -un) did not start\" >&2; exit 1; }\n  sleep 0.1\ndone\nunits=$HOME/.config/systemd/user\nmkdir -p \"$units\" \"$HOME/.config/environment.d\"\ncat > \"$units/station-xvfb.service\" <<'UNIT'\n[Unit]\nDescription=Xvfb, the virtual screen :99 of the desktop session\nWants=station-matchbox.service\n\n[Service]\nExecStart=/usr/bin/Xvfb :99 -screen 0 1280x800x24\nRestart=on-failure\n\n[Install]\nWantedBy=default.target\nUNIT\ncat > \"$units/station-matchbox.service\" <<'UNIT'\n[Unit]\nDescription=matchbox, the window manager of the desktop session\nBindsTo=station-xvfb.service\nAfter=station-xvfb.service\n\n[Service]\nEnvironment=DISPLAY=:99\nExecStartPre=/usr/bin/timeout 10 /bin/sh -c 'until [ -S /tmp/.X11-unix/X99 ]; do sleep 0.1; done'\nExecStart=/usr/bin/matchbox-window-manager\nRestart=on-failure\n\n[Install]\nWantedBy=default.target\nUNIT\necho DISPLAY=:99 > \"$HOME/.config/environment.d/60-station-desktop-session.conf\"\nsystemctl --user daemon-reload\nsystemctl --user enable --now station-xvfb.service station-matchbox.service\nfor rc in .zshenv .bashrc; do\n  f=$HOME/$rc\n  if ! grep -qxF '# >>> station:desktop-session >>>' \"$f\" 2>/dev/null; then\n    { printf '%s\\n' '# >>> station:desktop-session >>>' 'export DISPLAY=:99' 'export DBUS_SESSION_BUS_ADDRESS=\"${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/$UID/bus}\"' '# <<< station:desktop-session <<<'; cat \"$f\" 2>/dev/null || true; } > \"$f.station\"\n    mv \"$f.station\" \"$f\"\n  fi\ndone\n",
+								Undo:  "export XDG_RUNTIME_DIR=/run/user/$(id -u)\nsystemctl --user disable --now station-matchbox.service station-xvfb.service\nrm -f \"$HOME/.config/systemd/user/station-xvfb.service\" \"$HOME/.config/systemd/user/station-matchbox.service\" \"$HOME/.config/environment.d/60-station-desktop-session.conf\"\nsystemctl --user daemon-reload\nfor rc in .zshenv .bashrc; do\n  [ -f \"$HOME/$rc\" ] && sed -i '/^# >>> station:desktop-session >>>$/,/^# <<< station:desktop-session <<<$/d' \"$HOME/$rc\"\ndone\nsudo -n loginctl disable-linger \"$(id -un)\"\n"}}}},
+				Folder: "ai-tooling",
+				File:   "packages/ai-tooling/desktop-session.yaml",
+				Origin: "built-in"},
+			{
+				Package: Package{
+					Package:     "station.package/v1",
+					Kind:        "app",
+					Name:        "desktop-session-deps",
+					Description: "The virtual screen, the window manager and the session and accessibility buses a desktop session runs on Linux, installed and not started",
 					Methods: []MethodSpec{
 						{
 							Selector: Selector{
@@ -7735,13 +7775,9 @@ func builtinCatalog() (Catalog, error) {
 									"xvfb",
 									"at-spi2-core",
 									"dbus-user-session",
-									"matchbox-window-manager"}},
-							Shell: []ShellBlock{
-								{
-									ID:  "station:desktop-session",
-									Zsh: "export DISPLAY=:99\nexport DBUS_SESSION_BUS_ADDRESS=unix:path=${XDG_RUNTIME_DIR:-/run/user/$UID}/bus\nif ! pgrep -u $UID -x Xvfb >/dev/null; then\n  setsid -f Xvfb :99 -screen 0 1280x800x24 >/dev/null 2>&1\n  for _ in {1..25}; do [[ -S /tmp/.X11-unix/X99 ]] && break; sleep 0.2; done\nfi\npgrep -u $UID -x matchbox-window >/dev/null || setsid -f matchbox-window-manager >/dev/null 2>&1\n"}}}}},
+									"matchbox-window-manager"}}}}},
 				Folder: "ai-tooling",
-				File:   "packages/ai-tooling/desktop-session.yaml",
+				File:   "packages/ai-tooling/desktop-session-deps.yaml",
 				Origin: "built-in"},
 			{
 				Package: Package{

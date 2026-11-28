@@ -7,6 +7,7 @@ bat batcat
 browser-use browser-use
 codex codex
 desktop-session
+desktop-session-deps
 difftastic difft
 dust dust
 eza eza
