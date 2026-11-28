@@ -158,13 +158,16 @@ func (a *Applier) applyMerge(r *record, setting string, c catalog.Copy) ([]setti
 		return nil, err
 	}
 	step := settings.ChangeStep{Label: c.To, State: catalog.StateOK, Detail: "as Machines wrote it: nothing written"}
+	w.Values = m.now
+	if err := a.fits(r, w); err != nil {
+		return nil, err
+	}
 	if !there || !bytes.Equal(out, data) {
 		if err := a.land(&w, at, out, seenAs(data, there)); err != nil {
 			return nil, err
 		}
 		step.Detail = "merged"
 	}
-	w.Values = m.now
 	if len(w.Values) > 0 || w.Made {
 		r.put(w)
 	} else {
@@ -310,13 +313,16 @@ func (a *Applier) applyBlock(r *record, setting string, c catalog.Copy) ([]setti
 	w, _ := r.of(setting, c.To)
 	after, changed := settings.UpsertPackageBlock(text, id, body)
 	step := settings.ChangeStep{Label: label, State: catalog.StateOK, Detail: "as Machines wrote it: nothing written"}
+	w.Block = textDigest(body)
+	if err := a.fits(r, w); err != nil {
+		return nil, err
+	}
 	if changed {
 		if err := a.land(&w, at, []byte(after), seenAs(data, there)); err != nil {
 			return nil, err
 		}
 		step.Detail = "written"
 	}
-	w.Block = textDigest(body)
 	r.put(w)
 	return []settings.ChangeStep{step}, nil
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -228,6 +229,24 @@ func TestAFileThatGrewPastItsBoundOnceMeasuredIsReadNoFurther(t *testing.T) {
 				t.Errorf("read %d bytes of a file bounded at 1 MiB", read)
 			}
 		})
+	}
+}
+
+func TestAFragmentWhoseRecordWouldPassItsBoundIsRefusedUnwritten(t *testing.T) {
+	elements := make([]string, 8000)
+	for i := range elements {
+		elements[i] = strconv.Itoa(i)
+	}
+	b := newBench(t, catalog.WriteMerge, `{"a": [`+strings.Join(elements, ",")+`]}`, ".x.json")
+	b.write("{}\n", 0o600)
+	if _, err := b.applier.Apply(t.Context(), b.setting, nil); err == nil || !strings.Contains(err.Error(), "merged.json would pass 1 MiB") {
+		t.Errorf("Apply: %v; want the apply refused by the record it would write", err)
+	}
+	if got := b.read(); got != "{}\n" {
+		t.Errorf("the file was written: %d bytes", len(got))
+	}
+	if _, err := b.files.Stat(b.record); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("a record was written: %v", err)
 	}
 }
 
