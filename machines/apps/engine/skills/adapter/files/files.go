@@ -81,8 +81,14 @@ func (f Files) List(_ context.Context, project string) ([]skills.Skill, error) {
 				continue
 			}
 			body, _, err := folder.ReadFile(file)
+			if errors.Is(err, local.ErrTooLarge) {
+				continue
+			}
 			if err != nil {
 				return nil, err
+			}
+			if !spwnproject.SkillFile(file, body) {
+				continue
 			}
 			out = append(out, skills.Skill{Name: name, Path: filepath.Join(dir, file), Description: skills.Describe(string(body))})
 		}

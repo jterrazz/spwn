@@ -87,9 +87,9 @@ func LoadSkills(t *platform.Tree, dir string) ([]Skill, error) {
 			}
 			files[SkillEntry] = body
 			out = append(out, Skill{Name: name, Files: files})
-		case e.Type().IsRegular() && strings.HasSuffix(name, ".md") && !strings.EqualFold(name, "README.md"):
-			body, ok := namedEntry(t, path)
-			if !ok {
+		case e.Type().IsRegular() && strings.HasSuffix(name, ".md"):
+			body, _ := namedEntry(t, path)
+			if !SkillFile(name, body) {
 				continue
 			}
 			out = append(out, Skill{Name: strings.TrimSuffix(name, ".md"), Files: map[string][]byte{SkillEntry: body}})
@@ -109,6 +109,16 @@ func namedEntry(t *platform.Tree, path string) ([]byte, bool) {
 		return nil, false
 	}
 	return body, frontMatterName(body) != ""
+}
+
+// value: a file named name directly under a skills folder, holding body,
+// is a skill: a .md file, neither hidden nor a README.md, no larger than a
+// skill's file, whose own front matter parses and carries a name. The one
+// rule of a bare skill file, for every binary that lists or loads one.
+
+func SkillFile(name string, body []byte) bool {
+	return !strings.HasPrefix(name, ".") && strings.HasSuffix(name, ".md") && !strings.EqualFold(name, "README.md") &&
+		len(body) <= skillFileSize && frontMatterName(body) != ""
 }
 
 func frontMatterName(body []byte) string {

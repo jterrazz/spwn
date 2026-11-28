@@ -221,7 +221,7 @@ station skills create <name> # a markdown file made from a template, skills/<nam
 station skills delete <skill> [--confirm=<skill>] # its file, for good
 ```
 
-A skill is a bare markdown file, `skills/<name>.md` in the project, or `~/.spwn/skills/<name>.md` outside one; its description is the `description:` line of its frontmatter, and it reaches an agent only when that frontmatter carries a `name:`, as `create` writes it. A name is lowercase letters, digits and dashes, a letter first, and no verb of `skills`; a name taken is refused, exit 2. A skill's text is changed by opening its file: no command edits it. `delete` asks the skill's name typed on a terminal and needs `--confirm=<skill>` off one. `--on` reads the project as `station agents` does. `--json` is `station.skills.list/v1`, or `station.skills.show/v1` for one skill.
+A skill is a bare markdown file, `skills/<name>.md` in the project, or `~/.spwn/skills/<name>.md` outside one; its description is the `description:` line of its frontmatter, and it is listed, and reaches an agent, only when that frontmatter carries a `name:`, as `create` writes it, and it is not a `README.md`: the list is the files the project loads as skills. A name is lowercase letters, digits and dashes, a letter first, and no verb of `skills`; a name taken is refused, exit 2. A skill's text is changed by opening its file: no command edits it. `delete` asks the skill's name typed on a terminal and needs `--confirm=<skill>` off one. `--on` reads the project as `station agents` does. `--json` is `station.skills.list/v1`, or `station.skills.show/v1` for one skill.
 
 ### `station project`
 

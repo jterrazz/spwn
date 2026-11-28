@@ -85,7 +85,7 @@ func TestTheUsersOwnSkillsAreThoseOfNoProject(t *testing.T) {
 	})
 }
 
-func TestAProjectKeepsItsSkillsUnderItsSpwnFolder(t *testing.T) {
+func TestAProjectKeepsItsSkillsInItsLayoutsSkillsFolder(t *testing.T) {
 	root := t.TempDir()
 	made, err := open(t).Create(t.Context(), root, "focus")
 	if err != nil {
@@ -99,19 +99,25 @@ func TestAProjectKeepsItsSkillsUnderItsSpwnFolder(t *testing.T) {
 	}
 }
 
-func TestOnlyMarkdownFilesAreSkills(t *testing.T) {
+func TestOnlyMarkdownFilesItsFrontMatterNamesAreSkills(t *testing.T) {
 	root := t.TempDir()
 	dir := filepath.Join(root, "skills")
 	if err := os.MkdirAll(filepath.Join(dir, "nested"), 0o750); err != nil {
 		t.Fatal(err)
 	}
-	for name, body := range map[string]string{"paper-reading.md": "# Paper Reading", "notes.txt": "ignore"} {
+	for name, body := range map[string]string{
+		"paper-reading.md": "---\nname: paper-reading\n---\n# Paper Reading",
+		"notes.txt":        "ignore",
+		"prose.md":         "# Just prose",
+		"unnamed.md":       "---\ndescription: no name\n---\n",
+		"README.md":        "---\nname: readme\n---\n",
+	} {
 		if err := os.WriteFile(filepath.Join(dir, name), []byte(body), 0o600); err != nil {
 			t.Fatal(err)
 		}
 	}
 	list, err := open(t).List(t.Context(), root)
 	if err != nil || len(list) != 1 || list[0].Name != "paper-reading" {
-		t.Errorf("List = %+v, %v; want paper-reading alone", list, err)
+		t.Errorf("List = %+v, %v; want paper-reading alone, as the project loads its skills", list, err)
 	}
 }
