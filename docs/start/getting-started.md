@@ -77,10 +77,10 @@ dependencies:
 | ----------------------- | --------------------------------------------- |
 | `spwn:<name>`           | Built-in catalog dep compiled into the binary |
 | `github:<owner>/<repo>` | Community registry _(planned)_                |
-| `skill/<name>`          | `./skills/<name>.md`                     |
-| `tool/<name>`           | `./tools/<name>/` (with `tool.yaml`)     |
-| `hook/<name>`           | `./hooks/<name>.yaml`                    |
-| `command/<name>`        | `./commands/<name>.md`                   |
+| `skill/<name>`          | `./skills/<name>.md`                          |
+| `tool/<name>`           | `./tools/<name>/` (with `tool.yaml`)          |
+| `hook/<name>`           | `./hooks/<name>.yaml`                         |
+| `command/<name>`        | `./commands/<name>.md`                        |
 
 Add one with `spwn install <ref> --agent neo`: the ref lands in `agent.yaml` and pins in `spwn.lock`. Browse the full [dependency catalog](../reference/dependency-catalog.md).
 

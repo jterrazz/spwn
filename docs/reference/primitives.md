@@ -69,10 +69,10 @@ An agent's composition is one `dependencies:` list. The grammar splits **source*
 | ----------------------- | ----------- | ------------------------------------------------------------------ |
 | `spwn:<name>`           | catalog dep | bundled catalog entry (e.g. `spwn:unix`, `spwn:git`, `spwn:codex`) |
 | `github:<owner>/<repo>` | remote dep  | remote package fetched at resolve time _(planned)_                 |
-| `skill/<name>`          | local block | `skills/<name>.md`                                            |
-| `tool/<name>`           | local block | `tools/<name>/`                                               |
-| `hook/<name>`           | local block | `hooks/<name>.yaml`                                           |
-| `command/<name>`        | local block | `commands/<name>.md`                                          |
+| `skill/<name>`          | local block | `skills/<name>.md`                                                 |
+| `tool/<name>`           | local block | `tools/<name>/`                                                    |
+| `hook/<name>`           | local block | `hooks/<name>.yaml`                                                |
+| `command/<name>`        | local block | `commands/<name>.md`                                               |
 
 The four local schemes are iso: a path-style ref, selected per agent, resolving to one file or directory on disk. Each agent inherits only the blocks it explicitly subscribes to. Project-wide `dependencies:` in `spwn.yaml` are unioned into every agent: an agent can add but never remove them.
 
