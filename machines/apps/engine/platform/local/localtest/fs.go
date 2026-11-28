@@ -1,6 +1,7 @@
 package localtest
 
 import (
+	"bytes"
 	"context"
 	"io/fs"
 	"maps"
@@ -50,6 +51,14 @@ func (f *FS) Replace(p string, data []byte, perm fs.FileMode) error {
 		perm = file.Mode.Perm()
 	}
 	return f.WriteFile(p, data, perm)
+}
+
+func (f *FS) Swap(p string, seen local.Seen, data []byte, perm fs.FileMode) error {
+	file, there := f.Files[key(p)]
+	if there != seen.There || (there && !bytes.Equal(file.Data, seen.Data)) {
+		return local.ErrChanged
+	}
+	return f.Replace(p, data, perm)
 }
 
 func (f *FS) MkdirAll(p string, perm fs.FileMode) error {

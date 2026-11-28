@@ -149,7 +149,7 @@ func (a *Applier) applyMerge(r *record, setting string, c catalog.Copy) ([]setti
 	}
 	step := settings.ChangeStep{Label: c.To, State: catalog.StateOK, Detail: "as Machines wrote it: nothing written"}
 	if !there || !bytes.Equal(out, data) {
-		if err := a.land(&w, at, out, there); err != nil {
+		if err := a.land(&w, at, out, seenAs(data, there)); err != nil {
 			return nil, err
 		}
 		step.Detail = "merged"
@@ -189,7 +189,7 @@ func (a *Applier) undoMerge(r *record, setting string, c catalog.Copy) ([]settin
 		}
 		step.Detail = "removed"
 	case !bytes.Equal(out, data):
-		if err := a.files.Replace(at, out, 0o600); err != nil {
+		if err := a.files.Swap(at, seenAs(data, true), out, 0o600); err != nil {
 			return nil, err
 		}
 	default:
@@ -299,7 +299,7 @@ func (a *Applier) applyBlock(r *record, setting string, c catalog.Copy) ([]setti
 	after, changed := settings.UpsertPackageBlock(text, id, body)
 	step := settings.ChangeStep{Label: label, State: catalog.StateOK, Detail: "as Machines wrote it: nothing written"}
 	if changed {
-		if err := a.land(&w, at, []byte(after), there); err != nil {
+		if err := a.land(&w, at, []byte(after), seenAs(data, there)); err != nil {
 			return nil, err
 		}
 		step.Detail = "written"
@@ -341,7 +341,7 @@ func (a *Applier) undoBlock(r *record, setting string, c catalog.Copy) ([]settin
 	if w.Made && after == "" && a.direct(c.To) {
 		err = a.unmake(w, at)
 	} else {
-		err = a.files.Replace(at, []byte(after), 0o600)
+		err = a.files.Swap(at, seenAs(data, true), []byte(after), 0o600)
 	}
 	if err != nil {
 		return nil, err

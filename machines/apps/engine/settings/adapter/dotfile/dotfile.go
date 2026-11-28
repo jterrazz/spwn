@@ -25,6 +25,9 @@ type Files interface {
 	// value: the file replaced whole, at once, with its own mode and
 	// owner; one not there yet is made with perm.
 	Replace(path string, data []byte, perm fs.FileMode) error
+	// value: Replace, only while the file still holds what was seen
+	// (local.ErrChanged), and never by an overwrite in place.
+	Swap(path string, seen local.Seen, data []byte, perm fs.FileMode) error
 	MkdirAll(path string, perm fs.FileMode) error
 	Chmod(path string, perm fs.FileMode) error
 	Remove(path string) error
@@ -32,8 +35,8 @@ type Files interface {
 	ReadDir(path string) ([]fs.DirEntry, error)
 	Readlink(path string) (string, error)
 	// invariant: an exclusive lock on path, made when missing, held until
-	// release; a second holder waits for it.
-	Lock(path string) (release func(), err error)
+	// release; a second holder waits for it until ctx ends.
+	Hold(ctx context.Context, path string) (release func(), err error)
 }
 
 type Runner interface {
@@ -167,9 +170,9 @@ func (a *Applier) Apply(ctx context.Context, it catalog.Setting, _ map[string]st
 	}
 	var change settings.Change
 	if d.Fragment() {
-		err = a.locked(func(r *record) error {
+		err = a.locked(ctx, func(r *record) error {
 			for _, c := range d.Files {
-				steps, failed := a.write(r, it.Name, d.Mode, c)
+				steps, failed := a.swapped(c.To, func() ([]settings.ChangeStep, error) { return a.write(r, it.Name, d.Mode, c) })
 				change.Steps = append(change.Steps, steps...)
 				if failed != nil {
 					return failed
@@ -221,7 +224,7 @@ func (a *Applier) write(r *record, setting string, mode catalog.WriteMode, c cat
 	return a.applyBlock(r, setting, c)
 }
 
-func (a *Applier) Undo(_ context.Context, it catalog.Setting) (settings.Change, error) {
+func (a *Applier) Undo(ctx context.Context, it catalog.Setting) (settings.Change, error) {
 	// invariant: Undo removes a file only while it is still exactly station's,
 	// and from a file of the owner's only the fragment station wrote and he
 	// left as it is: off never destroys a change of the owner's.
@@ -231,9 +234,9 @@ func (a *Applier) Undo(_ context.Context, it catalog.Setting) (settings.Change, 
 	}
 	var change settings.Change
 	if d.Fragment() {
-		err = a.locked(func(r *record) error {
+		err = a.locked(ctx, func(r *record) error {
 			for _, c := range d.Files {
-				steps, failed := a.takeBack(r, it.Name, d.Mode, c)
+				steps, failed := a.swapped(c.To, func() ([]settings.ChangeStep, error) { return a.takeBack(r, it.Name, d.Mode, c) })
 				change.Steps = append(change.Steps, steps...)
 				if failed != nil {
 					return failed
@@ -273,6 +276,29 @@ func (a *Applier) takeBack(r *record, setting string, mode catalog.WriteMode, c 
 	}
 	return a.undoBlock(r, setting, c)
 }
+
+// value: how many times a fragment is judged again over a file another
+// writer changed between its read and its write, before it is refused.
+const swaps = 3
+
+// invariant: a step writes the file only while it holds what the step
+// read (Swap); one changed meanwhile by a writer outside the lock (an
+// editor, the app itself) is read and judged again, at most swaps times,
+// then refused, the file left as that writer made it. The record moves
+// only once the file is written, so a step judged again starts from it
+// as it was.
+func (a *Applier) swapped(to string, step func() ([]settings.ChangeStep, error)) ([]settings.ChangeStep, error) {
+	for range swaps {
+		steps, err := step()
+		if !errors.Is(err, local.ErrChanged) {
+			return steps, err
+		}
+	}
+	return nil, fmt.Errorf("%s changed under Machines %d times between its read and its write: nothing written; apply again once what writes it is done", to, swaps)
+}
+
+// value: the file as a step read it, which its write must still find.
+func seenAs(data []byte, there bool) local.Seen { return local.Seen{Data: data, There: there} }
 
 // value: how many links a path is followed through before it is refused,
 // the kernel's own bound on a path.
@@ -362,7 +388,7 @@ func (a *Applier) target(to string, mode catalog.WriteMode) (at string, data []b
 // invariant: a file a fragment makes is the owner's from then on: made
 // 0600 with the folders it lacks, which are recorded with it, so off takes
 // them back only once they are empty.
-func (a *Applier) land(w *written, at string, data []byte, there bool) error {
+func (a *Applier) land(w *written, at string, data []byte, seen local.Seen) error {
 	home, err := a.real(a.o.Home)
 	if err != nil {
 		return err
@@ -377,10 +403,10 @@ func (a *Applier) land(w *written, at string, data []byte, there bool) error {
 	if err := a.files.MkdirAll(path.Dir(at), 0o750); err != nil {
 		return err
 	}
-	if err := a.files.Replace(at, data, 0o600); err != nil {
+	if err := a.files.Swap(at, seen, data, 0o600); err != nil {
 		return err
 	}
-	w.Made = w.Made || !there
+	w.Made = w.Made || !seen.There
 	for _, dir := range made {
 		if !slices.Contains(w.Folders, dir) {
 			w.Folders = append(w.Folders, dir)

@@ -62,6 +62,13 @@ func (d disk) Replace(path string, data []byte, perm fs.FileMode) error {
 	return d.owner.give(path)
 }
 
+func (d disk) Swap(path string, seen Seen, data []byte, perm fs.FileMode) error {
+	if err := (durable{sync: (*os.File).Sync}).swap(path, seen, data, perm); err != nil {
+		return err
+	}
+	return d.owner.give(path)
+}
+
 func (disk) WalkDir(root string, fn fs.WalkDirFunc) error { return filepath.WalkDir(root, fn) }
 
 // invariant: the lock is flock(2)'s on its own file, exclusive and

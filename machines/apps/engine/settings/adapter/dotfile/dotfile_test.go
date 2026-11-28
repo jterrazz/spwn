@@ -1,6 +1,7 @@
 package dotfile_test
 
 import (
+	"bytes"
 	"context"
 	"io/fs"
 	"testing"
@@ -40,7 +41,16 @@ func (m *memory) Replace(p string, b []byte, perm fs.FileMode) error { return m.
 func (*memory) MkdirAll(string, fs.FileMode) error    { return nil }
 func (*memory) Chmod(string, fs.FileMode) error       { return nil }
 func (*memory) ReadDir(string) ([]fs.DirEntry, error) { return nil, nil }
-func (*memory) Lock(string) (func(), error)           { return func() {}, nil }
+
+func (m *memory) Swap(p string, seen local.Seen, b []byte, perm fs.FileMode) error {
+	if have, there := m.files[p]; there != seen.There || !bytes.Equal(have, seen.Data) {
+		return local.ErrChanged
+	}
+	return m.WriteFile(p, b, perm)
+}
+
+func (*memory) Hold(context.Context, string) (func(), error) { return func() {}, nil }
+
 func (*memory) Readlink(p string) (string, error) {
 	return "", &fs.PathError{Op: "readlink", Path: p, Err: fs.ErrInvalid}
 }

@@ -29,7 +29,7 @@ import (
 
 type disk struct{ local.FS }
 
-func (disk) Lock(p string) (func(), error) { return local.Exclusive(context.Background(), p) }
+func (disk) Hold(ctx context.Context, p string) (func(), error) { return local.Exclusive(ctx, p) }
 
 // value: a home of the test's own, a fragment of Machines' and a setting
 // that writes it into one file of that home in the mode given.

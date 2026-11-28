@@ -2,6 +2,7 @@ package dotfile
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"regexp"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/core/store"
@@ -79,6 +81,10 @@ func (r *record) drop(setting, file string) {
 
 // value: the bound of the record, past which it is no record Machines wrote.
 const maxRecord = 1 << 20
+
+// value: how long a change of a fragment waits for the lock, as the
+// authorized keys' writer does.
+const lockWait = 10 * time.Second
 
 func (a *Applier) read() (record, error) {
 	info, err := a.files.Stat(a.o.Record)
@@ -201,12 +207,19 @@ func (a *Applier) save(r record) error {
 // invariant: every change of a fragment, from its file's read to its
 // record's write, holds the one lock beside the record, so two settings
 // writing into one file at once never drop each other's values.
-func (a *Applier) locked(edit func(r *record) error) error {
+func (a *Applier) locked(ctx context.Context, edit func(r *record) error) error {
 	if err := a.files.MkdirAll(path.Dir(a.o.Record), 0o700); err != nil {
 		return &store.UnwritableError{Path: a.o.Record, Cause: err}
 	}
-	release, err := a.files.Lock(a.o.Record + ".lock")
-	if err != nil {
+	// invariant: the lock is waited for at most lockWait: one held longer
+	// by another run is refused, nothing touched, never waited for forever.
+	held, cancel := context.WithTimeout(ctx, lockWait)
+	defer cancel()
+	release, err := a.files.Hold(held, a.o.Record+".lock")
+	switch {
+	case errors.Is(err, context.DeadlineExceeded) && ctx.Err() == nil:
+		return fmt.Errorf("%s.lock is held by another run writing a fragment, nothing touched: apply again once it ends", a.o.Record)
+	case err != nil:
 		return fmt.Errorf("%s.lock: %w", a.o.Record, err)
 	}
 	defer release()

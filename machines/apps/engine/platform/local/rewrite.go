@@ -1,7 +1,9 @@
 package local
 
 import (
+	"bytes"
 	"errors"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -75,6 +77,56 @@ func (d durable) replace(path string, data []byte, perm fs.FileMode) error {
 		return err
 	}
 	return d.syncFolder(dir)
+}
+
+// invariant: a swap is a replace that never lands over another writer's
+// change: the file is read again after the new one is synced, just before
+// the rename, and one that no longer holds what was seen is left as it is
+// (ErrChanged). A swap never overwrites in place: where a replace would
+// fall back to it, a swap refuses.
+func (d durable) swap(path string, seen Seen, data []byte, perm fs.FileMode) error {
+	was, err := os.Stat(path)
+	switch {
+	case err == nil:
+		perm = was.Mode().Perm()
+	case !errors.Is(err, fs.ErrNotExist):
+		return err
+	}
+	dir := filepath.Dir(path)
+	tmp, err := os.CreateTemp(dir, "."+strings.TrimPrefix(filepath.Base(path), ".")+".*.station")
+	if err != nil {
+		return err
+	}
+	err = d.fill(tmp, data, perm, was)
+	if err == nil {
+		err = unchanged(path, seen)
+	}
+	if err == nil {
+		err = os.Rename(tmp.Name(), path)
+	}
+	if err != nil {
+		_ = os.Remove(tmp.Name())
+		if errors.Is(err, errOwner) {
+			return fmt.Errorf("%s: %w, and Machines writes it only whole, at once", path, err)
+		}
+		return err
+	}
+	return d.syncFolder(dir)
+}
+
+func unchanged(path string, seen Seen) error {
+	now, err := os.ReadFile(path) //nolint:gosec // outside: the file the caller swaps.
+	switch {
+	case errors.Is(err, fs.ErrNotExist) && !seen.There:
+		return nil
+	case errors.Is(err, fs.ErrNotExist):
+		return ErrChanged
+	case err != nil:
+		return err
+	case !seen.There || !bytes.Equal(now, seen.Data):
+		return ErrChanged
+	}
+	return nil
 }
 
 // value: the owner a new file cannot be given, so the target is
