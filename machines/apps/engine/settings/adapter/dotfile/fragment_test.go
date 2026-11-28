@@ -20,7 +20,9 @@ import (
 	"testing/fstest"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/textblock"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/settings"
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/dotfile"
 	"github.com/jterrazz/studio-station/apps/engine/settings/contract/contracttest"
 )
@@ -434,10 +436,10 @@ func TestABlockIsWrittenOnceAndTakenBackToTheOwnersBytes(t *testing.T) {
 	b := newBench(t, catalog.WriteBlock, "set -g mouse on\n", ".tmux.conf")
 	b.write("set -g base-index 1\n", 0o644)
 	b.apply()
-	if got := b.read(); got != "set -g base-index 1\n# >>> station:fmt >>>\nset -g mouse on\n# <<< station:fmt <<<\n" {
+	if got := b.read(); got != "set -g base-index 1\n# >>> station setting:fmt >>>\nset -g mouse on\n# <<< station setting:fmt <<<\n" {
 		t.Errorf("wrote %q", got)
 	}
-	if got := b.apply(); got[0] != "~/.tmux.conf [station:fmt]: as Machines wrote it: nothing written" {
+	if got := b.apply(); got[0] != "~/.tmux.conf [station setting:fmt]: as Machines wrote it: nothing written" {
 		t.Errorf("a second apply said %q", got)
 	}
 	b.off()
@@ -451,7 +453,7 @@ func TestABlockEditedByHandIsLeftAndSaid(t *testing.T) {
 	b.apply()
 	edited := strings.Replace(b.read(), "mouse on", "mouse off", 1)
 	b.write(edited, 0o600)
-	if got := b.off(); !reflect.DeepEqual(got, []string{"~/.tmux.conf [station:fmt]: yours, kept"}) {
+	if got := b.off(); !reflect.DeepEqual(got, []string{"~/.tmux.conf [station setting:fmt]: yours, kept"}) {
 		t.Errorf("off said %q", got)
 	}
 	if b.read() != edited {
@@ -459,9 +461,46 @@ func TestABlockEditedByHandIsLeftAndSaid(t *testing.T) {
 	}
 }
 
+func TestASettingsBlockAndAPackagesShellBlockOfOneNameNeverTouchEachOther(t *testing.T) {
+	shell := "# >>> station:fmt >>>\nalias f=fmt\n# <<< station:fmt <<<\n"
+	b := newBench(t, catalog.WriteBlock, "set -g mouse on\n", ".tmux.conf")
+	b.write(shell, 0o600)
+	b.apply()
+	both := shell + "# >>> station setting:fmt >>>\nset -g mouse on\n# <<< station setting:fmt <<<\n"
+	if got := b.read(); got != both {
+		t.Errorf("the setting's block wrote %q, want %q", got, both)
+	}
+	if after, changed := settings.UpsertPackageBlock(both, "station:fmt", "alias f=fmt -w\n"); !changed || !strings.HasSuffix(after, "# >>> station setting:fmt >>>\nset -g mouse on\n# <<< station setting:fmt <<<\n") {
+		t.Errorf("the package's shell block moved the setting's: %q", after)
+	}
+	if after, _ := textblock.Remove(both, "station:fmt"); after != "# >>> station setting:fmt >>>\nset -g mouse on\n# <<< station setting:fmt <<<\n" {
+		t.Errorf("removing the package's shell block left %q", after)
+	}
+	b.off()
+	if got := b.read(); got != shell {
+		t.Errorf("off left %q, want the package's block alone %q", got, shell)
+	}
+}
+
+func TestOffTakesBackNoBlockWithoutItsRecord(t *testing.T) {
+	b := newBench(t, catalog.WriteBlock, "set -g mouse on\n", ".tmux.conf")
+	b.write("set -g base-index 1\n", 0o600)
+	b.apply()
+	written := b.read()
+	if err := b.files.Remove(b.record); err != nil {
+		t.Fatal(err)
+	}
+	if got := b.off(); !reflect.DeepEqual(got, []string{"~/.tmux.conf [station setting:fmt]: no record of a block Machines wrote: left as it is"}) {
+		t.Errorf("off said %q", got)
+	}
+	if b.read() != written {
+		t.Errorf("off with no record took the block: %q", b.read())
+	}
+}
+
 func TestADamagedBlockIsRefused(t *testing.T) {
 	b := newBench(t, catalog.WriteBlock, "set -g mouse on\n", ".tmux.conf")
-	b.write("# >>> station:fmt >>>\nset -g mouse on\n", 0o600)
+	b.write("# >>> station setting:fmt >>>\nset -g mouse on\n", 0o600)
 	if _, err := b.applier.Apply(t.Context(), b.setting, nil); err == nil || !strings.Contains(err.Error(), "damaged") {
 		t.Errorf("Apply: %v; want the damaged block refused", err)
 	}

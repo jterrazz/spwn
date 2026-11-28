@@ -21,18 +21,18 @@ runs:
     - command: 'settings apply mux'
       exit: 0
       stdout: |
-          ●	mux	~/.config/mux.conf [station:mux]: written
+          ●	mux	~/.config/mux.conf [station setting:mux]: written
     - command: 'settings apply mux'
       exit: 0
       stdout: |
-          ●	mux	~/.config/mux.conf [station:mux]: as Machines wrote it: nothing written
-    - command: '--version >/dev/null; /usr/bin/sed ''s/^# <<< station:mux <<<$/# mine\n&/'' .config/mux.conf > edited && /bin/mv edited .config/mux.conf'
+          ●	mux	~/.config/mux.conf [station setting:mux]: as Machines wrote it: nothing written
+    - command: '--version >/dev/null; /usr/bin/sed ''s/^# <<< station setting:mux <<<$/# mine\n&/'' .config/mux.conf > edited && /bin/mv edited .config/mux.conf'
       exit: 0
     - command: 'settings off mux --yes'
       exit: 0
       stdout: |
-          ●	mux	~/.config/mux.conf [station:mux]: yours, kept
-    - command: '--version >/dev/null; /usr/bin/head -1 .config/mux.conf; /usr/bin/grep -c ''station:mux'' .config/mux.conf'
+          ●	mux	~/.config/mux.conf [station setting:mux]: yours, kept
+    - command: '--version >/dev/null; /usr/bin/head -1 .config/mux.conf; /usr/bin/grep -c ''station setting:mux'' .config/mux.conf'
       exit: 0
       stdout: |
           set -g base-index 1

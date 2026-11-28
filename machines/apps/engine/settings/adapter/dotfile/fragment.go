@@ -197,7 +197,10 @@ func keptSteps(to string, pointers []string) []settings.ChangeStep {
 	return out
 }
 
-func blockID(setting string) string { return "station:" + setting }
+// invariant: a setting's block has its own namespace, `station setting:`,
+// so it never meets a package's shell block (`station:<package>`), the
+// guest's (`station hosts`) or the main block of one name.
+func blockID(setting string) string { return "station setting:" + setting }
 
 func (a *Applier) blockBody(c catalog.Copy) (string, error) {
 	data, err := fs.ReadFile(a.o.Ours, c.From)
@@ -308,9 +311,11 @@ func (a *Applier) undoBlock(r *record, setting string, c catalog.Copy) ([]settin
 		return nil, err
 	}
 	id, label := blockID(setting), c.To+" ["+blockID(setting)+"]"
-	w, _ := r.of(setting, c.To)
+	w, held := r.of(setting, c.To)
 	have, state := textblock.Of(text, id)
 	switch {
+	case held < 0 && state != textblock.Absent:
+		return []settings.ChangeStep{{Label: label, State: catalog.StateOK, Detail: "no record of a block Machines wrote: left as it is"}}, nil
 	case state == textblock.Absent:
 		r.drop(setting, c.To)
 		return nil, nil
