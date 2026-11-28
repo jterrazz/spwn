@@ -121,7 +121,21 @@ Only community skills are in the catalog. The `@jterrazz` skills are not curated
 
 ## The toolbelt
 
-[`skills/studio-toolbelt/`](../../skills/studio-toolbelt/SKILL.md) tells an agent on a studio machine what is available. The sections between its `GENERATED` markers are compiled from the catalog by `make generate` (`apps/engine/cmd/generate/`), never edited by hand, and a test run by `make test` fails when the catalog and the skill drift. Change the catalog, run `make generate`, commit both together.
+[`skills/studio-toolbelt/`](../../skills/studio-toolbelt/SKILL.md) tells an agent on a studio machine what is available. The sections between its `GENERATED` markers are compiled from the catalog by `make generate` (`apps/engine/cmd/generate/`), never edited by hand, and a test run by `make test` fails when the catalog and the skill drift. Change the catalog, run `make generate`, commit both together. It says the whole catalog, where the `spwn` skill below says one machine; whether that skill retires it is the open question of [ADR-111](../decisions/111-every-machine-carries-a-generated-spwn-skill.md).
+
+## The `spwn` skill
+
+Every machine carries one skill of its own, `spwn`, which tells an AI agent on it where it is, which apps it can use and how to drive spwn. Machines writes it as the last step of each `station machinefile apply` run to its end (a create's boot phase included, never an image's bake) and of each `station machinefile update`, the night's included, to `~/.agents/skills/spwn/SKILL.md` and `~/.claude/skills/spwn/SKILL.md`. It owns the file whole, so a hand edit is lost at the next run, and [Footprint](footprint.md) lists both copies.
+
+The skill says, in this order:
+
+1. Where you are: the machine's name, its kind, its system, and its `vm.mounts` and `ports.*` values when its Machinefile says them. The Mac a VM runs on is not said: a VM's own record does not name it.
+2. The apps present: only the apps that read present (OK, update available, not managed), grouped by category in the catalog's order, then by name, one line each: the package, the commands it brings when they differ from its name, then its `agent` line ([Catalog](catalog.md#package-keys)), else its description.
+3. How to drive spwn: what spwn and Machines are, quoted from the two READMEs, then each visible noun of the command tree with its short line and each of its commands as it is used.
+
+Each line has one owner: the package file, the resolution, the command tree. The third section is written by `make generate` into `apps/engine/catalog/spwn/drive.txt` and embedded in the binary; a test fails while it differs from the tree or the READMEs.
+
+The file holds at most 8 KiB, which a test proves with every package of the catalog present. Past that bound the apps are said shorter, a step at a time: first the apps with no agent line are named only, then every app is. The file then says that `station apps <name>` prints one app's detail, its agent line included. The same machine, apps and binary give the same bytes, and a copy is rewritten only when its bytes change.
 
 ## Across machines
 

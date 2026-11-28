@@ -1,0 +1,30 @@
+description: 'update rewrites the spwn skill: an app installed since the last apply joins it'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'machinefile apply >/dev/null'
+      exit: 0
+    - command: 'apps install fd >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].stores.spwn_skill'' world.json | /usr/bin/grep -c -e "^- .fd.:"'
+      exit: 1
+      stdout: |
+          0
+    - command: 'machinefile update >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].stores.spwn_skill'' world.json | /usr/bin/grep -e "^- .fd.:" -e "^- .jq.:"'
+      exit: 0
+      stdout: |
+          - `fd`: Find files by name, .gitignore respected: fd <pattern> [path]; fd -e <extension> by extension
+          - `jq`: Read or reshape JSON: jq '.key' <file>, or <command> | jq -r '.items[].name'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.spwn_skill_writes'' world.json'
+      exit: 0
+      stdout: |
+          2

@@ -166,6 +166,11 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 		if n, ran, err := d.Ledger.Night(ctx); err == nil && ran && n.Machinefile == plan.Name {
 			_ = d.Ledger.Write(context.WithoutCancel(ctx), n.Reread(plan))
 		}
+		if in.Phase != catalog.PhaseImage {
+			if err := spwnSkill(ctx, d, plan.Name); err != nil {
+				return out, err
+			}
+		}
 		return out, ctx.Err()
 	},
 }

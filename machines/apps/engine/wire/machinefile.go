@@ -217,7 +217,18 @@ func (m machine) machinefileDeps(calls call.Router) machinefilecalls.Deps {
 		Sources: m.machinefileSources, Machine: machineOf(m.profile), Name: m.profile.Ref.Name, Kind: m.profile.Kind,
 		Prefs: machinefilecontract.NewSourcePrefs(m.stores.prefs), Ledger: m.stores.ledger, Locks: m.locks(), Owned: m.owned(), Vault: m.vault(),
 		Password: m.password(), Turn: m.turn(), Shell: m.phaseShell(), Now: m.sys.Clock.Now, Calls: calls, Far: farRouter{m}, MacOf: m.macOf, AllMachines: settingsAllMachines{m}.Machines, Judge: judgeEach, Zshrc: m.zshrc(), Home: m.sys.Env.Home(),
+		Skill: m.spwnSkill(),
 	}
+}
+
+// value: the machine's `spwn` skill, in each agent skill folder of its
+// user; in a world, the machine's store.
+func (m machine) spwnSkill() machinefilecontract.Skill {
+	if m.world != nil {
+		return m.world.spwnSkill(m.profile.Ref.Name)
+	}
+	home := m.sys.Env.Home()
+	return files.NewSkill(m.sys.FS, catalog.SpwnSkillPaths(home)...)
 }
 
 // value: the machine's one turn of apply, upgrade and the night, across

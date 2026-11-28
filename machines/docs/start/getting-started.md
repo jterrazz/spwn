@@ -66,7 +66,10 @@ Then the binaries, the shell profile's blocks and the folders:
 ```sh
 rm -f ~/.local/bin/spwn ~/.local/bin/spwn-agents ~/.local/bin/station ~/.local/bin/spwn-machines
 rm -rf ~/.local/state/station ~/.config/station ~/.cache/station ~/.spwn
+rm -rf ~/.agents/skills/spwn ~/.claude/skills/spwn
 ```
+
+The second line takes the machine's `spwn` skill, which each apply and update wrote for the agents on it ([Apps and skills](../reference/apps-and-skills.md#the-spwn-skill)); the other skills of those folders are yours, or the `skills` CLI's.
 
 `~/.local/share/station` is left out of that line on purpose: remove it last, once its VMs are deleted.
 

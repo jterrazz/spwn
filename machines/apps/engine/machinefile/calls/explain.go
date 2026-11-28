@@ -45,6 +45,9 @@ type Deps struct {
 	// value: this machine's ~/.zshrc, and the home its variables name.
 	Zshrc Zshrc
 	Home  string
+	// value: the machine's `spwn` skill, written at the end of each apply
+	// and update; nil where none is kept.
+	Skill contract.Skill
 	// value: this machine's own calls: apps and settings read and act
 	// through them, never through their adapters.
 	Calls call.Router

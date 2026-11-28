@@ -1,0 +1,30 @@
+description: 'apply writes the spwn skill: where it is, each app present with its agent line, once'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq, fd]
+      exit: 0
+    - command: 'machinefile apply >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].stores.spwn_skill'' world.json | /usr/bin/grep -e "^name: " -e "^- Machine: " -e "^- System: " -e "^- .jq.:" -e "^- .fd.:" -e "^## "'
+      exit: 0
+      stdout: |
+          name: spwn
+          ## Where you are
+          - Machine: `macbook-pro`, a computer (a Mac)
+          - System: macOS
+          ## The apps present
+          - `fd`: Find files by name, .gitignore respected: fd <pattern> [path]; fd -e <extension> by extension
+          - `jq`: Read or reshape JSON: jq '.key' <file>, or <command> | jq -r '.items[].name'
+          ## How to drive spwn
+    - command: 'machinefile apply >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.spwn_skill_writes'' world.json'
+      exit: 0
+      stdout: |
+          1

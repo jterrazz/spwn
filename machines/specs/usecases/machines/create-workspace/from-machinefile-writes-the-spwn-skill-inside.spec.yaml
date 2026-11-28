@@ -1,0 +1,33 @@
+description: 'create --from writes the spwn skill inside the VM: its system, its mounts, its apps'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p Developer/notes'
+      exit: 0
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base-ubuntu]
+          vm:
+            resources: { memory: 4G }
+            mounts:
+              - { computer: ~/Developer/notes, guest: ~/notes, read-only: true }
+          apps: [jq]
+      exit: 0
+    - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
+      exit: 0
+    - command: 'machines create --memory 4G web --from studio-linux >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["web"].stores.spwn_skill'' world.json | /usr/bin/grep -e "^- Machine: " -e "^- System: " -e "^- Runs on " -e "^- .vm.mounts.:" -e "^- .jq.:"'
+      exit: 0
+      stdout: |
+          - Machine: `web`, a workspace (a VM set up by Machines for you)
+          - System: Ubuntu 24.04, arm64
+          - `vm.mounts`: ~/Developer/notes at ~/notes read-only
+          - `jq`: Read or reshape JSON: jq '.key' <file>, or <command> | jq -r '.items[].name'
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.spwn_skill'' world.json'
+      exit: 0
+      stdout: |
+          null

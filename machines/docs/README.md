@@ -154,5 +154,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [103 A create applies its whole Machinefile](decisions/103-a-create-applies-its-whole-machinefile.md) (Proposed)
 - [107 Activity is sampled by who looks, kept in tiers of mean and max for 30 days, and streamed as points](decisions/107-activity-is-sampled-by-who-looks-kept-in-tiers-of-mean-and-max-for-30-days-and-streamed-as-points.md) (Proposed)
 - [108 A panic breaks its call or its job, never the engine](decisions/108-a-panic-breaks-its-call-or-its-job-never-the-engine.md) (Proposed)
+- [111 Every machine carries a generated `spwn` skill](decisions/111-every-machine-carries-a-generated-spwn-skill.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

@@ -125,6 +125,9 @@ func upgrade(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machin
 			return out, err
 		}
 	}
+	if err := spwnSkill(ctx, d, plan.Name); err != nil {
+		return out, err
+	}
 	return out, ctx.Err()
 }
 

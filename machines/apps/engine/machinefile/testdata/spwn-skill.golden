@@ -1,0 +1,70 @@
+---
+name: spwn
+description: The machine you are on, the apps installed on it (its command-line programs included) and when to use each, and how to drive spwn (the station command). Load it when you need a program, wonder whether one is installed, or ask what machine this is.
+---
+
+# spwn: this machine
+
+Machines (`station`) writes this file at the end of every apply and update of the machine, from the machine's record, the apps that read present and its own commands. It is rewritten whole: edit nothing here.
+
+## Where you are
+
+- Machine: `dev-1`, a workspace (a VM set up by Machines for you)
+- System: Ubuntu 24.04, arm64
+- `vm.mounts`: ~/code at /code
+- `ports.open`: 3000-3999
+- `ports.to`: this-mac
+
+## The apps present
+
+Each app by its package name, the commands it brings when they differ, and when to use it. `station apps <name>` prints one app's detail.
+
+### Runtimes
+
+- `node` (npm, npx): Node.js with npm and npx: node <file>, npm install, npm run <script>, npx <package>
+
+### Command line
+
+- `bat`: Show a file to a human, highlighted and numbered: bat <file>; to read one yourself, plain cat is enough
+- `jq`: Read or reshape JSON: jq '.key' <file>, or <command> | jq -r '.items[].name'
+- `ripgrep` (rg): Search file contents, .gitignore respected: rg <pattern> [path]; rg -l <pattern> lists only the files
+
+### Git
+
+- `lazygit`: Terminal UI for git
+
+## How to drive spwn
+
+Spwn, in its README's words:
+
+> Spwn is a stack of apps and abstractions that lets one person build at the scale of a team, and still be the author of what gets built. It is three spaces: Machine, Agent and OS. Each takes one kind of work off your hands and leaves you the decision above it.
+
+Machines, the space this machine is set up by, in its own README's words:
+
+> A single CLI to set up and run a Mac, its VMs and your other Macs: the apps and agent skills, the settings, the disk, the ports and who reaches them, who is signed in and what the vault granted, Awake, and the servers and workspaces where development lives. No sudo required for the install.
+
+Its command here is `station`: `station <noun> [<verb>] [<name>...]`. `station help <command>` prints what a command does, its flags and examples; never guess a flag.
+
+- `station overview`: This machine at a glance: what needs you first, then each section.
+- `station machines [<machine>]`: All machines: every Mac, its VMs under it; one machine's Overview. `create [<name>]`, `start <vm>`, `stop <vm>`, `restart <machine>`, `delete <vm>`, `edit <vm>`, `ssh <machine>`, `log <vm>`, `cleanup [<vm>...]`, `add <mac>`, `forget <mac>`, `unlock <mac>`, `wake <mac>`, `remind <mac>`
+- `station devices`: The other devices this Mac lets into its VMs, and this Mac's own key. `add <name> <public key>`, `forget <name>`
+- `station images`: The VM images of every Mac, with their versions and the VMs made from each. `build [<image>...]`, `update [<image>...]`, `delete <image>[@<version>]`
+- `station engine`: This Mac's engine: it runs the VMs, Awake and the sharing, and serves the other Macs. `start`, `restart`, `stop`
+- `station approvals`: What macOS lets Spwn do on this Mac, as its engine read it.
+- `station apps [<app>]`: The catalogue's apps on this machine, agent skills included; one app's detail. `install <app...>`, `update [<app...>]`, `remove <app...>`, `move <app> --to <manager>`
+- `station settings [<setting>]`: What Machines sets on this machine: applied, changed since, off here. `diff <setting>`, `apply [<setting...>]`, `off <setting...>`
+- `station disk`: What each app keeps on this machine: misplaced, can rebuild, your data, never touched. `free [<app...>]`, `erase <app>`, `move <folder>`
+- `station ports`: What listens on your machines, who reaches it, and what your VMs share on Tailscale. `share <vm> <port>`, `stop-sharing <vm> <port>`, `declare <machine> <port>`, `undeclare <machine> <port>`, `https <on|off>`
+- `station accounts`: Who is signed in on a machine, and what the vault granted it: names and scopes, never a token. `login <program>`, `logout <program>`, `add <program>`, `grant <entry>`, `remove <entry>`
+- `station background`: The background tasks of this machine: failing, orphans, Machines', the apps', unknown. `remove <label>`
+- `station awake [<for>]`: Keep a Mac from sleeping: every Mac's mode, a keep-awake for a while, or off. `off`
+- `station activity`: What a machine is doing now: CPU, memory, disk, network, thermal, battery, the busiest processes.
+- `station agents [<agent>]`: The agents of this folder's project, or your own outside one; one agent's Mind. `create <name>`, `edit <agent>`, `delete <agent>`, `fork <agent> --as <name>`, `export <agent> --to <folder>`, `import <archive>`, `dream <agent>`, `sleep <agent>`
+- `station skills [<skill>]`: The skill files of this folder's project, or your own outside one; one skill's text. `create <name>`, `delete <skill>`
+- `station project`: The project of this folder: its file and its agents. `create <name>`, `plan`, `drift`, `apply`
+- `station teams [<team>]`: The teams declared for you, with the agents of this folder's project in each; one team's detail.
+- `station automations [<automation>]`: The automations this folder's project declares, with what their runs say; one automation's detail. `log [<automation>]`
+- `station init`: Make this machine known to station: its name, the ~/.zshrc block, the XDG folders.
+- `station use [<machine>|-]`: Choose the machine this terminal's commands run on.
+- `station journal`: What was done on every Mac and its VMs, by day, kept thirty days.
+- `station machinefile`: The Machinefiles this Mac reads: what each makes, where it is read, and whether its machines match it. `plan`, `apply`, `drift`, `update`, `explain [<key>]`

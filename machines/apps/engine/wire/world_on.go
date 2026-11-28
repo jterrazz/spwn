@@ -530,7 +530,13 @@ func (m *worldMac) userSource() machinefilecontract.Source {
 func (m *worldMac) owned() machinefilecontract.Owned { return machinefilefake.OwnedOf(m.run.w, m.name) }
 
 func (m *worldMac) locks() machinefilecontract.Locks { return machinefilefake.LocksOf(m.run.w, m.name) }
-func (m *worldMac) turn() machinefilecontract.Turn   { return machinefilefake.TurnOf(m.run.w, m.name) }
+
+// value: a machine's `spwn` skill in its own stores, a VM's in its slice,
+// since a VM a create made runs its calls on its Mac's files.
+func (m *worldMac) spwnSkill(machine string) machinefilecontract.Skill {
+	return machinefilefake.SkillOf(m.run.w, machine)
+}
+func (m *worldMac) turn() machinefilecontract.Turn { return machinefilefake.TurnOf(m.run.w, m.name) }
 func (m *worldMac) password() machinefilecontract.Password {
 	return machinefilefake.PasswordOf(m.run.w, m.name)
 }

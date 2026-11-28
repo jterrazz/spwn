@@ -422,6 +422,10 @@ type Stores struct {
 	// read of it, as a locked keychain does.
 	DevicesAnchor           string `json:"devices_anchor,omitempty"`
 	DevicesAnchorUnreadable bool   `json:"devices_anchor_unreadable,omitempty"`
+	// value: the machine's `spwn` skill as the last apply or update wrote
+	// it, and how many times its bytes were written.
+	SpwnSkill       string `json:"spwn_skill,omitempty"`
+	SpwnSkillWrites int    `json:"spwn_skill_writes,omitempty"`
 }
 
 func (m *Mac) Store() *Stores {
