@@ -51,6 +51,41 @@ func TestRightsAreReadFromTheChainAndTheOverlayWins(t *testing.T) {
 	}
 }
 
+func TestARefusedChainOpensNoPort(t *testing.T) {
+	user := tree(machinefile.User, map[string]string{
+		"machinefiles/a.machine.yaml":     head + "name: a\napps: [{ name: fd, manager: skill }]\n",
+		"machinefiles/b.machine.yaml":     head + "name: b\napps: [fd]\n",
+		"machinefiles/web.machine.yaml":   head + "name: web\nmachine: { kind: workspace, system: { os: ubuntu } }\nextends: [a, b]\nports: { open: 5173, to: local }\n",
+		"machinefiles/mac.machine.yaml":   head + "name: mac\nmachine: { kind: workspace, system: { os: macos, version: '26' } }\nextends: [a, b]\nports: { open: 5173, to: local }\n",
+		"machinefiles/blank.machine.yaml": head + "name: blank\nmachine: { kind: workspace }\nextends: [a, b]\nports: { open: 5173, to: local }\n",
+		"machinefiles/c.machine.yaml":     head + "name: c\naccounts: { signins: [claude] }\n",
+		"machinefiles/d.machine.yaml":     head + "name: d\naccounts: { grants: [claude] }\n",
+		"machinefiles/ai.machine.yaml":    head + "name: ai\nmachine: { kind: workspace, system: { os: ubuntu } }\nextends: [c, d]\nports: { open: 5173, to: local }\n",
+		"machinefiles/ai.local.yaml":      head + "overrides: ai\naccounts: { grants: [claude] }\n",
+	})
+	builtin := machinefile.Tree{Kind: machinefile.Builtin, Root: "built-in"}
+	for p, body := range packages() {
+		builtin.Files = append(builtin.Files, machinefile.File{Path: p, Body: []byte(body)})
+	}
+	trees := []machinefile.Tree{user, builtin}
+	var conflict *machinefile.SiblingConflictError
+	if rights, _, err := machinefile.RightsOf(trees, "web", ""); !errors.As(err, &conflict) || conflict.Unjudged {
+		t.Errorf("web's rights, its siblings giving fd two ways on ubuntu: %+v, %v; want the siblings refused", rights, err)
+	}
+	if rights, _, err := machinefile.RightsOf(trees, "mac", ""); err != nil || rights == nil {
+		t.Errorf("mac's rights, skill being fd's default on macOS 26: %+v, %v; want its ports", rights, err)
+	}
+	if _, _, err := machinefile.RightsOf(trees, "blank", ""); !errors.As(err, &conflict) || !conflict.Unjudged {
+		t.Errorf("a chain that says no system: %v, want refused as unjudged", err)
+	}
+	if rights, _, err := machinefile.RightsOf(trees, "ai", ""); err != nil || rights == nil {
+		t.Errorf("ai, whose overlay settles its siblings' account: %+v, %v; want its ports", rights, err)
+	}
+	if _, _, err := machinefile.RightsOf(trees, "ai", "linux-1"); err != nil {
+		t.Errorf("ai followed by linux-1, the overlay still read: %v, want its ports", err)
+	}
+}
+
 // invariant: an overlay's ports change only the keys it says, and a merge
 // that cannot be read is the error.
 func TestAnOverlayChangesTheRightsKeyByKey(t *testing.T) {
