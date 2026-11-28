@@ -1,0 +1,20 @@
+description: off takes back caveman's telemetry choice and leaves the keys caveman wrote
+fixture: ../__fixtures__/caveman/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p .caveman; printf ''{\n  "apiUrl": "https://example.invalid"\n}\n'' > .caveman/cloud.json; /bin/cp .caveman/cloud.json mine'
+      exit: 0
+    - command: 'settings apply caveman-telemetry-off'
+      exit: 0
+      stdout: |
+          ●	caveman-telemetry-off	~/.caveman/cloud.json: merged
+    - command: 'settings off caveman-telemetry-off --yes'
+      exit: 0
+      stdout: |
+          ●	caveman-telemetry-off	~/.caveman/cloud.json: taken back
+    - command: '--version >/dev/null; /usr/bin/cmp .caveman/cloud.json mine && echo same'
+      exit: 0
+      stdout: |
+          same
+      files:
+          .local/state/station/merged.json: absent

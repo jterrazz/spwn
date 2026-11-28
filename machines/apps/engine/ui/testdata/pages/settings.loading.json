@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "19 set by Machines here"
+                    "text": "20 set by Machines here"
                   },
                   {
                     "kind": "text",
@@ -146,6 +146,16 @@
             "id": "authorized-key",
             "mark": "pending",
             "label": "authorized-key",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
+            "id": "caveman-telemetry-off",
+            "mark": "pending",
+            "label": "caveman-telemetry-off",
             "detail": {
               "kind": "pending"
             }
@@ -265,7 +275,7 @@
       "counts": [
         {
           "mark": "pending",
-          "n": 19
+          "n": 20
         }
       ],
       "pipe_counts": true

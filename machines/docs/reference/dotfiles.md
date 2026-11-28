@@ -14,14 +14,15 @@ The application configs `station` puts on a machine are embedded in the binary, 
 
 They live under `apps/engine/catalog/dotfiles/` and are embedded with `go:embed`.
 
-| Application | Contents                                                                                                 | Installed by        |
-| ----------- | -------------------------------------------------------------------------------------------------------- | ------------------- |
-| `ghostty`   | terminal `config` and `themes/`                                                                          | `ghostty-dotfiles`  |
-| `rtk`       | `claude-settings.json`: the Claude Code hook `rtk init -g` writes, merged into `~/.claude/settings.json` | `rtk-claude-hook`   |
-| `starship`  | the `starship.toml` prompt                                                                               | `starship-dotfiles` |
-| `tmux`      | `tmux.conf`                                                                                              | `tmux-dotfiles`     |
-| `zed`       | `settings.json` and `.oxfmtrc.json`: Zed settings and the formatter values it applies                    | `zed-dotfiles`      |
-| `zsh`       | `zshrc.sh`, the shell loader: prompt, colours, FZF, `jj` `jc` `jo` `jg`                                  | `station shell zsh` |
+| Application | Contents                                                                                                 | Installed by            |
+| ----------- | -------------------------------------------------------------------------------------------------------- | ----------------------- |
+| `caveman`   | `cloud.json`: caveman's telemetry choice, off, merged into `~/.caveman/cloud.json`                       | `caveman-telemetry-off` |
+| `ghostty`   | terminal `config` and `themes/`                                                                          | `ghostty-dotfiles`      |
+| `rtk`       | `claude-settings.json`: the Claude Code hook `rtk init -g` writes, merged into `~/.claude/settings.json` | `rtk-claude-hook`       |
+| `starship`  | the `starship.toml` prompt                                                                               | `starship-dotfiles`     |
+| `tmux`      | `tmux.conf`                                                                                              | `tmux-dotfiles`         |
+| `zed`       | `settings.json` and `.oxfmtrc.json`: Zed settings and the formatter values it applies                    | `zed-dotfiles`          |
+| `zsh`       | `zshrc.sh`, the shell loader: prompt, colours, FZF, `jj` `jc` `jo` `jg`                                  | `station shell zsh`     |
 
 The `jj`, `jc`, `jo` and `jg` shortcuts attach tmux session `main` and open Claude, Codex and Gemini in tmux.
 

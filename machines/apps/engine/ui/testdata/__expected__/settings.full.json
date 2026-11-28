@@ -108,9 +108,9 @@
         },
         {
           "row": {
-            "id": "spotlight-exclude",
+            "id": "github-login",
             "mark": "attention",
-            "label": "spotlight-exclude",
+            "label": "github-login",
             "cells": [
               {
                 "kind": "text",
@@ -119,15 +119,15 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff spotlight-exclude"
+              "command": "station settings diff github-login"
             }
           }
         },
         {
           "row": {
-            "id": "dock-spacer",
+            "id": "dock-reset",
             "mark": "attention",
-            "label": "dock-spacer",
+            "label": "dock-reset",
             "cells": [
               {
                 "kind": "text",
@@ -136,7 +136,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff dock-spacer"
+              "command": "station settings diff dock-reset"
             }
           }
         },
@@ -251,9 +251,9 @@
         },
         {
           "row": {
-            "id": "spotlight-exclude",
+            "id": "github-login",
             "mark": "attention",
-            "label": "spotlight-exclude",
+            "label": "github-login",
             "cells": [
               {
                 "kind": "text",
@@ -262,15 +262,15 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff spotlight-exclude"
+              "command": "station settings diff github-login"
             }
           }
         },
         {
           "row": {
-            "id": "dock-spacer",
+            "id": "dock-reset",
             "mark": "attention",
-            "label": "dock-spacer",
+            "label": "dock-reset",
             "cells": [
               {
                 "kind": "text",
@@ -279,7 +279,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff dock-spacer"
+              "command": "station settings diff dock-reset"
             }
           }
         },
@@ -317,9 +317,9 @@
         },
         {
           "row": {
-            "id": "ssh-key",
+            "id": "spotlight-exclude",
             "mark": "absent",
-            "label": "ssh-key",
+            "label": "spotlight-exclude",
             "cells": [
               {
                 "kind": "text",
@@ -327,15 +327,15 @@
               }
             ],
             "hint": {
-              "command": "station settings apply ssh-key"
+              "command": "station settings apply spotlight-exclude"
             }
           }
         },
         {
           "row": {
-            "id": "tart-launcher",
+            "id": "dock-spacer",
             "mark": "absent",
-            "label": "tart-launcher",
+            "label": "dock-spacer",
             "cells": [
               {
                 "kind": "text",
@@ -343,7 +343,7 @@
               }
             ],
             "hint": {
-              "command": "station settings apply tart-launcher"
+              "command": "station settings apply dock-spacer"
             }
           }
         },
@@ -393,9 +393,9 @@
         },
         {
           "row": {
-            "id": "github-login",
+            "id": "git-signing",
             "mark": "ok",
-            "label": "github-login",
+            "label": "git-signing",
             "cells": [
               {
                 "kind": "list",
@@ -406,7 +406,7 @@
                   },
                   {
                     "kind": "text",
-                    "text": "~/.github-login"
+                    "text": "~/.git-signing"
                   }
                 ]
               }
@@ -415,9 +415,9 @@
         },
         {
           "row": {
-            "id": "dock-reset",
+            "id": "backup-exclusions",
             "mark": "ok",
-            "label": "dock-reset",
+            "label": "backup-exclusions",
             "cells": [
               {
                 "kind": "list",
@@ -428,7 +428,7 @@
                   },
                   {
                     "kind": "text",
-                    "text": "~/.dock-reset"
+                    "text": "~/.backup-exclusions"
                   }
                 ]
               }
@@ -450,9 +450,9 @@
         },
         {
           "row": {
-            "id": "dns",
+            "id": "caveman-telemetry-off",
             "mark": "off-here",
-            "label": "dns",
+            "label": "caveman-telemetry-off",
             "cells": [
               {
                 "kind": "text",
@@ -463,9 +463,9 @@
         },
         {
           "row": {
-            "id": "zed-dotfiles",
+            "id": "ssh-key",
             "mark": "off-here",
-            "label": "zed-dotfiles",
+            "label": "ssh-key",
             "cells": [
               {
                 "kind": "text",
@@ -476,9 +476,9 @@
         },
         {
           "row": {
-            "id": "tailscale-cli",
+            "id": "tart-launcher",
             "mark": "off-here",
-            "label": "tailscale-cli",
+            "label": "tart-launcher",
             "cells": [
               {
                 "kind": "text",
@@ -812,7 +812,7 @@
           "row": {
             "id": "not-for-this-machine",
             "mark": "not-for-this-machine",
-            "label": "3 not for this machine",
+            "label": "4 not for this machine",
             "cells": [
               {
                 "kind": "list",

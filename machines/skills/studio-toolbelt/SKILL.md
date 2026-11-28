@@ -130,6 +130,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 
 - **agent-browser**: Browser automation CLI for AI agents
 - **browser-use**: AI agent library for browser automation
+- **caveman-cli**: The caveman runtime, its terse-output modes and stats for coding agents
 - **inferrs**: TurboQuant LLM inference server
 - **markitdown**: Convert files to Markdown for LLMs
 - **mcp2cli**: Any MCP server exposed as command-line subcommands

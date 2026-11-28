@@ -1,0 +1,25 @@
+description: an owner's recorded caveman telemetry choice is kept, and said, beside his keys
+fixture: ../__fixtures__/caveman/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p .caveman; printf ''{\n  "apiUrl": "https://example.invalid",\n  "telemetry": {\n    "enabled": true,\n    "decidedAt": "2026-11-01T00:00:00.000Z",\n    "promptVersion": 6,\n    "anonymousId": "a1"\n  }\n}\n'' > .caveman/cloud.json'
+      exit: 0
+    - command: 'settings apply caveman-telemetry-off'
+      exit: 0
+      stdout: |
+          ●	caveman-telemetry-off
+          ●	~/.caveman/cloud.json	as Machines wrote it: nothing written
+          ◐	~/.caveman/cloud.json /telemetry/enabled	yours, kept
+          ◐	~/.caveman/cloud.json /telemetry/decidedAt	yours, kept
+    - command: '--version >/dev/null; /bin/cat .caveman/cloud.json'
+      exit: 0
+      stdout: |
+          {
+            "apiUrl": "https://example.invalid",
+            "telemetry": {
+              "enabled": true,
+              "decidedAt": "2026-11-01T00:00:00.000Z",
+              "promptVersion": 6,
+              "anonymousId": "a1"
+            }
+          }

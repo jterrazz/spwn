@@ -21,8 +21,8 @@ runs:
             {warn ◐} {bold ~/.tart is misplaced}   station disk move ~/.tart
             3 more: station overview --all
           {bold Activity}    memory 12.4 of 16 GB · 388 GB free
-          {bold Apps}        {good ●} 7 ok · {warn ◐} 2 updates · {muted ○} 104 not installed
-          {bold Settings}    set by Machines · {muted ○} 0 of 18 · checked · {good ●} 8 of 9
+          {bold Apps}        {good ●} 7 ok · {warn ◐} 2 updates · {muted ○} 105 not installed
+          {bold Settings}    set by Machines · {muted ○} 0 of 19 · checked · {good ●} 8 of 9
           {bold Disk}        {warn ◐} 388 GB free · 34.8 GB can rebuild · {warn ◐} 1 misplaced
           {bold Ports}       Public 0 · Private 2
           {bold Accounts}    {good ●} 3
@@ -37,12 +37,12 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · 113 apps for this Mac · 2 updates · 104 not installed
+          This Mac · 114 apps for this Mac · 2 updates · 105 not installed
 
           Updates
             ◐ node  22.11.0 → 24.11.0  mise  update available  → station apps update node
             ◐ gh    2.97.0 → 2.98.0    brew  update available  → station apps update gh
-          Not installed  ○ 104 · cocoapods, homebrew, mas, pnpm, skills, uv, bun, java, …
+          Not installed  ○ 105 · cocoapods, homebrew, mas, pnpm, skills, uv, bun, java, …
           OK             ● 7 · github-release, mise, go, ghostty, bat, jq, lazygit
           Not for this machine  14 apps live on other machines
 
@@ -53,29 +53,29 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · 18 set by Machines here · 9 checked · 1 needs a look
+          This Mac · 19 set by Machines here · 9 checked · 1 needs a look
 
           Needs a look
             ◐ firewall  off  → System Settings > Network > Firewall
-          Set by Machines  ○ 18 · docker-shortcuts, git-shortcuts, ghostty-dotfiles, …
+          Set by Machines  ○ 19 · docker-shortcuts, git-shortcuts, ghostty-dotfiles, …
           Checked          ● 8  ◐ 1 · firewall, filevault, sip, automatic-updates, …
           – 6 not for this machine · VMs only · Always-on Macs only
 
-          → station settings apply  apply the 18
+          → station settings apply  apply the 19
           → station settings --all  for every row
     - command: '--version >/dev/null; terminal --size 80x60 /usr/bin/env -u NO_COLOR COLUMNS=80 "$STATION" settings --all-machines'
       stdin: |
           scrollback
       exit: 0
       stdout: |
-          33 settings on 4 machines · 1 needs a look · infra is a server: not checked
+          34 settings on 4 machines · 1 needs a look · infra is a server: not checked
 
           Needs a look
             ◐ This Mac  firewall  off  → System Settings > Network > Firewall
           Machines  ● 3  – 1  ? 1 · This Mac, mac-mini, linux-1, api, infra
           Set by Machines
                            This Mac  mac-mini  linux-1  api  OK
-            ○ 19 settings  ○ 0/18    ○ 0/18    ○ 0/8    ?    0/44
+            ○ 20 settings  ○ 0/19    ○ 0/19    ○ 0/9    ?    0/47
           Always-on Mac
                           This Mac  mac-mini  linux-1  api  OK
             ○ 5 settings  –         ○ 3/5     –        ?    3/5

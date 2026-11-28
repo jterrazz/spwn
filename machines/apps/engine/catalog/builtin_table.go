@@ -2883,6 +2883,35 @@ func builtinCatalog() (Catalog, error) {
 				Requires: []string{
 					"uv"}},
 			{
+				Name:        "caveman-cli",
+				Kind:        "app",
+				AppKind:     "app",
+				Description: "The caveman runtime, its terse-output modes and stats for coding agents",
+				Category:    "AI Tooling",
+				Installs: []LivesOn{
+					{
+						Kinds: []MachineKind{
+							"mac"},
+						Install: NpmInstall{
+							Package: "@caveman-ai/cli"}},
+					{
+						Kinds: []MachineKind{
+							"linux"},
+						Install: BunInstall{
+							Package: "@caveman-ai/cli"}},
+					{
+						Kinds: []MachineKind{
+							"macos"},
+						Install: NpmInstall{
+							Package: "@caveman-ai/cli"}}},
+				Provides: []string{
+					"caveman",
+					"cave"},
+				Requires: []string{
+					"node"},
+				Then: []string{
+					"caveman-telemetry-off"}},
+			{
 				Name:        "inferrs",
 				Kind:        "app",
 				AppKind:     "app",
@@ -4408,6 +4437,22 @@ func builtinCatalog() (Catalog, error) {
 					{
 						Key:   "~user/.ssh/authorized_keys",
 						Value: "the block station:authorized-key"}}},
+			{
+				Name:        "caveman-telemetry-off",
+				Description: "caveman sends no usage telemetry, its choice recorded off before its first run",
+				Category:    "Security",
+				Kinds: []MachineKind{
+					"mac",
+					"linux",
+					"macos"},
+				Requires: "caveman-cli",
+				Effect: Dotfiles{
+					Files: []Copy{
+						{
+							From: "caveman/cloud.json",
+							To:   "~/.caveman/cloud.json"}},
+					Mode: "merge"},
+				Reversible: true},
 			{
 				Name:        "dns",
 				Description: "Encrypted DNS via Quad9 (DoH)",
@@ -7548,6 +7593,31 @@ func builtinCatalog() (Catalog, error) {
 				Package: Package{
 					Package:     "station.package/v1",
 					Kind:        "app",
+					Name:        "caveman-cli",
+					Description: "The caveman runtime, its terse-output modes and stats for coding agents",
+					Provides: []string{
+						"caveman",
+						"cave"},
+					Requires: []string{
+						"node"},
+					Then: []string{
+						"caveman-telemetry-off"},
+					Methods: []MethodSpec{
+						{
+							Selector: Selector{
+								OS: "macos"},
+							Npm: "@caveman-ai/cli"},
+						{
+							Selector: Selector{
+								Family: "linux"},
+							Bun: "@caveman-ai/cli"}}},
+				Folder: "ai-tooling",
+				File:   "packages/ai-tooling/caveman-cli.yaml",
+				Origin: "built-in"},
+			{
+				Package: Package{
+					Package:     "station.package/v1",
+					Kind:        "app",
 					Name:        "inferrs",
 					Description: "TurboQuant LLM inference server",
 					Provides: []string{
@@ -9135,6 +9205,28 @@ func builtinCatalog() (Catalog, error) {
 							Note:  "empty: the lock apply and off hold around the record; inside it each ~/.ssh they write in is held, the folder itself, the lock the VM's guest takes too"}}},
 				Folder: "security",
 				File:   "packages/security/authorized-key.yaml",
+				Origin: "built-in"},
+			{
+				Package: Package{
+					Package:     "station.package/v1",
+					Kind:        "setting",
+					Name:        "caveman-telemetry-off",
+					Description: "caveman sends no usage telemetry, its choice recorded off before its first run",
+					Requires: []string{
+						"caveman-cli"},
+					Reversible: true,
+					Methods: []MethodSpec{
+						{
+							Selector: Selector{
+								OS: "any"},
+							File: &FileMethod{
+								Copy: []Copy{
+									{
+										From: "caveman/cloud.json",
+										To:   "~/.caveman/cloud.json"}},
+								Mode: "merge"}}}},
+				Folder: "security",
+				File:   "packages/security/caveman-telemetry-off.yaml",
 				Origin: "built-in"},
 			{
 				Package: Package{

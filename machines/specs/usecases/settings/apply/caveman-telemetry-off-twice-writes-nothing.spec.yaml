@@ -1,0 +1,18 @@
+description: caveman's telemetry switch applied again writes nothing, the file is the same file
+fixture: ../__fixtures__/caveman/
+env: two-macs
+runs:
+    - command: 'settings apply caveman-telemetry-off'
+      exit: 0
+      stdout: |
+          ●	caveman-telemetry-off	~/.caveman/cloud.json: merged
+    - command: '--version >/dev/null; /bin/ls -i .caveman/cloud.json > before; /bin/cp .caveman/cloud.json copy'
+      exit: 0
+    - command: 'settings apply caveman-telemetry-off'
+      exit: 0
+      stdout: |
+          ●	caveman-telemetry-off	~/.caveman/cloud.json: as Machines wrote it: nothing written
+    - command: '--version >/dev/null; /bin/ls -i .caveman/cloud.json | /usr/bin/cmp - before && /usr/bin/cmp .caveman/cloud.json copy && echo same'
+      exit: 0
+      stdout: |
+          same

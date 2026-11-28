@@ -29,7 +29,7 @@
           "row": {
             "id": "summary/settings",
             "mark": "ok",
-            "label": "33 settings on 4 machines",
+            "label": "34 settings on 4 machines",
             "cells": [
               {
                 "kind": "list",
@@ -117,14 +117,14 @@
         },
         {
           "row": {
-            "id": "macbook-pro/spotlight-exclude",
+            "id": "macbook-pro/github-login",
             "mark": "attention",
             "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
                 "kind": "text",
-                "text": "spotlight-exclude"
+                "text": "github-login"
               },
               {
                 "kind": "text",
@@ -133,20 +133,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff spotlight-exclude"
+              "command": "station settings diff github-login"
             }
           }
         },
         {
           "row": {
-            "id": "macbook-pro/dock-spacer",
+            "id": "macbook-pro/dock-reset",
             "mark": "attention",
             "label": "macbook-pro",
             "short": "This Mac",
             "cells": [
               {
                 "kind": "text",
-                "text": "dock-spacer"
+                "text": "dock-reset"
               },
               {
                 "kind": "text",
@@ -155,7 +155,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff dock-spacer"
+              "command": "station settings diff dock-reset"
             }
           }
         },
@@ -265,14 +265,14 @@
         },
         {
           "row": {
-            "id": "mac-mini/spotlight-exclude",
+            "id": "mac-mini/github-login",
             "mark": "attention",
             "label": "mac-mini",
             "short": "mac-mini",
             "cells": [
               {
                 "kind": "text",
-                "text": "spotlight-exclude"
+                "text": "github-login"
               },
               {
                 "kind": "text",
@@ -281,20 +281,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff spotlight-exclude --on mac-mini"
+              "command": "station settings diff github-login --on mac-mini"
             }
           }
         },
         {
           "row": {
-            "id": "mac-mini/dock-spacer",
+            "id": "mac-mini/dock-reset",
             "mark": "attention",
             "label": "mac-mini",
             "short": "mac-mini",
             "cells": [
               {
                 "kind": "text",
-                "text": "dock-spacer"
+                "text": "dock-reset"
               },
               {
                 "kind": "text",
@@ -303,7 +303,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff dock-spacer --on mac-mini"
+              "command": "station settings diff dock-reset --on mac-mini"
             }
           }
         },
@@ -413,14 +413,14 @@
         },
         {
           "row": {
-            "id": "linux-1/spotlight-exclude",
+            "id": "linux-1/github-login",
             "mark": "attention",
             "label": "linux-1",
             "short": "linux-1",
             "cells": [
               {
                 "kind": "text",
-                "text": "spotlight-exclude"
+                "text": "github-login"
               },
               {
                 "kind": "text",
@@ -429,20 +429,20 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff spotlight-exclude --on linux-1"
+              "command": "station settings diff github-login --on linux-1"
             }
           }
         },
         {
           "row": {
-            "id": "linux-1/dock-spacer",
+            "id": "linux-1/dock-reset",
             "mark": "attention",
             "label": "linux-1",
             "short": "linux-1",
             "cells": [
               {
                 "kind": "text",
-                "text": "dock-spacer"
+                "text": "dock-reset"
               },
               {
                 "kind": "text",
@@ -451,7 +451,7 @@
             ],
             "reason": "differs",
             "hint": {
-              "command": "station settings diff dock-spacer --on linux-1"
+              "command": "station settings diff dock-reset --on linux-1"
             }
           }
         },
@@ -501,14 +501,14 @@
         },
         {
           "row": {
-            "id": "api/spotlight-exclude",
+            "id": "api/github-login",
             "mark": "attention",
             "label": "api",
             "short": "api",
             "cells": [
               {
                 "kind": "text",
-                "text": "spotlight-exclude"
+                "text": "github-login"
               },
               {
                 "kind": "text",
@@ -523,14 +523,14 @@
         },
         {
           "row": {
-            "id": "api/dock-spacer",
+            "id": "api/dock-reset",
             "mark": "attention",
             "label": "api",
             "short": "api",
             "cells": [
               {
                 "kind": "text",
-                "text": "dock-spacer"
+                "text": "dock-reset"
               },
               {
                 "kind": "text",
@@ -807,9 +807,9 @@
         },
         {
           "row": {
-            "id": "spotlight-exclude",
+            "id": "github-login",
             "mark": "attention",
-            "label": "spotlight-exclude",
+            "label": "github-login",
             "cells": [
               {
                 "kind": "text",
@@ -837,9 +837,9 @@
         },
         {
           "row": {
-            "id": "dock-spacer",
+            "id": "dock-reset",
             "mark": "attention",
-            "label": "dock-spacer",
+            "label": "dock-reset",
             "cells": [
               {
                 "kind": "text",
@@ -869,7 +869,7 @@
           "row": {
             "id": "folded",
             "mark": "absent",
-            "label": "15 more",
+            "label": "16 more",
             "cells": [
               {
                 "kind": "text",
@@ -1130,6 +1130,7 @@
         "starship-dotfiles",
         "tmux-dotfiles",
         "authorized-key",
+        "caveman-telemetry-off",
         "dns",
         "git-signing",
         "github-login",
@@ -1163,6 +1164,7 @@
         "starship-dotfiles",
         "tmux-dotfiles",
         "authorized-key",
+        "caveman-telemetry-off",
         "dns",
         "git-signing",
         "github-login",

@@ -11,7 +11,7 @@ runs:
           ?	api	Workspace	stopped · not read since the engine started
           –	infra	Server	not checked: Machines does not manage its settings
           # Set by Machines
-          ○	19 settings	○ 0/18	?	○ 0/8	?	0/26
+          ○	20 settings	○ 0/19	?	○ 0/9	?	0/28
           # Always-on Mac
           –	5 settings	–	?	–	?	–
           # Checked

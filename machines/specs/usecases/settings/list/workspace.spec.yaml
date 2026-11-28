@@ -4,7 +4,7 @@ runs:
     - command: 'settings'
       exit: 0
       stdout: |
-          # Set by Machines	8 ○
+          # Set by Machines	9 ○
           ○	docker-shortcuts	not applied	station settings apply docker-shortcuts
           ○	git-shortcuts	not applied	station settings apply git-shortcuts
           ○	hushlogin	not applied	station settings apply hushlogin
@@ -12,6 +12,7 @@ runs:
           ○	starship-dotfiles	not applied · needs starship	station apps install starship
           ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
           ○	authorized-key	not applied	station settings apply authorized-key
+          ○	caveman-telemetry-off	not applied · needs caveman-cli	station apps install caveman-cli
           ○	github-login	not applied · needs gh	station apps install gh
           # Checked
           –	9 checked	not for this machine · Mac only

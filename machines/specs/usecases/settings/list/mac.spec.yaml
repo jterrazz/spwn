@@ -4,7 +4,7 @@ runs:
     - command: 'settings'
       exit: 0
       stdout: |
-          # Set by Machines	18 ○
+          # Set by Machines	19 ○
           ○	docker-shortcuts	not applied	station settings apply docker-shortcuts
           ○	git-shortcuts	not applied	station settings apply git-shortcuts
           ○	ghostty-dotfiles	not applied · needs ghostty	station apps install ghostty
@@ -12,6 +12,7 @@ runs:
           ○	rtk-claude-hook	not applied · needs rtk	station apps install rtk
           ○	starship-dotfiles	not applied · needs starship	station apps install starship
           ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
+          ○	caveman-telemetry-off	not applied · needs caveman-cli	station apps install caveman-cli
           ○	dns	not applied	station settings apply dns
           ○	git-signing	not applied · needs gpg	station apps install gpg
           ○	github-login	not applied · needs gh	station apps install gh

@@ -1,0 +1,12 @@
+package: station.package/v1
+kind: app
+name: caveman-cli
+description: The caveman runtime, its terse-output modes and stats for coding agents
+provides: [caveman, cave]
+requires: [node]
+then: [caveman-telemetry-off]
+methods:
+    - os: macos
+      npm: '@caveman-ai/cli'
+    - family: linux
+      bun: '@caveman-ai/cli'

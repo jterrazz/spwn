@@ -1,0 +1,12 @@
+description: caveman's telemetry switch is refused where caveman is not installed, and nothing is written
+env: two-macs
+runs:
+    - command: 'settings apply caveman-telemetry-off'
+      exit: 1
+      stdout: |
+          ✗	caveman-telemetry-off	failed: caveman-telemetry-off is written only where caveman-cli is installed, and here it is not: nothing written; station apps install caveman-cli
+      stderr: |
+          Error: 1 of 1 settings failed
+          Hint: re-run it: station settings apply caveman-telemetry-off
+      files:
+          .caveman: absent

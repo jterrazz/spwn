@@ -1,20 +1,20 @@
 # Set by Machines	4 ●	4 ◐	4 ○	4 ⊘
 ◐	git-shortcuts	changed since 2 d ago	station settings diff git-shortcuts
 ◐	tmux-dotfiles	changed since 2 d ago	station settings diff tmux-dotfiles
-◐	spotlight-exclude	changed since 2 d ago	station settings diff spotlight-exclude
-◐	dock-spacer	changed since 2 d ago	station settings diff dock-spacer
+◐	github-login	changed since 2 d ago	station settings diff github-login
+◐	dock-reset	changed since 2 d ago	station settings diff dock-reset
 ○	ghostty-dotfiles	not applied	station settings apply ghostty-dotfiles
 ○	authorized-key	not applied	station settings apply authorized-key
-○	ssh-key	not applied	station settings apply ssh-key
-○	tart-launcher	not applied	station settings apply tart-launcher
+○	spotlight-exclude	not applied	station settings apply spotlight-exclude
+○	dock-spacer	not applied	station settings apply dock-spacer
 ●	docker-shortcuts	applied · ~/.docker-shortcuts
 ●	starship-dotfiles	applied · ~/.starship-dotfiles
-●	github-login	applied · ~/.github-login
-●	dock-reset	applied · ~/.dock-reset
+●	git-signing	applied · ~/.git-signing
+●	backup-exclusions	applied · ~/.backup-exclusions
 ⊘	hushlogin	off here
-⊘	dns	off here
-⊘	zed-dotfiles	off here
-⊘	tailscale-cli	off here
+⊘	caveman-telemetry-off	off here
+⊘	ssh-key	off here
+⊘	tart-launcher	off here
 # Always-on Mac
 ○	Always-on Mac	5 · for a Mac that hosts servers
 # Checked	5 ●	2 ◐	1 ⊘	1 ?
@@ -28,4 +28,4 @@
 ●	macos-updates	as expected · up to date
 ⊘	gatekeeper	off here · not checked on this machine
 # Not for this machine
-–	3 not for this machine	VMs only
+–	4 not for this machine	VMs only

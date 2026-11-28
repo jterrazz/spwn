@@ -1,0 +1,13 @@
+package: station.package/v1
+kind: setting
+name: caveman-telemetry-off
+description: caveman sends no usage telemetry, its choice recorded off before its first run
+reversible: true
+requires: [caveman-cli]
+methods:
+    - os: any
+      file:
+          copy:
+              - from: caveman/cloud.json
+                to: ~/.caveman/cloud.json
+          mode: merge

@@ -1,0 +1,23 @@
+description: caveman's telemetry is recorded off in a home where caveman never ran
+fixture: ../__fixtures__/caveman/
+env: two-macs
+runs:
+    - command: 'settings apply caveman-telemetry-off'
+      exit: 0
+      stdout: |
+          ●	caveman-telemetry-off	~/.caveman/cloud.json: merged
+    - command: '--version >/dev/null; /usr/bin/grep -v decidedAt .caveman/cloud.json; /usr/bin/grep -c ''"decidedAt": "'' .caveman/cloud.json; /bin/ls -l .caveman/cloud.json | /usr/bin/cut -c1-10'
+      exit: 0
+      stdout: |
+          {
+            "telemetry": {
+              "enabled": false,
+              "promptVersion": 6
+            }
+          }
+          1
+          -rw-------
+    - command: 'settings caveman-telemetry-off | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ●	caveman-telemetry-off	applied · ~/.caveman/cloud.json

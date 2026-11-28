@@ -5,6 +5,7 @@
 ansible ansible
 bat batcat
 browser-use browser-use
+caveman-cli caveman cave
 codex codex
 difftastic difft
 dust dust
