@@ -1,0 +1,29 @@
+description: 'git-identity off takes back only the keys Machines wrote: the person''s identical name stays'
+fixture:
+    - ../../__fixtures__/terminal/
+    - ./__fixtures__/settings-git-identity/
+env: terminal
+runs:
+    - command: '--version >/dev/null; /usr/bin/printf "user.name=Jane Doe\n" > .stub-gitconfig'
+      exit: 0
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out[0].Steps'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["git-identity"],"Values":{"git-identity":{"name":"Jane Doe","email":"jane@example.com"}}}}
+      exit: 0
+      stdout: |
+          [{"Label":"git","State":"ok","Detail":"commits as Jane Doe <jane@example.com>"}]
+    - command: '--version >/dev/null; /usr/bin/cut -d: -f1 .stub-gitconfig; /usr/bin/grep -c "^git config --global user.name Jane Doe$" .calls || true'
+      exit: 0
+      stdout: |
+          user.name=Jane Doe
+          user.email=jane@example.com
+          station.identity=user.email
+          0
+    - command: 'settings off git-identity --yes'
+      exit: 0
+      stdout: |
+          ●	git-identity	git: identity removed
+    - command: '--version >/dev/null; /bin/cat .stub-gitconfig'
+      exit: 0
+      stdout: |
+          user.name=Jane Doe

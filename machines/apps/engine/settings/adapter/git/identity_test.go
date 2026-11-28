@@ -77,11 +77,67 @@ func TestAnIdentityMachinesDidNotWriteIsKeptByUndo(t *testing.T) {
 	if _, err := applier.Apply(context.Background(), identity, map[string]string{"name": "Jane Doe", "email": "jane@example.com"}); err != nil {
 		t.Fatalf("Apply: %v", err)
 	}
+	if c.writes != 0 {
+		t.Fatalf("Apply over the same identity wrote %d keys, want none", c.writes)
+	}
 	if _, err := applier.Undo(context.Background(), identity); err != nil {
 		t.Fatalf("Undo: %v", err)
 	}
 	if c.keys["user.name"] != "Jane Doe" || c.keys["user.email"] != "jane@example.com" {
 		t.Fatalf("Undo took an identity Machines never wrote: %v", c.keys)
+	}
+}
+
+func TestAnotherIdentityMachinesDidNotWriteIsRefusedByItsKey(t *testing.T) {
+	for key, keys := range map[string]map[string]string{
+		"user.name":  {"user.name": "Someone Else"},
+		"user.email": {"user.name": "Jane Doe", "user.email": "mine@example.com"},
+	} {
+		t.Run(key, func(t *testing.T) {
+			c := &config{keys: keys}
+			_, err := git.NewIdentity(c).Apply(context.Background(), identity, map[string]string{"name": "Jane Doe", "email": "jane@example.com"})
+			if err == nil || !strings.HasPrefix(err.Error(), key+" is already set") || strings.Contains(err.Error(), "@example.com") || strings.Contains(err.Error(), "Someone") {
+				t.Fatalf("Apply said %v; want a refusal naming %s and never its value", err, key)
+			}
+			if c.writes != 0 {
+				t.Fatalf("a refused identity still wrote %d keys", c.writes)
+			}
+		})
+	}
+}
+
+func TestUndoTakesBackOnlyTheKeysMachinesWrote(t *testing.T) {
+	c := &config{keys: map[string]string{"user.name": "Jane Doe"}}
+	applier := git.NewIdentity(c)
+	if _, err := applier.Apply(context.Background(), identity, map[string]string{"name": "Jane Doe", "email": "jane@example.com"}); err != nil {
+		t.Fatalf("Apply: %v", err)
+	}
+	if c.keys["user.email"] != "jane@example.com" {
+		t.Fatalf("Apply left %v; want the email written", c.keys)
+	}
+	if _, err := applier.Undo(context.Background(), identity); err != nil {
+		t.Fatalf("Undo: %v", err)
+	}
+	if len(c.keys) != 1 || c.keys["user.name"] != "Jane Doe" {
+		t.Fatalf("Undo left %v; want the person's name alone", c.keys)
+	}
+}
+
+func TestAnIdentityMachinesWroteIsReplacedByTheNextApply(t *testing.T) {
+	c := &config{keys: map[string]string{}}
+	applier := git.NewIdentity(c)
+	ctx := context.Background()
+	if _, err := applier.Apply(ctx, identity, map[string]string{"name": "Jane Doe", "email": "jane@example.com"}); err != nil {
+		t.Fatalf("Apply: %v", err)
+	}
+	if _, err := applier.Apply(ctx, identity, map[string]string{"name": "Jane Doe", "email": "jane@work.example"}); err != nil {
+		t.Fatalf("a new email over Machines' own was refused: %v", err)
+	}
+	if _, err := applier.Undo(ctx, identity); err != nil {
+		t.Fatalf("Undo: %v", err)
+	}
+	if len(c.keys) != 0 {
+		t.Fatalf("Undo left %v; want nothing: Machines wrote it all", c.keys)
 	}
 }
 

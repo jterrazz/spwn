@@ -22,4 +22,7 @@ methods:
 writes:
     - path: ~/.gitconfig
       level: settings
-      note: '`git config --global` user.name and user.email, and station.identity, the digest of what Machines wrote, which off checks before it takes the identity back'
+      note: '`git config --global` user.name and user.email where Machines wrote them, and station.identity, those keys and the digest of their values, which off checks before it takes them back; an identity git already holds that Machines did not write is refused, never replaced'
+    - path: '{config}/git/config'
+      level: settings
+      note: 'instead of `~/.gitconfig` when only this file exists: `git config --global` writes here then'

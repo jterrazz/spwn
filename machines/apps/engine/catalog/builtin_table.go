@@ -4624,7 +4624,11 @@ func builtinCatalog() (Catalog, error) {
 					{
 						Path:  "~/.gitconfig",
 						Level: "settings",
-						Note:  "`git config --global` user.name and user.email, and station.identity, the digest of what Machines wrote, which off checks before it takes the identity back"}},
+						Note:  "`git config --global` user.name and user.email where Machines wrote them, and station.identity, those keys and the digest of their values, which off checks before it takes them back; an identity git already holds that Machines did not write is refused, never replaced"},
+					{
+						Path:  "{config}/git/config",
+						Level: "settings",
+						Note:  "instead of `~/.gitconfig` when only this file exists: `git config --global` writes here then"}},
 				Sets: []Value{
 					{
 						Key:   "user.name",
@@ -9572,7 +9576,11 @@ func builtinCatalog() (Catalog, error) {
 						{
 							Path:  "~/.gitconfig",
 							Level: "settings",
-							Note:  "`git config --global` user.name and user.email, and station.identity, the digest of what Machines wrote, which off checks before it takes the identity back"}}},
+							Note:  "`git config --global` user.name and user.email where Machines wrote them, and station.identity, those keys and the digest of their values, which off checks before it takes them back; an identity git already holds that Machines did not write is refused, never replaced"},
+						{
+							Path:  "{config}/git/config",
+							Level: "settings",
+							Note:  "instead of `~/.gitconfig` when only this file exists: `git config --global` writes here then"}}},
 				Folder: "security",
 				File:   "packages/security/git-identity.yaml",
 				Origin: "built-in"},
