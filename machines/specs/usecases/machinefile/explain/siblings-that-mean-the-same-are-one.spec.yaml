@@ -18,7 +18,7 @@ runs:
       exit: 0
       stdout: |
           # linux-1
-          	apps.git	listed	built-in	base-ubuntu
+          	apps.git	listed	user	git-kit
           	apps.git.method	apt	built-in	git
           	apps.git.because	its one method for ubuntu 24.04	built-in	git
 

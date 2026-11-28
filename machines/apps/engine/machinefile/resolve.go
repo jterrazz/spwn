@@ -491,8 +491,13 @@ func (m *merged) judged(cat catalog.Catalog, sys catalog.System) error {
 			_, _, beyond := differ(heads, same(true), line)
 			return &SiblingConflictError{Kind: "app", Name: name, First: a, Second: b, Top: m.top, Unjudged: sys.OS == "" && !beyond}
 		}
-		if i := slices.IndexFunc(m.apps, func(l listed[catalog.AppEntry]) bool { return l.name == name }); i >= 0 && requiredBy(heads, func(e catalog.AppEntry) bool { return e.Optional }) {
-			m.apps[i].entry.Optional = false
+		if i := slices.IndexFunc(m.apps, func(l listed[catalog.AppEntry]) bool { return l.name == name }); i >= 0 {
+			if best, ok := specific(heads); ok {
+				m.apps[i].entry, m.apps[i].origin = best.entry, best.origin
+			}
+			if requiredBy(heads, func(e catalog.AppEntry) bool { return e.Optional }) {
+				m.apps[i].entry.Optional = false
+			}
 		}
 	}
 	for _, name := range slices.Sorted(maps.Keys(m.setHeads)) {
@@ -541,6 +546,30 @@ func plainSetting(e catalog.SettingEntry) catalog.SettingEntry {
 		e.Values = nil
 	}
 	return e
+}
+
+// invariant: of siblings that mean one entry, the merge keeps the most
+// specific whatever their order: one that names its manager over one
+// that leaves it, then a required one over an optional one; between two
+// equal, the one whose version reads first, then whose file's name does.
+// No claim kept when the name is removed.
+func specific(heads []claim[catalog.AppEntry]) (claim[catalog.AppEntry], bool) {
+	if len(heads) == 0 || heads[0].removed {
+		return claim[catalog.AppEntry]{}, false
+	}
+	score := func(e catalog.AppEntry) int {
+		s := 0
+		if e.Manager != "" {
+			s += 2
+		}
+		if !e.Optional {
+			s++
+		}
+		return s
+	}
+	return slices.MinFunc(heads, func(x, y claim[catalog.AppEntry]) int {
+		return cmp.Or(cmp.Compare(score(y.entry), score(x.entry)), cmp.Compare(x.entry.Version.String(), y.entry.Version.String()), cmp.Compare(x.origin.Name, y.origin.Name))
+	}), true
 }
 
 // value: one of the claims kept lists the name and does not mark it

@@ -1,6 +1,8 @@
 package machinefile_test
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"slices"
 	"strconv"
@@ -215,17 +217,17 @@ func TestTwoFilesNeitherExtendingTheOtherGiveANameOneWayOrAreRefused(t *testing.
 			"a":   kit("a", "apps: [fd]\n"),
 			"b":   kit("b", "apps: [{ name: fd }]\n"),
 			"top": top + "extends: [a, b]\n",
-		}, "", "b"},
+		}, "", "a"},
 		{"latest is no version said", map[string]string{
 			"a":   kit("a", "apps: [{ name: fd, version: latest }]\n"),
 			"b":   kit("b", "apps: [fd]\n"),
 			"top": top + "extends: [a, b]\n",
-		}, "", "b"},
+		}, "", "a"},
 		{"optional is no other way", map[string]string{
 			"a":   kit("a", "apps: [fd]\n"),
 			"b":   kit("b", "apps: [{ name: fd, optional: true }]\n"),
 			"top": top + "extends: [a, b]\n",
-		}, "", "b"},
+		}, "", "a"},
 		{"the file that extends both settles it", map[string]string{
 			"a":   kit("a", "apps: [{ name: fd, version: '1' }]\n"),
 			"b":   kit("b", "apps: [fd]\n"),
@@ -383,6 +385,53 @@ func TestSiblingsAreJudgedForTheSystemTheChainIsFor(t *testing.T) {
 	}
 	if got := lib.Templates(); slices.Contains(got, "top") {
 		t.Errorf("templates %v, want top none", got)
+	}
+}
+
+func TestSiblingsMeaningOneEntryMergeIntoTheMostSpecificWhateverTheirOrder(t *testing.T) {
+	top := machine("top", "{ os: macos, version: '26' }", "[]")
+	for _, tc := range []struct {
+		how, a, b string
+	}{
+		{"a named manager and required, beside a bare optional one", "apps: [{ name: fd, manager: skill }]\n", "apps: [{ name: fd, optional: true }]\n"},
+		{"a named manager, optional, beside a bare required one", "apps: [{ name: fd, manager: skill, optional: true }]\n", "apps: [fd]\n"},
+		{"latest beside no version", "apps: [{ name: fd, version: latest }]\n", "apps: [fd]\n"},
+		{"two forms of one range", "apps: [{ name: fd, version: '24' }]\n", "apps: [{ name: fd, version: '^24.0.0' }]\n"},
+	} {
+		said := map[string][]byte{}
+		for _, order := range []string{"[a, b]", "[b, a]"} {
+			lib := library(t, files(map[string]string{"a": kit("a", tc.a), "b": kit("b", tc.b), "top": top + "extends: " + order + "\n"}), nil)
+			r, err := machinefile.Own(lib, "top")
+			if err != nil {
+				t.Fatalf("%s, extends %s: %v", tc.how, order, err)
+			}
+			var apps []machinefile.Value
+			for _, v := range r.Values {
+				if strings.HasPrefix(v.Key, "apps.") {
+					apps = append(apps, v)
+				}
+			}
+			said[order], _ = json.Marshal(apps)
+		}
+		if !bytes.Equal(said["[a, b]"], said["[b, a]"]) {
+			t.Errorf("%s: extends [a, b] says %s, [b, a] says %s; want one entry whatever the order", tc.how, said["[a, b]"], said["[b, a]"])
+		}
+	}
+	steps := map[string][]byte{}
+	for _, order := range []string{"[a, b]", "[b, a]"} {
+		lib := library(t, files(map[string]string{"a": kit("a", "apps: [{ name: fd, manager: skill, optional: true }]\n"), "b": kit("b", "apps: [fd]\n"), "top": top + "extends: " + order + "\n"}), nil)
+		r, err := machinefile.Resolve(lib, "top", machinefile.Machine{}, machinefile.Lock{})
+		if err != nil {
+			t.Fatalf("extends %s: %v", order, err)
+		}
+		i := slices.IndexFunc(r.Steps, func(s machinefile.Step) bool { return s.Package == "fd" })
+		if i < 0 || r.Steps[i].Optional || r.Steps[i].Origin.Name != "a" {
+			t.Errorf("extends %s: fd's step %+v, want a's, which names skill, and required, as b requires it", order, r.Steps)
+		}
+		steps[order], _ = json.Marshal(r.Steps)
+	}
+	if !bytes.Equal(steps["[a, b]"], steps["[b, a]"]) {
+		t.Errorf("the plan of extends [a, b] is %s, of [b, a] %s; want them byte for byte one", steps["[a, b]"], steps["[b, a]"])
 	}
 }
 
