@@ -152,7 +152,7 @@ func TestImportDoesNotWriteThroughAProjectLinkOut(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := Import("neo", writeArchive(t, []entry{reg("SOUL.md", "soul\n")})); err == nil {
-		t.Fatal("Import wrote through spwn/agents/neo linked out")
+		t.Fatal("Import wrote through agents/neo linked out")
 	}
 	if left, _ := os.ReadDir(outside); len(left) != 0 {
 		t.Errorf("Import wrote outside: %v", left)

@@ -29,12 +29,12 @@ func TestAToolSkillRefusedAsALinkIsReportedNotDropped(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "site")
 	writeFiles(t, root, map[string]string{
 		".env":                               outsideSecret + "\n",
-		"spwn/tools/evil/skills/ok/SKILL.md": "# ok\n",
+		"tools/evil/skills/ok/SKILL.md": "# ok\n",
 	})
-	if err := os.Symlink(filepath.Join("..", "..", "..", "..", ".env"), filepath.Join(root, "spwn", "tools", "evil", "skills", "SKILL.md")); err != nil {
+	if err := os.Symlink(filepath.Join("..", "..", "..", "..", ".env"), filepath.Join(root, "tools", "evil", "skills", "SKILL.md")); err != nil {
 		t.Fatal(err)
 	}
-	skills, err := fs.Sub(platform.FSUnder(root, filepath.Join("spwn", "tools", "evil")), "skills")
+	skills, err := fs.Sub(platform.FSUnder(root, filepath.Join("tools", "evil")), "skills")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,11 +59,11 @@ func TestSpawnSaysARefusedToolSkillInItsWarnings(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "site")
 	writeFiles(t, root, map[string]string{
 		".env":                               outsideSecret + "\n",
-		"spwn/tools/evil/tool.yaml":          "name: evil\n",
-		"spwn/tools/evil/skills/ok/SKILL.md": "# ok\n",
+		"tools/evil/tool.yaml":          "name: evil\n",
+		"tools/evil/skills/ok/SKILL.md": "# ok\n",
 	})
 	linkAll(t, root, map[string]string{
-		"spwn/tools/evil/skills/SKILL.md": filepath.Join("..", "..", "..", "..", ".env"),
+		"tools/evil/skills/SKILL.md": filepath.Join("..", "..", "..", "..", ".env"),
 	})
 	platform.SetProjectRoot(root)
 	t.Cleanup(func() { platform.SetProjectRoot("") })

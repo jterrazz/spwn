@@ -16,7 +16,7 @@ import (
 
 const outsideSecret = "OUTSIDE-SECRET-TOOL"
 
-// toolBeside writes spwn/tools/evil/tool.yaml in a project at <dir>/site,
+// toolBeside writes tools/evil/tool.yaml in a project at <dir>/site,
 // beside <dir>/secret, a file no read may open (mode 000), and
 // <dir>/pipe, a FIFO no read may wait on. It returns the project's root
 // and <dir>.
@@ -24,7 +24,7 @@ func toolBeside(t *testing.T, files string) (root, dir string) {
 	t.Helper()
 	dir = t.TempDir()
 	root = filepath.Join(dir, "site")
-	tooldir := filepath.Join(root, "spwn", "tools", "evil")
+	tooldir := filepath.Join(root, "tools", "evil")
 	if err := os.MkdirAll(filepath.Join(tooldir, "files"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -126,7 +126,7 @@ func TestAFilesSourceThatIsALinkOutOrAFIFOIsNeverRead(t *testing.T) {
 			if err := os.Chmod(filepath.Join(dir, "secret"), 0o644); err != nil {
 				t.Fatal(err)
 			}
-			if err := plant(filepath.Join(root, "spwn", "tools", "evil"), dir); err != nil {
+			if err := plant(filepath.Join(root, "tools", "evil"), dir); err != nil {
 				t.Fatal(err)
 			}
 			tl, err := loadWithin(t, root)
@@ -140,7 +140,7 @@ func TestAFilesSourceThatIsALinkOutOrAFIFOIsNeverRead(t *testing.T) {
 	}
 }
 
-// TestAToolFolderThatIsALinkOutIsNeverRead: spwn/tools/<name> as a link
+// TestAToolFolderThatIsALinkOutIsNeverRead: tools/<name> as a link
 // to a folder outside the project is refused by the project's root, and
 // the error is the same whether that folder is there or not.
 func TestAToolFolderThatIsALinkOutIsNeverRead(t *testing.T) {
@@ -149,7 +149,7 @@ func TestAToolFolderThatIsALinkOutIsNeverRead(t *testing.T) {
 		dir := t.TempDir()
 		root := filepath.Join(dir, "site")
 		away := filepath.Join(dir, "away")
-		if err := os.MkdirAll(filepath.Join(root, "spwn", "tools"), 0o755); err != nil {
+		if err := os.MkdirAll(filepath.Join(root, "tools"), 0o755); err != nil {
 			t.Fatal(err)
 		}
 		if there {
@@ -160,7 +160,7 @@ func TestAToolFolderThatIsALinkOutIsNeverRead(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		if err := os.Symlink(away, filepath.Join(root, "spwn", "tools", "evil")); err != nil {
+		if err := os.Symlink(away, filepath.Join(root, "tools", "evil")); err != nil {
 			t.Fatal(err)
 		}
 		tl, err := loadWithin(t, root)
@@ -176,8 +176,8 @@ func TestAToolFolderThatIsALinkOutIsNeverRead(t *testing.T) {
 
 func TestAToolFolderThatIsALinkInsideTheProjectIsRefused(t *testing.T) {
 	for name, link := range map[string][2]string{
-		"the tool's folder": {filepath.Join("spwn", "tools", "evil"), filepath.Join("..", "..")},
-		"spwn/tools":        {filepath.Join("spwn", "tools"), "elsewhere"},
+		"the tool's folder": {filepath.Join("tools", "evil"), filepath.Join("..", "..")},
+		"tools":        {filepath.Join("tools"), "elsewhere"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			dir := t.TempDir()
@@ -193,7 +193,7 @@ func TestAToolFolderThatIsALinkInsideTheProjectIsRefused(t *testing.T) {
 			if err := os.WriteFile(filepath.Join(root, ".env"), []byte(outsideSecret+"\n"), 0o644); err != nil {
 				t.Fatal(err)
 			}
-			if err := os.MkdirAll(filepath.Join(root, "spwn", "tools"), 0o755); err != nil {
+			if err := os.MkdirAll(filepath.Join(root, "tools"), 0o755); err != nil {
 				t.Fatal(err)
 			}
 			at := filepath.Join(root, link[0])
@@ -207,7 +207,7 @@ func TestAToolFolderThatIsALinkInsideTheProjectIsRefused(t *testing.T) {
 			if err == nil {
 				t.Fatalf("LoadTool = %s through a linked folder; the image would carry the project's .env", tl.Name())
 			}
-			want := `local dependency "evil": ` + filepath.ToSlash(link[0]) + ` is a link, refused: a tool's folder is a folder of spwn/tools/, never a link to one`
+			want := `local dependency "evil": ` + filepath.ToSlash(link[0]) + ` is a link, refused: a tool's folder is a folder of tools/, never a link to one`
 			if err.Error() != want {
 				t.Errorf("refusal = %q, want %q", err, want)
 			}
@@ -217,7 +217,7 @@ func TestAToolFolderThatIsALinkInsideTheProjectIsRefused(t *testing.T) {
 
 func TestAFilesSourceThatLinksToAnotherProjectFileSaysItIsALink(t *testing.T) {
 	root, _ := toolBeside(t, "  /etc/evil: files/x")
-	if err := os.Symlink(filepath.Join("..", "..", "..", "..", ".env"), filepath.Join(root, "spwn", "tools", "evil", "files", "x")); err != nil {
+	if err := os.Symlink(filepath.Join("..", "..", "..", "..", ".env"), filepath.Join(root, "tools", "evil", "files", "x")); err != nil {
 		t.Fatal(err)
 	}
 	_, err := loadWithin(t, root)
@@ -231,7 +231,7 @@ func TestAFilesSourceThatLinksToAnotherProjectFileIsNeverRead(t *testing.T) {
 	var said [2]string
 	for i, there := range []bool{true, false} {
 		root, dir := toolBeside(t, "  /etc/evil: files/x")
-		tooldir := filepath.Join(root, "spwn", "tools", "evil")
+		tooldir := filepath.Join(root, "tools", "evil")
 		if there {
 			if err := os.WriteFile(filepath.Join(root, ".env"), []byte(outsideSecret+"\n"), 0o644); err != nil {
 				t.Fatal(err)
@@ -256,7 +256,7 @@ func TestAFilesSourceThatLinksToAnotherProjectFileIsNeverRead(t *testing.T) {
 
 func TestAToolSkillThatLinksOutOfTheToolsFolderIsNeverRead(t *testing.T) {
 	root, _ := toolBeside(t, "  /usr/local/bin/run: files/run.sh")
-	tooldir := filepath.Join(root, "spwn", "tools", "evil")
+	tooldir := filepath.Join(root, "tools", "evil")
 	if err := os.WriteFile(filepath.Join(root, ".env"), []byte(outsideSecret+"\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}

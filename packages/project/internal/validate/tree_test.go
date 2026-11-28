@@ -21,10 +21,10 @@ func openFiles(t *testing.T) int {
 // thousand runs leave no root open, with the collector off.
 func TestARuleRunAloneClosesTheTreeItOpens(t *testing.T) {
 	root := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(root, "spwn", "skills"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(root, "skills"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(root, "spwn", "skills", "focus.md"), []byte("---\nname: focus\ndescription: stay on it\n---\n"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "skills", "focus.md"), []byte("---\nname: focus\ndescription: stay on it\n---\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	defer debug.SetGCPercent(debug.SetGCPercent(-1))

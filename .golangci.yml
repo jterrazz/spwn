@@ -131,8 +131,8 @@ linters:
                   - errcheck
               path: _test\.go
             # invariant: forbidigo binds the packages that read a project: its loader, the transpiler's source, the
-            # dependency packages that read spwn.lock, spwn/tools/ and a tool's files, the architect, which reads
-            # spwn/skills/, spwn/hooks/, spwn/commands/ and the agents' Minds into a world, the automation engine, the agent
+            # dependency packages that read spwn.lock, tools/ and a tool's files, the architect, which reads
+            # skills/, hooks/, commands/ and the agents' Minds into a world, the automation engine, the agent
             # package's agent.yaml, journal and session files, and the world-state store under .spwn/world-states.
             - linters:
                   - forbidigo

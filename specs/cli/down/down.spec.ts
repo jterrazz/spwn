@@ -17,9 +17,9 @@ describe('down', () => {
         expect(result.stderr).toMatch(file('./__expected__/down.txt'));
         expect({
             containers: result.containerIds,
-            soul: result.file('spwn/agents/neo/SOUL.md').exists,
+            soul: result.file('agents/neo/SOUL.md').exists,
         }).toStrictEqual({ containers: [], soul: true });
-        const journal = await result.directory('spwn/agents/neo/journal').files();
+        const journal = await result.directory('agents/neo/journal').files();
         expect(text(journal.map((name) => `${name}\n`).join(''))).toMatch(`
             .gitkeep
             {{date}}_{{number}}_world-neo-{{hex#world}}.md

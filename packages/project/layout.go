@@ -91,7 +91,7 @@ type OldLayoutError struct {
 	AtRoot []string
 }
 
-const oldLayoutSentence = "spwn/ is the old project layout: its folders now sit at the project's root. Move each one up (mv spwn/agents agents, and the same for skills, tools, hooks, commands, profiles), point knowledge: at its new path, change any .gitignore line naming spwn/, then run again."
+const oldLayoutSentence = "spwn/ is the old project layout: its folders now sit at the project's root. Move each one up (mv agents agents, and the same for skills, tools, hooks, commands, profiles), point knowledge: at its new path, change any .gitignore line naming spwn/, then run again."
 
 func (e *OldLayoutError) Error() string { return OldLayoutCode + ": " + e.Message() }
 

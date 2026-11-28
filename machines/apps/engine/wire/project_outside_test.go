@@ -24,7 +24,7 @@ func besideTheProject(t *testing.T, folder string) canary {
 	t.Helper()
 	out := filepath.Join(folder, "outside")
 	c := canary{
-		agent:     filepath.Join(out, "proj", "spwn", "agents", "secret"),
+		agent:     filepath.Join(out, "proj", "agents", "secret"),
 		note:      filepath.Join(out, "abs.md"),
 		knowledge: filepath.Join(out, "knowledge"),
 		fifo:      filepath.Join(out, "notes.md"),
@@ -105,7 +105,7 @@ func leaves(plan project.Plan, path, says string) bool {
 func TestADeclaredAgentOrKnowledgeThatLeavesTheProjectIsAPlanErrorAndNothingOutsideIsOpened(t *testing.T) {
 	for name, field := range map[string]func(c canary) (old, with, path string){
 		"agent-climbing": func(canary) (string, string, string) {
-			return "agents: [neo]", `agents: [neo, "../../../outside/proj/spwn/agents/secret"]`, "spwn.yaml#worlds.neo.agents[1]"
+			return "agents: [neo]", `agents: [neo, "../../../outside/proj/agents/secret"]`, "spwn.yaml#worlds.neo.agents[1]"
 		},
 		"agent-dotdot": func(canary) (string, string, string) {
 			return "agents: [neo]", `agents: [neo, ".."]`, "spwn.yaml#worlds.neo.agents[1]"
@@ -123,13 +123,13 @@ func TestADeclaredAgentOrKnowledgeThatLeavesTheProjectIsAPlanErrorAndNothingOuts
 			return "agents: [neo]", `agents: [neo, "ne\x00o"]`, "spwn.yaml#worlds.neo.agents[1]"
 		},
 		"knowledge-absolute": func(c canary) (string, string, string) {
-			return "knowledge: ./spwn/knowledge", fmt.Sprintf("knowledge: %q", c.knowledge), "spwn.yaml#worlds.neo.knowledge"
+			return "knowledge: ./knowledge", fmt.Sprintf("knowledge: %q", c.knowledge), "spwn.yaml#worlds.neo.knowledge"
 		},
 		"knowledge-absolute-missing": func(c canary) (string, string, string) {
-			return "knowledge: ./spwn/knowledge", fmt.Sprintf("knowledge: %q", c.knowledge+"-not-there"), "spwn.yaml#worlds.neo.knowledge"
+			return "knowledge: ./knowledge", fmt.Sprintf("knowledge: %q", c.knowledge+"-not-there"), "spwn.yaml#worlds.neo.knowledge"
 		},
 		"knowledge-climbing": func(canary) (string, string, string) {
-			return "knowledge: ./spwn/knowledge", "knowledge: ../outside/knowledge", "spwn.yaml#worlds.neo.knowledge"
+			return "knowledge: ./knowledge", "knowledge: ../outside/knowledge", "spwn.yaml#worlds.neo.knowledge"
 		},
 	} {
 		t.Run(name, func(t *testing.T) {
@@ -147,7 +147,7 @@ func TestADeclaredAgentOrKnowledgeThatLeavesTheProjectIsAPlanErrorAndNothingOuts
 func TestAnImportThatLeavesTheProjectIsAPlanErrorAndNeverRead(t *testing.T) {
 	d, folder, root := applying(t)
 	c := besideTheProject(t, folder)
-	prompt := filepath.Join(root, "spwn", "agents", project.Starter, "AGENTS.md")
+	prompt := filepath.Join(root, "agents", project.Starter, "AGENTS.md")
 	data, err := os.ReadFile(prompt)
 	if err != nil {
 		t.Fatal(err)
@@ -156,7 +156,7 @@ func TestAnImportThatLeavesTheProjectIsAPlanErrorAndNeverRead(t *testing.T) {
 		t.Fatal(err)
 	}
 	plan := readsBounded(t, d, root, c)
-	from := "spwn/agents/" + project.Starter + "/AGENTS.md"
+	from := "agents/" + project.Starter + "/AGENTS.md"
 	for _, target := range []string{"../../../../outside/notes.md", c.note} {
 		if !leaves(plan, from+" @"+target, "@-import "+target) {
 			t.Errorf("Plan = %+v; want the import of %s an error that leaves the project", plan.Issues, target)

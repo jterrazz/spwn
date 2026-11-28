@@ -4,7 +4,7 @@
 // catalog/<slug>/tools/<name>/tool.yaml (one dir per tool, so a
 // single catalog entry can ship multiple tools) and lift skills to
 // catalog/<slug>/skills/ so they're shared across the bundle.
-// Project-local tools live at spwn/tools/<name>/tool.yaml. All
+// Project-local tools live at tools/<name>/tool.yaml. All
 // paths share this schema.
 //
 // A dependency is whatever its fields say it is: install steps +

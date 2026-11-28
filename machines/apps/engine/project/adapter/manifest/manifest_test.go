@@ -50,12 +50,12 @@ func made(t *testing.T) (contract.Projects, project.Project) {
 
 func TestANewProjectHoldsTheMindLayoutAndNoMore(t *testing.T) {
 	_, m := made(t)
-	for _, rel := range []string{"spwn/agents/neo/playbooks", "spwn/agents/neo/journal", "spwn/knowledge"} {
+	for _, rel := range []string{"agents/neo/playbooks", "agents/neo/journal", "knowledge"} {
 		if e, err := (local.Beneath{}).Lstat(m.Root, rel); err != nil || !e.Mode.IsDir() {
 			t.Errorf("%s = %v; want the folder", rel, err)
 		}
 	}
-	for _, rel := range []string{"spwn/agents/neo/identity", "spwn/agents/neo/skills", "spwn/agents/neo/knowledge", "knowledge", "spwn/worlds", "spwn/hooks.yaml"} {
+	for _, rel := range []string{"agents/neo/identity", "agents/neo/skills", "agents/neo/knowledge", "knowledge", "spwn/worlds", "hooks.yaml"} {
 		if _, err := (local.Beneath{}).Lstat(m.Root, rel); !errors.Is(err, fs.ErrNotExist) {
 			t.Errorf("%s = %v; want it absent", rel, err)
 		}
@@ -64,7 +64,7 @@ func TestANewProjectHoldsTheMindLayoutAndNoMore(t *testing.T) {
 
 func TestABrokenAgentPlansInvalid(t *testing.T) {
 	p, m := made(t)
-	if err := os.WriteFile(filepath.Join(m.Root, "spwn", "agents", project.Starter, "agent.yaml"), []byte("name: [\n"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(m.Root, "agents", project.Starter, "agent.yaml"), []byte("name: [\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	plan, err := p.Plan(t.Context(), m.Root)
@@ -89,7 +89,7 @@ func TestAMissingPromptIsAnIssueOfTheRender(t *testing.T) {
 				secondAgent(t, m.Root, c.agent)
 			}
 			content := c.content
-			prompt := filepath.Join(m.Root, "spwn", "agents", c.agent, "AGENTS.md")
+			prompt := filepath.Join(m.Root, "agents", c.agent, "AGENTS.md")
 			if content == nil {
 				if err := local.New(nil, nil, nil, nil).FS.Remove(prompt); err != nil {
 					t.Fatal(err)
@@ -100,12 +100,12 @@ func TestAMissingPromptIsAnIssueOfTheRender(t *testing.T) {
 			plan, err := p.Plan(t.Context(), m.Root)
 			missing := func(i project.Issue) bool { return strings.Contains(i.Message, "agent prompt is missing or empty") }
 			if err != nil || plan.Valid || !slices.ContainsFunc(plan.Issues, func(i project.Issue) bool {
-				return i.Source == project.SourceCompile && i.Level == project.Error && missing(i) && strings.Contains(i.Hint, "spwn/agents/"+c.agent+"/AGENTS.md")
+				return i.Source == project.SourceCompile && i.Level == project.Error && missing(i) && strings.Contains(i.Hint, "agents/"+c.agent+"/AGENTS.md")
 			}) {
 				t.Fatalf("Plan = %+v, %v; want a render error naming the prompt to write", plan, err)
 			}
 			for _, i := range plan.Issues {
-				if missing(i) && !strings.Contains(i.Hint, "spwn/agents/"+c.agent+"/") {
+				if missing(i) && !strings.Contains(i.Hint, "agents/"+c.agent+"/") {
 					t.Errorf("issue %+v names another agent than %s", i, c.agent)
 				}
 			}
@@ -115,7 +115,7 @@ func TestAMissingPromptIsAnIssueOfTheRender(t *testing.T) {
 
 func secondAgent(t *testing.T, root, name string) {
 	t.Helper()
-	from, to := filepath.Join(root, "spwn", "agents", project.Starter), filepath.Join(root, "spwn", "agents", name)
+	from, to := filepath.Join(root, "agents", project.Starter), filepath.Join(root, "agents", name)
 	if err := os.MkdirAll(to, 0o750); err != nil {
 		t.Fatal(err)
 	}
@@ -131,7 +131,7 @@ func secondAgent(t *testing.T, root, name string) {
 			t.Fatal(err)
 		}
 	}
-	edited(t, filepath.Join(root, project.ManifestName), appended("  "+name+":\n    agents: ["+name+"]\n    workspaces: [.]\n    knowledge: ./spwn/knowledge\n"))
+	edited(t, filepath.Join(root, project.ManifestName), appended("  "+name+":\n    agents: ["+name+"]\n    workspaces: [.]\n    knowledge: ./knowledge\n"))
 }
 
 func ptr(s string) *string { return &s }
@@ -160,7 +160,7 @@ func TestAnAgentIsRenderedByTheHarnessItDeclaresAndByNoOther(t *testing.T) {
 func TestAnUnsupportedBackendPlansInvalidNamingTheSupportedOnes(t *testing.T) {
 	p, m := made(t)
 	agent := "name: " + project.Starter + "\nruntime:\n  backend: \"spwn:fictional-runtime\"\n"
-	if err := os.WriteFile(filepath.Join(m.Root, "spwn", "agents", project.Starter, "agent.yaml"), []byte(agent), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(m.Root, "agents", project.Starter, "agent.yaml"), []byte(agent), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	plan, err := p.Plan(t.Context(), m.Root)
@@ -228,13 +228,13 @@ func appended(tail string) func(string) string {
 func depending(ref string) func(string) string { return appended("\n  - " + ref + "\n") }
 
 func agentFile(root string) string {
-	return filepath.Join(root, "spwn", "agents", project.Starter, "agent.yaml")
+	return filepath.Join(root, "agents", project.Starter, "agent.yaml")
 }
 
 func skillFile(t *testing.T, root, name string) {
 	t.Helper()
 	body := "---\nname: " + name + "\ndescription: One-line description of what this skill does.\n---\n\n# " + name + "\n"
-	if err := os.WriteFile(filepath.Join(root, "spwn", "skills", name+".md"), []byte(body), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "skills", name+".md"), []byte(body), 0o600); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -250,7 +250,7 @@ func TestEachRuleOfTheDeclarationIsAnIssueOfThePlan(t *testing.T) {
 		{"an agent with no description", func(t *testing.T, root string) { edited(t, agentFile(root), without("description:")) },
 			project.Error, "is missing a description", ""},
 		{"an agent without its SOUL.md", func(t *testing.T, root string) {
-			if err := local.New(nil, nil, nil, nil).FS.Remove(filepath.Join(root, "spwn", "agents", project.Starter, "SOUL.md")); err != nil {
+			if err := local.New(nil, nil, nil, nil).FS.Remove(filepath.Join(root, "agents", project.Starter, "SOUL.md")); err != nil {
 				t.Fatal(err)
 			}
 		}, project.Error, "missing SOUL.md", ""},
@@ -263,7 +263,7 @@ func TestEachRuleOfTheDeclarationIsAnIssueOfThePlan(t *testing.T) {
 			edited(t, manifestFile(root), func(s string) string { return strings.Replace(s, "\n  "+project.Starter+":\n", "\n  knowledge:\n", 1) })
 		}, project.Error, `world name "knowledge" collides`, ""},
 		{"a local skill with no file", func(t *testing.T, root string) { edited(t, agentFile(root), depending("skill/unknown-local")) },
-			project.Error, `dependency "skill/unknown-local" does not exist`, "spwn/skills/unknown-local.md"},
+			project.Error, `dependency "skill/unknown-local" does not exist`, "skills/unknown-local.md"},
 		{"a bare reference", func(t *testing.T, root string) {
 			skillFile(t, root, "code-review")
 			edited(t, agentFile(root), depending("code-review"))
@@ -348,7 +348,7 @@ func TestReadingAProjectWritesNoHome(t *testing.T) {
 
 func TestAProjectIsFoundFromAFolderInsideIt(t *testing.T) {
 	p, m := made(t)
-	if root, err := p.Find(t.Context(), filepath.Join(m.Root, "spwn", "agents")); err != nil || root != m.Root {
+	if root, err := p.Find(t.Context(), filepath.Join(m.Root, "agents")); err != nil || root != m.Root {
 		t.Fatalf("Find = %q, %v; want %q", root, err, m.Root)
 	}
 }

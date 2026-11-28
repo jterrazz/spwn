@@ -18,7 +18,7 @@ import (
 const Manifest = "spwn.yaml"
 
 // ToolManifest is the basename for an individual tool definition
-// (install / verify / files). Lives under spwn/tools/<name>/tool.yaml
+// (install / verify / files). Lives under tools/<name>/tool.yaml
 // in a user project and catalog/<slug>/tools/<name>/tool.yaml in the
 // catalog.
 const ToolManifest = "tool.yaml"
@@ -127,7 +127,7 @@ func leavesTheFolder(source string) bool {
 // FSResolver is a Resolver backed by an fs.FS: the embedded catalog's,
 // so dependency manifests ship inside the spwn binary, or a project's
 // folder read through its root (platform.FS), for the tools under
-// spwn/tools/<name>/.
+// tools/<name>/.
 //
 // Example:
 //

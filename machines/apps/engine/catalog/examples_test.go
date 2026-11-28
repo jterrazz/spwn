@@ -28,13 +28,13 @@ func TestAnExampleIsTheFilesOfAProject(t *testing.T) {
 					t.Errorf("missing %s: %v", p, err)
 				}
 			}
-			agents, err := fs.ReadDir(files, "spwn/agents")
+			agents, err := fs.ReadDir(files, "agents")
 			if err != nil || len(agents) == 0 {
-				t.Fatalf("spwn/agents holds %v, %v; want an agent", agents, err)
+				t.Fatalf("agents holds %v, %v; want an agent", agents, err)
 			}
 			for _, a := range agents {
 				for _, f := range []string{"SOUL.md", "AGENTS.md", "agent.yaml"} {
-					if _, err := fs.Stat(files, "spwn/agents/"+a.Name()+"/"+f); err != nil {
+					if _, err := fs.Stat(files, "agents/"+a.Name()+"/"+f); err != nil {
 						t.Errorf("agent %s lacks %s: %v", a.Name(), f, err)
 					}
 				}
@@ -45,7 +45,7 @@ func TestAnExampleIsTheFilesOfAProject(t *testing.T) {
 
 func TestTheSeveranceExampleShipsItsKnowledge(t *testing.T) {
 	files, _ := catalog.Example("severance")
-	for _, p := range []string{"spwn/knowledge/handbook.md", "spwn/knowledge/raw/note-001.md", "spwn/knowledge/raw/.gitkeep"} {
+	for _, p := range []string{"knowledge/handbook.md", "knowledge/raw/note-001.md", "knowledge/raw/.gitkeep"} {
 		if _, err := fs.Stat(files, p); err != nil {
 			t.Errorf("missing %s: %v", p, err)
 		}

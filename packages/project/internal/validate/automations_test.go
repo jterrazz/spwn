@@ -464,8 +464,8 @@ func TestAutomations_CommandRef_MissingFileRejected(t *testing.T) {
 
 func TestAutomations_CommandRef_FoundFileAccepted(t *testing.T) {
 	root := t.TempDir()
-	mkdir(t, root, filepath.Join("spwn", "commands"))
-	must(t, os.WriteFile(filepath.Join(root, "spwn", "commands", "morning-brief.md"), []byte("body"), 0o644))
+	mkdir(t, root, filepath.Join("commands"))
+	must(t, os.WriteFile(filepath.Join(root, "commands", "morning-brief.md"), []byte("body"), 0o644))
 
 	in := automationInput(t, root, automationFixture{
 		Worlds: map[string]worldFixture{
@@ -578,8 +578,8 @@ func TestAutomations_Agent_MissingRejected(t *testing.T) {
 func TestAutomations_FullValid_ZeroErrors(t *testing.T) {
 	root := t.TempDir()
 	mkdir(t, root, "inbox")
-	mkdir(t, root, filepath.Join("spwn", "commands"))
-	must(t, os.WriteFile(filepath.Join(root, "spwn", "commands", "process.md"), []byte("body"), 0o644))
+	mkdir(t, root, filepath.Join("commands"))
+	must(t, os.WriteFile(filepath.Join(root, "commands", "process.md"), []byte("body"), 0o644))
 
 	in := automationInput(t, root, automationFixture{
 		Worlds: map[string]worldFixture{

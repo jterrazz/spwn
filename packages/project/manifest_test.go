@@ -20,22 +20,22 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 	required := []string{
 		"spwn.yaml",
 		"spwn.lock",
-		"spwn/agents/neo/agent.yaml",
-		"spwn/agents/neo/AGENTS.md",
-		"spwn/agents/neo/SOUL.md",
-		"spwn/agents/neo/playbooks/.gitkeep",
-		"spwn/agents/neo/journal/.gitkeep",
-		"spwn/knowledge/.gitkeep",
+		"agents/neo/agent.yaml",
+		"agents/neo/AGENTS.md",
+		"agents/neo/SOUL.md",
+		"agents/neo/playbooks/.gitkeep",
+		"agents/neo/journal/.gitkeep",
+		"knowledge/.gitkeep",
 		".gitignore",
 		// One example per local-ref scheme so the scaffold demonstrates
 		// skill/, tool/, hook/, and command/ authoring patterns
 		// end-to-end. All four are iso: a path-style ref selected per
 		// agent in agent.yaml#dependencies, resolving to one file/dir
 		// on disk.
-		"spwn/skills/focus.md",
-		"spwn/tools/greet/tool.yaml",
-		"spwn/hooks/session-banner.yaml",
-		"spwn/commands/refactor.md",
+		"skills/focus.md",
+		"tools/greet/tool.yaml",
+		"hooks/session-banner.yaml",
+		"commands/refactor.md",
 	}
 	for _, rel := range required {
 		path := filepath.Join(dir, rel)
@@ -45,8 +45,8 @@ func TestInit_createsManifestAndLayout(t *testing.T) {
 	}
 
 	// Agent no longer owns a knowledge layer: it moved to the world.
-	if _, err := os.Stat(filepath.Join(dir, "spwn", "agents", "neo", "knowledge")); err == nil {
-		t.Errorf("spwn/agents/neo/knowledge/ should not exist (knowledge moved to world scope)")
+	if _, err := os.Stat(filepath.Join(dir, "agents", "neo", "knowledge")); err == nil {
+		t.Errorf("agents/neo/knowledge/ should not exist (knowledge moved to world scope)")
 	}
 
 	// The old per-world nested location should be gone: knowledge now
@@ -113,19 +113,19 @@ worlds:
   neo:
     agents: [neo]
     workspaces: [.]
-    knowledge: ./spwn/knowledge
+    knowledge: ./knowledge
 `,
-		"spwn/agents/neo/agent.yaml": `# Agent composition: the source of truth for what this agent needs.
+		"agents/neo/agent.yaml": `# Agent composition: the source of truth for what this agent needs.
 #
 # dependencies: lists every external and local dep with an explicit form.
 # The prefix tells you the source; the leading path segment tells you
 # the kind of local block:
 #   spwn:<name>                  built-in catalog dep (e.g. spwn:python)
 #   github:<owner>/<repo>        third-party dep (planned, not yet resolved)
-#   skill/<name>                 local skill   (./spwn/skills/<name>.md)
-#   tool/<name>                  local tool    (./spwn/tools/<name>/)
-#   hook/<name>                  local hook    (./spwn/hooks/<name>.yaml)
-#   command/<name>               local command (./spwn/commands/<name>.md)
+#   skill/<name>                 local skill   (./skills/<name>.md)
+#   tool/<name>                  local tool    (./tools/<name>/)
+#   hook/<name>                  local hook    (./hooks/<name>.yaml)
+#   command/<name>               local command (./commands/<name>.md)
 # Bare names are invalid; always use one of the forms above.
 #
 # Hooks fire on runtime events (PreToolUse, SessionStart, ...) and are
@@ -154,10 +154,10 @@ dependencies:
   # Local blocks scaffolded by ` + "`station project create`" + `, one of each form so you
   # can see how they're authored and used. Keep, edit, or delete them;
   # ` + "`station project plan`" + ` is happy either way.
-  - "skill/focus"           # ./spwn/skills/focus.md
-  - "tool/greet"            # ./spwn/tools/greet/
-  - "hook/session-banner"   # ./spwn/hooks/session-banner.yaml
-  - "command/refactor"      # ./spwn/commands/refactor.md (slash-invoked)
+  - "skill/focus"           # ./skills/focus.md
+  - "tool/greet"            # ./tools/greet/
+  - "hook/session-banner"   # ./hooks/session-banner.yaml
+  - "command/refactor"      # ./commands/refactor.md (slash-invoked)
 `,
 	}
 	for rel, body := range want {
@@ -174,7 +174,7 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 		t.Fatalf("Init: %v", err)
 	}
 
-	agentYAML, err := os.ReadFile(filepath.Join(dir, "spwn/agents/neo/agent.yaml"))
+	agentYAML, err := os.ReadFile(filepath.Join(dir, "agents/neo/agent.yaml"))
 	if err != nil {
 		t.Fatalf("read agent.yaml: %v", err)
 	}
@@ -192,9 +192,9 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 		}
 	}
 
-	// spwn/hooks/<name>.yaml carries the runtime-hook examples now;
+	// hooks/<name>.yaml carries the runtime-hook examples now;
 	// one file per hook, body is just the entry shape.
-	hookYAML, err := os.ReadFile(filepath.Join(dir, "spwn/hooks/session-banner.yaml"))
+	hookYAML, err := os.ReadFile(filepath.Join(dir, "hooks/session-banner.yaml"))
 	if err != nil {
 		t.Fatalf("stat hooks/session-banner.yaml: %v", err)
 	}
@@ -205,13 +205,13 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 	}
 	// The legacy single-file project hooks.yaml must NOT be created:
 	// it's the migration error condition the loader rejects.
-	if _, err := os.Stat(filepath.Join(dir, "spwn/hooks.yaml")); err == nil {
-		t.Errorf("legacy spwn/hooks.yaml leaked into the scaffold output")
+	if _, err := os.Stat(filepath.Join(dir, "hooks.yaml")); err == nil {
+		t.Errorf("legacy hooks.yaml leaked into the scaffold output")
 	}
 
-	// spwn/commands/<name>.md is the slash-invoked prompt shape.
+	// commands/<name>.md is the slash-invoked prompt shape.
 	// One file per command; body is the prompt body verbatim.
-	cmdMD, err := os.ReadFile(filepath.Join(dir, "spwn/commands/refactor.md"))
+	cmdMD, err := os.ReadFile(filepath.Join(dir, "commands/refactor.md"))
 	if err != nil {
 		t.Fatalf("stat commands/refactor.md: %v", err)
 	}
@@ -223,7 +223,7 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 
 	// Skill must be a valid frontmatter-first markdown block: starts
 	// with --- so the skill loader picks up its name/description.
-	skill, err := os.ReadFile(filepath.Join(dir, "spwn/skills/focus.md"))
+	skill, err := os.ReadFile(filepath.Join(dir, "skills/focus.md"))
 	if err != nil {
 		t.Fatalf("read skill: %v", err)
 	}
@@ -234,7 +234,7 @@ func TestInit_scaffoldsLocalRefExamples(t *testing.T) {
 	// Tool must declare a name and a verify command, the two fields
 	// the dep resolver cares about. No YAML parse needed; substring
 	// checks are enough to catch regressions in the template.
-	tool, err := os.ReadFile(filepath.Join(dir, "spwn/tools/greet/tool.yaml"))
+	tool, err := os.ReadFile(filepath.Join(dir, "tools/greet/tool.yaml"))
 	if err != nil {
 		t.Fatalf("read tool: %v", err)
 	}
@@ -258,7 +258,7 @@ func TestInit_defaultScaffoldOmitsRuntimeBackend(t *testing.T) {
 	if err := Init(dir, InitOpts{Name: "no-backend"}); err != nil {
 		t.Fatalf("Init: %v", err)
 	}
-	agentYAML, err := os.ReadFile(filepath.Join(dir, "spwn/agents/neo/agent.yaml"))
+	agentYAML, err := os.ReadFile(filepath.Join(dir, "agents/neo/agent.yaml"))
 	if err != nil {
 		t.Fatalf("read agent.yaml: %v", err)
 	}
@@ -288,7 +288,7 @@ func TestInit_backendOptEmitsRuntimeBlock(t *testing.T) {
 	if err := Init(dir, InitOpts{Name: "pinned", Backend: "spwn:codex"}); err != nil {
 		t.Fatalf("Init: %v", err)
 	}
-	agentYAML, err := os.ReadFile(filepath.Join(dir, "spwn/agents/neo/agent.yaml"))
+	agentYAML, err := os.ReadFile(filepath.Join(dir, "agents/neo/agent.yaml"))
 	if err != nil {
 		t.Fatalf("read agent.yaml: %v", err)
 	}
@@ -414,7 +414,7 @@ func TestValidate_missingAgentDirIsError(t *testing.T) {
 	if err := Init(dir, InitOpts{Name: "missing-agent-test"}); err != nil {
 		t.Fatalf("Init: %v", err)
 	}
-	if err := os.RemoveAll(filepath.Join(dir, "spwn", "agents", "neo")); err != nil {
+	if err := os.RemoveAll(filepath.Join(dir, "agents", "neo")); err != nil {
 		t.Fatalf("rm agent dir: %v", err)
 	}
 	p, err := Load(filepath.Join(dir, "spwn.yaml"))

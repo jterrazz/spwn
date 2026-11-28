@@ -28,7 +28,7 @@ func open(inProject bool) contracttest.Opener {
 		project, agents := "", filepath.Join(home, "agents")
 		if inProject {
 			project = t.TempDir()
-			agents = filepath.Join(project, "spwn", "agents")
+			agents = filepath.Join(project, "agents")
 		}
 		for _, d := range declared {
 			body := "name: " + d.Name + "\n"

@@ -7,10 +7,10 @@ runs:
       exit: 0
       stdout: |
           ●	site	created	{{workdir}}/site
-    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" link spwn/commands/refactor.md /tmp/secret'
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" link commands/refactor.md /tmp/secret'
       exit: 0
     - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project'
       exit: 2
       stderr: |
-          Error: spwn/commands/refactor.md is a link: a project's declaration is never read through one
+          Error: commands/refactor.md is a link: a project's declaration is never read through one
           Hint: put the file it points to there instead, then station project plan

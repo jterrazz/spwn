@@ -146,7 +146,7 @@ type registered struct {
 // Commands resolves `command:` refs to their markdown body. Pass
 // nil for in-process tests with prompt-only automations; in
 // production the architect supplies a loader that reads
-// spwn/commands/<name>.md from the project root.
+// commands/<name>.md from the project root.
 type Config struct {
 	Clock      Clock
 	Dispatcher Dispatcher

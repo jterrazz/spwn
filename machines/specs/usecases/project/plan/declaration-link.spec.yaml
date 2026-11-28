@@ -7,10 +7,10 @@ runs:
       exit: 0
       stdout: |
           ●	site	created	{{workdir}}/site
-    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" link spwn/skills /tmp/elsewhere'
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" link skills /tmp/elsewhere'
       exit: 0
     - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project plan'
       exit: 2
       stderr: |
-          Error: spwn/skills is a link: a project's declaration is never read through one
+          Error: skills is a link: a project's declaration is never read through one
           Hint: put the file it points to there instead, then station project plan

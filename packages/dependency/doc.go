@@ -3,7 +3,7 @@
 //
 // One shared schema backs both catalog entries (built-in,
 // compiled into the spwn binary) and project-local tools under
-// spwn/tools/<name>/. Parse() takes a Resolver (an FSResolver, over
+// tools/<name>/. Parse() takes a Resolver (an FSResolver, over
 // the embedded catalog or a project read through its root) and
 // ParseOptions, and returns
 // a *Parsed that downstream layers (image, project, validate)

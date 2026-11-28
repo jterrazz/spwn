@@ -31,7 +31,7 @@ func formatUptime(d time.Duration) string {
 //
 // Before the container is stopped, every deployed agent's durable
 // memory layers (journal, playbooks) are snapshotted out via docker
-// cp into the host-side spwn/agents/<name>/ tree. Runtime state that
+// cp into the host-side agents/<name>/ tree. Runtime state that
 // isn't in the allowlist (dotfiles, npm caches, compiled CLAUDE.md)
 // stays in the container and is discarded with it. Non-graceful
 // shutdowns (crash, docker kill) skip this step and lose any unsaved

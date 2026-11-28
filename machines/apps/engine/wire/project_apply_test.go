@@ -102,7 +102,7 @@ func TestAFileEditedByHandIsNeverOverwrittenUnasked(t *testing.T) {
 
 func TestALinkIsWrittenAsALinkAndReadAsOne(t *testing.T) {
 	d, _, root := applying(t)
-	link := project.File{Path: "SOUL.md", Data: []byte("../../../spwn/agents/neo/SOUL.md"), Link: true}
+	link := project.File{Path: "SOUL.md", Data: []byte("../../../agents/neo/SOUL.md"), Link: true}
 	exec := project.File{Path: "bin/run", Data: []byte("#!/bin/sh\n"), Mode: 0o755}
 	rendered := map[string][]project.File{project.Starter: {link, exec}}
 	changes, next, err := project.ChangesOf(rendered, nil, nil)
@@ -126,7 +126,7 @@ func TestALinkIsWrittenAsALinkAndReadAsOne(t *testing.T) {
 
 func TestAPlanWithAnErrorAppliesNothing(t *testing.T) {
 	d, _, root := applying(t)
-	if err := os.WriteFile(filepath.Join(root, "spwn", "agents", project.Starter, "agent.yaml"), []byte("name: [\n"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "agents", project.Starter, "agent.yaml"), []byte("name: [\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root, Confirm: confirm.Yes}, nil); !refusedWith(err, calls.Invalid) {
@@ -275,7 +275,7 @@ func TestASkillMadeAsItsTemplatePlansValidAndListingSkillsWritesNoHome(t *testin
 	if _, err := skillsOf.Create(t.Context(), root, "reading"); err != nil {
 		t.Fatal(err)
 	}
-	agent := filepath.Join(root, "spwn", "agents", project.Starter, "agent.yaml")
+	agent := filepath.Join(root, "agents", project.Starter, "agent.yaml")
 	data, err := os.ReadFile(agent)
 	if err != nil {
 		t.Fatal(err)

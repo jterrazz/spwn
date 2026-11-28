@@ -32,27 +32,27 @@ type ProjectSource struct {
 	// Manifest is the parsed spwn.yaml.
 	Manifest *project.Manifest
 
-	// Agents is every agent directory on disk under spwn/agents/ whose
+	// Agents is every agent directory on disk under agents/ whose
 	// name is referenced by at least one world in the manifest. Order
 	// is deterministic (sorted by Name).
 	Agents []AgentSource
 
 	// Skills are every bare-markdown skill at the top of
-	// spwn/skills/*.md. Nested .md files inside a directory-form
+	// skills/*.md. Nested .md files inside a directory-form
 	// package belong to that dependency's own spwn.yaml and are not
 	// enumerated here.
 	Skills []SkillSource
 
-	// Hooks is every file directly under spwn/hooks/.
+	// Hooks is every file directly under hooks/.
 	Hooks []HookSource
 
-	// Commands is every *.md file directly under spwn/commands/.
+	// Commands is every *.md file directly under commands/.
 	// Each command becomes a slash-invoked prompt shortcut in the
 	// runtime (e.g. `/refactor` in Claude Code / Codex). Empty if
 	// the directory does not exist.
 	Commands []CommandSource
 
-	// Profiles is every *.md file under spwn/profiles/ (optional).
+	// Profiles is every *.md file under profiles/ (optional).
 	// Empty if the directory does not exist.
 	Profiles []ProfileSource
 
@@ -63,20 +63,20 @@ type ProjectSource struct {
 
 // AgentSource is a fully loaded agent directory.
 type AgentSource struct {
-	// Name is the directory basename under spwn/agents/.
+	// Name is the directory basename under agents/.
 	Name string
 
-	// AgentMD is the raw bytes of spwn/agents/<name>/AGENTS.md, the
+	// AgentMD is the raw bytes of agents/<name>/AGENTS.md, the
 	// provider-neutral prompt. May be nil if the file is missing.
 	AgentMD []byte
 
-	// Soul is the raw bytes of spwn/agents/<name>/SOUL.md, the
+	// Soul is the raw bytes of agents/<name>/SOUL.md, the
 	// agent's identity body. May be nil if the file is missing.
 	// Renderers that can @-import (claude-code) don't need this;
 	// renderers that must inline (codex) do.
 	Soul []byte
 
-	// Config is the parsed spwn/agents/<name>/agent.yaml. Zero value
+	// Config is the parsed agents/<name>/agent.yaml. Zero value
 	// if the file is missing.
 	Config AgentConfig
 
@@ -121,21 +121,21 @@ type LayerFiles struct {
 	Journal   map[string][]byte
 }
 
-// SkillSource is one project-authored skill under spwn/skills/. The
+// SkillSource is one project-authored skill under skills/. The
 // canonical on-disk shape is a directory per skill:
 //
-//	spwn/skills/<name>/
+//	skills/<name>/
 //	  SKILL.md          (required; YAML frontmatter + body)
 //	  template.md       (optional sidecar, anything goes)
 //	  scripts/run.sh    (optional sidecar, preserved verbatim)
 //
-// Legacy bare-markdown form (`spwn/skills/<name>.md`) is still
+// Legacy bare-markdown form (`skills/<name>.md`) is still
 // accepted: the loader synthesises a `<name>/SKILL.md` entry (and
 // injects minimal `name:`/`description:` frontmatter when the file
 // has none) so downstream renderers can treat both forms identically.
 type SkillSource struct {
 	// Name is the skill identifier: either the sub-directory name
-	// under spwn/skills/ (dir form) or the bare filename minus .md.
+	// under skills/ (dir form) or the bare filename minus .md.
 	Name string
 
 	// Files is every file that belongs to the skill, keyed by path
@@ -147,7 +147,7 @@ type SkillSource struct {
 }
 
 // HookSource is one runtime hook entry loaded from
-// <root>/spwn/hooks/<name>.yaml. Runtime hooks fire on runtime-defined
+// <root>/hooks/<name>.yaml. Runtime hooks fire on runtime-defined
 // events (PreToolUse, UserPromptSubmit, SessionStart, ...) inside the
 // container; they are NOT host-side lifecycle scripts.
 //
@@ -177,14 +177,14 @@ type HookSource struct {
 	Command string
 }
 
-// ProfileSource is one file under spwn/profiles/.
+// ProfileSource is one file under profiles/.
 type ProfileSource struct {
 	Name    string
 	Content []byte
 }
 
 // CommandSource is one slash-invoked prompt shortcut loaded from
-// <root>/spwn/commands/<name>.md. The body becomes the prompt the
+// <root>/commands/<name>.md. The body becomes the prompt the
 // runtime injects when the user types `/<name>` inside an agent
 // session. Per-agent selection happens via `command/<name>` in
 // agent.yaml#dependencies: an agent only ships the commands it

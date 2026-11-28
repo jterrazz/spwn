@@ -23,7 +23,7 @@ func appliedWithWork(t *testing.T) (d calls.Deps, root, record string) {
 	if _, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root}, nil); err != nil {
 		t.Fatal(err)
 	}
-	at := filepath.Join(root, "spwn", "agents", project.Starter, "AGENTS.md")
+	at := filepath.Join(root, "agents", project.Starter, "AGENTS.md")
 	data, err := os.ReadFile(at)
 	if err != nil {
 		t.Fatal(err)

@@ -79,7 +79,7 @@ func TestSplitVersion(t *testing.T) {
 
 func TestResolveTool_LocalTool(t *testing.T) {
 	root := t.TempDir()
-	mustMkdir(t, filepath.Join(root, "spwn", "tools", "present"))
+	mustMkdir(t, filepath.Join(root, "tools", "present"))
 
 	got := refs.ResolveTool(root, refs.ParseRef("tool/present"), nil, false)
 	if got != refs.ResolveOK {
@@ -94,8 +94,8 @@ func TestResolveTool_LocalTool(t *testing.T) {
 
 func TestResolveTool_LocalSkill(t *testing.T) {
 	root := t.TempDir()
-	mustMkdir(t, filepath.Join(root, "spwn", "skills"))
-	if err := os.WriteFile(filepath.Join(root, "spwn", "skills", "focus.md"), []byte("# focus"), 0o644); err != nil {
+	mustMkdir(t, filepath.Join(root, "skills"))
+	if err := os.WriteFile(filepath.Join(root, "skills", "focus.md"), []byte("# focus"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -112,9 +112,9 @@ func TestResolveTool_LocalSkill(t *testing.T) {
 
 func TestResolveTool_LocalHook(t *testing.T) {
 	root := t.TempDir()
-	mustMkdir(t, filepath.Join(root, "spwn", "hooks"))
+	mustMkdir(t, filepath.Join(root, "hooks"))
 	body := []byte("event: SessionStart\ncommand: echo hi\n")
-	if err := os.WriteFile(filepath.Join(root, "spwn", "hooks", "pre-spawn.yaml"), body, 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "hooks", "pre-spawn.yaml"), body, 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -131,9 +131,9 @@ func TestResolveTool_LocalHook(t *testing.T) {
 
 func TestResolveTool_LocalCommand(t *testing.T) {
 	root := t.TempDir()
-	mustMkdir(t, filepath.Join(root, "spwn", "commands"))
+	mustMkdir(t, filepath.Join(root, "commands"))
 	body := []byte("# Refactor\n\nRefactor the selected code while preserving behaviour.\n")
-	if err := os.WriteFile(filepath.Join(root, "spwn", "commands", "refactor.md"), body, 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "commands", "refactor.md"), body, 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -150,9 +150,9 @@ func TestResolveTool_LocalCommand(t *testing.T) {
 
 func TestResolveTool_InvalidBareName(t *testing.T) {
 	root := t.TempDir()
-	// Even if a file named "present" existed in spwn/tools/, a bare
+	// Even if a file named "present" existed in tools/, a bare
 	// ref must NOT resolve: the grammar rejects it up front.
-	mustMkdir(t, filepath.Join(root, "spwn", "tools", "present"))
+	mustMkdir(t, filepath.Join(root, "tools", "present"))
 
 	got := refs.ResolveTool(root, refs.ParseRef("present"), nil, false)
 	if got != refs.ResolveInvalid {
@@ -165,7 +165,7 @@ func TestResolveTool_RetiredColonForm(t *testing.T) {
 	// The retired `tool:foo` colon-form must not resolve, even if the
 	// matching directory exists. The grammar gates it as invalid so
 	// the user gets a hint pointing at the new form.
-	mustMkdir(t, filepath.Join(root, "spwn", "tools", "present"))
+	mustMkdir(t, filepath.Join(root, "tools", "present"))
 
 	for _, in := range []string{"tool:present", "skill:focus", "hook:pre-spawn"} {
 		if got := refs.ResolveTool(root, refs.ParseRef(in), nil, false); got != refs.ResolveInvalid {
@@ -207,8 +207,8 @@ func TestResolveSkill_PathForm(t *testing.T) {
 	root := t.TempDir()
 
 	// skill/ form: file.
-	mustMkdir(t, filepath.Join(root, "spwn", "skills"))
-	if err := os.WriteFile(filepath.Join(root, "spwn", "skills", "focus.md"), []byte("# focus"), 0o644); err != nil {
+	mustMkdir(t, filepath.Join(root, "skills"))
+	if err := os.WriteFile(filepath.Join(root, "skills", "focus.md"), []byte("# focus"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	got := refs.ResolveSkill(root, refs.ParseRef("skill/focus"), nil, false)
@@ -217,7 +217,7 @@ func TestResolveSkill_PathForm(t *testing.T) {
 	}
 
 	// tool/ form: directory.
-	mustMkdir(t, filepath.Join(root, "spwn", "tools", "debug"))
+	mustMkdir(t, filepath.Join(root, "tools", "debug"))
 	got = refs.ResolveSkill(root, refs.ParseRef("tool/debug"), nil, false)
 	if got != refs.ResolveOK {
 		t.Errorf("tool/ form resolves: want OK, got %v", got)

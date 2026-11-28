@@ -35,7 +35,7 @@ worlds:
 `), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	agentDir := filepath.Join(root, "spwn", "agents", "neo")
+	agentDir := filepath.Join(root, "agents", "neo")
 	if err := os.MkdirAll(agentDir, 0o755); err != nil {
 		t.Fatal(err)
 	}

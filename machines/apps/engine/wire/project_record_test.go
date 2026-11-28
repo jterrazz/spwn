@@ -27,7 +27,7 @@ func appliedThenChanged(t *testing.T) (d calls.Deps, root, changed string) {
 	if _, err := calls.Apply.Run(t.Context(), d, calls.ApplyIn{Folder: root}, nil); err != nil {
 		t.Fatal(err)
 	}
-	for _, rel := range []string{"spwn/commands/refactor.md", "spwn/skills/focus.md"} {
+	for _, rel := range []string{"commands/refactor.md", "skills/focus.md"} {
 		at := filepath.Join(root, filepath.FromSlash(rel))
 		data, err := os.ReadFile(at)
 		if err != nil {

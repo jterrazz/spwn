@@ -102,7 +102,7 @@ func TestSplitVersion_GithubVersioned(t *testing.T) {
 // ---------- ResolveTool edge cases ----------
 
 func TestResolveTool_EmptyRoot(t *testing.T) {
-	// Empty root means the path spwn/tools/<name>/ is relative to "".
+	// Empty root means the path tools/<name>/ is relative to "".
 	// The directory almost certainly does not exist, so expect NotFound.
 	got := refs.ResolveTool("", refs.ParseRef("tool/something"), nil, false)
 	if got != refs.ResolveNotFound {
@@ -149,7 +149,7 @@ func TestResolveTool_BuiltinWithCatalogMissing(t *testing.T) {
 func TestResolveSkill_MdPathIsDirectory(t *testing.T) {
 	root := t.TempDir()
 	// Create a directory named "trick.md" instead of a file.
-	mustMkdirEdge(t, filepath.Join(root, "spwn", "skills", "trick.md"))
+	mustMkdirEdge(t, filepath.Join(root, "skills", "trick.md"))
 
 	got := refs.ResolveSkill(root, refs.ParseRef("skill/trick"), nil, false)
 	// The .md path exists but is a directory, not a file: should NOT resolve.
@@ -161,7 +161,7 @@ func TestResolveSkill_MdPathIsDirectory(t *testing.T) {
 func TestResolveSkill_EmptyToolDir(t *testing.T) {
 	root := t.TempDir()
 	// Create an empty tool directory (no spwn.yaml or anything).
-	mustMkdirEdge(t, filepath.Join(root, "spwn", "tools", "empty-tool"))
+	mustMkdirEdge(t, filepath.Join(root, "tools", "empty-tool"))
 
 	got := refs.ResolveSkill(root, refs.ParseRef("tool/empty-tool"), nil, false)
 	// The directory exists, so ResolveSkill should return OK (it does not

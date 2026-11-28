@@ -170,26 +170,26 @@ func TestReleaseReadiness(t *testing.T) {
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
 		for _, layer := range []string{"playbooks", "journal"} {
-			if _, err := os.Stat(filepath.Join(wd, "spwn/agents/neo", layer)); err != nil {
+			if _, err := os.Stat(filepath.Join(wd, "agents/neo", layer)); err != nil {
 				t.Errorf("missing agent layer %s: %v", layer, err)
 			}
 		}
-		if _, err := os.Stat(filepath.Join(wd, "spwn/agents/neo/SOUL.md")); err != nil {
+		if _, err := os.Stat(filepath.Join(wd, "agents/neo/SOUL.md")); err != nil {
 			t.Errorf("missing SOUL.md at agent root: %v", err)
 		}
-		if _, err := os.Stat(filepath.Join(wd, "spwn/agents/neo/identity")); !os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(wd, "agents/neo/identity")); !os.IsNotExist(err) {
 			t.Errorf("identity/ directory should NOT exist (collapsed into SOUL.md), stat err=%v", err)
 		}
-		if _, err := os.Stat(filepath.Join(wd, "spwn/agents/neo/skills")); !os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(wd, "agents/neo/skills")); !os.IsNotExist(err) {
 			t.Errorf("agent skills layer should NOT exist (moved to build-time deps), stat err=%v", err)
 		}
-		if _, err := os.Stat(filepath.Join(wd, "spwn/agents/neo/knowledge")); !os.IsNotExist(err) {
+		if _, err := os.Stat(filepath.Join(wd, "agents/neo/knowledge")); !os.IsNotExist(err) {
 			t.Errorf("agent knowledge layer should NOT exist, stat err=%v", err)
 		}
 	})
 
 	t.Run("04_init_writes_world_knowledge", func(t *testing.T) {
-		// A04: fresh init seeds a ./spwn/knowledge/.gitkeep AND
+		// A04: fresh init seeds a ./knowledge/.gitkeep AND
 		// records the path explicitly in spwn.yaml. Also asserts that
 		// the retired spwn/worlds/ nested tree is not created. The
 		// knowledge dir moved from the project root (./knowledge/)
@@ -199,13 +199,13 @@ func TestReleaseReadiness(t *testing.T) {
 		env, _ := freshEnv(t)
 		wd := t.TempDir()
 		mustInit(t, env, wd, "acme")
-		gk := filepath.Join(wd, "spwn/knowledge/.gitkeep")
+		gk := filepath.Join(wd, "knowledge/.gitkeep")
 		if _, err := os.Stat(gk); err != nil {
 			t.Fatalf("world knowledge .gitkeep missing: %v", err)
 		}
 		manifest := readFile(t, filepath.Join(wd, "spwn.yaml"))
-		if !strings.Contains(manifest, "knowledge: ./spwn/knowledge") {
-			t.Fatalf("spwn.yaml missing `knowledge: ./spwn/knowledge`:\n%s", manifest)
+		if !strings.Contains(manifest, "knowledge: ./knowledge") {
+			t.Fatalf("spwn.yaml missing `knowledge: ./knowledge`:\n%s", manifest)
 		}
 		if _, err := os.Stat(filepath.Join(wd, "spwn/worlds")); !os.IsNotExist(err) {
 			t.Fatalf("spwn/worlds/ should not exist after init, stat err=%v", err)
@@ -311,7 +311,7 @@ func TestReleaseReadiness(t *testing.T) {
 		if _, _, code := runCLI(t, env, wd, "install", "spwn:python"); code != 0 {
 			t.Fatalf("install spwn:python failed")
 		}
-		y := readFile(t, filepath.Join(wd, "spwn/agents/neo/agent.yaml"))
+		y := readFile(t, filepath.Join(wd, "agents/neo/agent.yaml"))
 		if !strings.Contains(y, "spwn:python") {
 			t.Fatalf("agent.yaml missing spwn:python:\n%s", y)
 		}
@@ -328,7 +328,7 @@ func TestReleaseReadiness(t *testing.T) {
 				t.Fatalf("iter %d install failed", i)
 			}
 		}
-		y := readFile(t, filepath.Join(wd, "spwn/agents/neo/agent.yaml"))
+		y := readFile(t, filepath.Join(wd, "agents/neo/agent.yaml"))
 		if strings.Count(y, "spwn:node") != 1 {
 			t.Fatalf("expected exactly 1 occurrence of spwn:node:\n%s", y)
 		}
@@ -343,7 +343,7 @@ func TestReleaseReadiness(t *testing.T) {
 		if _, _, code := runCLI(t, env, wd, "uninstall", "spwn:python"); code != 0 {
 			t.Fatalf("uninstall failed")
 		}
-		y := readFile(t, filepath.Join(wd, "spwn/agents/neo/agent.yaml"))
+		y := readFile(t, filepath.Join(wd, "agents/neo/agent.yaml"))
 		if strings.Contains(y, "spwn:python") {
 			t.Fatalf("agent.yaml still has spwn:python:\n%s", y)
 		}
@@ -380,7 +380,7 @@ func TestReleaseReadiness(t *testing.T) {
 		if _, _, code := runCLI(t, env, wd, "install", "spwn:python"); code != 0 {
 			t.Fatalf("install failed")
 		}
-		y := readFile(t, filepath.Join(wd, "spwn/agents/neo/agent.yaml"))
+		y := readFile(t, filepath.Join(wd, "agents/neo/agent.yaml"))
 		if !strings.Contains(y, "spwn:python") {
 			t.Fatalf("agent.yaml missing spwn:python:\n%s", y)
 		}
@@ -401,7 +401,7 @@ func TestReleaseReadiness(t *testing.T) {
 				t.Fatalf("install iter %d failed", i)
 			}
 		}
-		y := readFile(t, filepath.Join(wd, "spwn/agents/neo/agent.yaml"))
+		y := readFile(t, filepath.Join(wd, "agents/neo/agent.yaml"))
 		if strings.Count(y, "spwn:node") != 1 {
 			t.Fatalf("expected 1 spwn:node, got:\n%s", y)
 		}
@@ -416,7 +416,7 @@ func TestReleaseReadiness(t *testing.T) {
 		if _, _, code := runCLI(t, env, wd, "uninstall", "spwn:python"); code != 0 {
 			t.Fatalf("uninstall failed")
 		}
-		y := readFile(t, filepath.Join(wd, "spwn/agents/neo/agent.yaml"))
+		y := readFile(t, filepath.Join(wd, "agents/neo/agent.yaml"))
 		if strings.Contains(y, "spwn:python") {
 			t.Fatalf("agent.yaml still references spwn:python:\n%s", y)
 		}

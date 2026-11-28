@@ -110,7 +110,7 @@ func Projects(t *testing.T, open func(t *testing.T) (contract.Projects, string))
 		for _, example := range catalog.Examples() {
 			p, folder := open(t)
 			files, _ := catalog.Example(example)
-			entries, err := fs.ReadDir(files, "spwn/agents")
+			entries, err := fs.ReadDir(files, "agents")
 			if err != nil {
 				t.Fatal(err)
 			}

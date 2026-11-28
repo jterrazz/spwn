@@ -25,4 +25,4 @@ worlds:
       - ballmer
     workspaces:
       - .
-    knowledge: ./spwn/knowledge
+    knowledge: ./knowledge

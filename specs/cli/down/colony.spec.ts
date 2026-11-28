@@ -17,8 +17,8 @@ describe('colony', () => {
         expect(result.exitCode).toBe(0);
         expect({
             containers: result.containerIds,
-            morpheus: result.file('spwn/agents/morpheus/SOUL.md').exists,
-            neo: result.file('spwn/agents/neo/SOUL.md').exists,
+            morpheus: result.file('agents/morpheus/SOUL.md').exists,
+            neo: result.file('agents/neo/SOUL.md').exists,
         }).toStrictEqual({ containers: [], morpheus: true, neo: true });
     });
 });

@@ -45,7 +45,7 @@ type AgentAgentsMDInput struct {
 //     verbatim so domain-specific instructions survive rendering.
 //
 // Codex's AGENTS.md convention collides with the USER-AUTHORED
-// source file name: the user writes `spwn/agents/<name>/AGENTS.md`
+// source file name: the user writes `agents/<name>/AGENTS.md`
 // as the provider-neutral seed, and this renderer's output also lands
 // at `/agents/<name>/AGENTS.md` inside the container. That's by
 // design: codex reads from cwd and the source body shows up as

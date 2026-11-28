@@ -12,7 +12,7 @@ runs:
             ✓  uninstalled spwn:qmd
                1 agent updated
       files:
-          spwn/agents/mark/agent.yaml:
+          agents/mark/agent.yaml:
               equals: |
                   name: mark
                   description: Mark, the team lead, reads the handbook first, delegates second, finishes the batch.

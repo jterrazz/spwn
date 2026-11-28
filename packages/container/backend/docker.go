@@ -242,7 +242,7 @@ func (d *Docker) CopyTo(ctx context.Context, containerID string, destPath string
 // to CopyToContainer in a single round-trip.
 //
 // The destination is the absolute container path where the contents
-// should land, e.g. hostSrcDir=/host/spwn/agents/neo, destDir=/agents/neo
+// should land, e.g. hostSrcDir=/host/agents/neo, destDir=/agents/neo
 // drops every file from the host tree under /agents/neo/ inside the
 // container.
 func (d *Docker) CopyDirTo(ctx context.Context, containerID string, destDir string, hostSrcDir string) error {

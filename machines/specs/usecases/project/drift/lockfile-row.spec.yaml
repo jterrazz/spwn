@@ -3,11 +3,11 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" drift spwn/agents/neo/agent.yaml "spwn:git is not recorded in spwn.lock"'
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" drift agents/neo/agent.yaml "spwn:git is not recorded in spwn.lock"'
       exit: 0
     - command: '--version >/dev/null; /bin/mkdir site && cd site && "$STATION" project drift'
       exit: 0
       stdout: |
           ◐	{{workdir}}/site/spwn.yaml	1 drifted
           # Drift
-          ✗	spwn/agents/neo/agent.yaml	spwn:git is not recorded in spwn.lock
+          ✗	agents/neo/agent.yaml	spwn:git is not recorded in spwn.lock

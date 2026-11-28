@@ -35,7 +35,7 @@ func TestAFolderSwappedForALinkAfterItsMkdirIsNeverWrittenThrough(t *testing.T) 
 			if err != nil {
 				t.Fatal(err)
 			}
-			files := map[string][]byte{"spwn.yaml": []byte("name: site\n"), "spwn/agents/neo/agent.yaml": []byte("name: neo\n")}
+			files := map[string][]byte{"spwn.yaml": []byte("name: site\n"), "agents/neo/agent.yaml": []byte("name: neo\n")}
 			if err = (Projects{}).lay(folder, "site", files); !errors.Is(err, local.ErrLink) {
 				t.Errorf("lay = %v; want the link at %s refused", err, swapped)
 			}

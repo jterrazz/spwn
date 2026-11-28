@@ -4,7 +4,7 @@
 // Schema model (v1):
 //
 //   - Agents are the primary runtime unit. Their on-disk presence at
-//     spwn/agents/<name>/ is the source of truth for the project's
+//     agents/<name>/ is the source of truth for the project's
 //     roster.
 //   - Worlds are inline entries in spwn.yaml under `worlds:`. Each one
 //     declares which agents it deploys, where the workspace mounts
@@ -69,7 +69,7 @@ type Runtime struct {
 // World is one inline world entry in spwn.yaml.
 type World struct {
 	// Agents is the ordered list of agent names this world deploys.
-	// Each name must match a directory under spwn/agents/.
+	// Each name must match a directory under agents/.
 	Agents []string `yaml:"agents"`
 
 	// Workspaces is the list of host paths to mount inside the
@@ -107,7 +107,7 @@ type World struct {
 //	    patterns: ["*.md"]    # default: [] (matches all)
 //	agent: <agent-name>      must be one of the world's agents
 //	prompt: <inline body>    exactly one of prompt / command
-//	command: command/<name>  references spwn/commands/<name>.md
+//	command: command/<name>  references commands/<name>.md
 //	catchup: collapse|skip   cron only; default collapse
 //
 // Catchup semantics mirror Apple Reminders: when the architect was
@@ -130,7 +130,7 @@ type Automation struct {
 	Prompt string `yaml:"prompt,omitempty"`
 
 	// Command is a `command/<name>` ref resolving to
-	// spwn/commands/<name>.md. The file's body is the prompt template.
+	// commands/<name>.md. The file's body is the prompt template.
 	// Mutually exclusive with Prompt.
 	Command string `yaml:"command,omitempty"`
 

@@ -63,7 +63,7 @@ func newE2EFixture(t *testing.T) *e2eFixture {
 	mb := newMockBackend()
 	arc, _ := newTestArchitect(t, mb)
 	root := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(root, "spwn", "commands"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(root, "commands"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 

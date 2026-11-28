@@ -7,7 +7,7 @@ runs:
             ✓  installed spwn:qmd
                4 agents updated, spwn.lock pinned
       files:
-          spwn/agents/mark/agent.yaml: { contains: 'spwn:qmd' }
-          spwn/agents/helly/agent.yaml: { contains: 'spwn:qmd' }
-          spwn/agents/irving/agent.yaml: { contains: 'spwn:qmd' }
-          spwn/agents/dylan/agent.yaml: { contains: 'spwn:qmd' }
+          agents/mark/agent.yaml: { contains: 'spwn:qmd' }
+          agents/helly/agent.yaml: { contains: 'spwn:qmd' }
+          agents/irving/agent.yaml: { contains: 'spwn:qmd' }
+          agents/dylan/agent.yaml: { contains: 'spwn:qmd' }

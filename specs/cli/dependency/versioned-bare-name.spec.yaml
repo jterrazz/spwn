@@ -7,7 +7,7 @@ runs:
             ✓  installed spwn:python
                1 agent updated, spwn.lock pinned
       files:
-          spwn/agents/neo/agent.yaml: { contains: 'spwn:python' }
+          agents/neo/agent.yaml: { contains: 'spwn:python' }
           spwn.lock:
               contains:
                   - 'spwn:python'

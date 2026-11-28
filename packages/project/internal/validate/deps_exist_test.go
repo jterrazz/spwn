@@ -13,7 +13,7 @@ import (
 // list.
 func scaffoldAgent(t *testing.T, root, name, yamlBody string) AgentRef {
 	t.Helper()
-	dir := filepath.Join(root, "spwn", "agents", name)
+	dir := filepath.Join(root, "agents", name)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}

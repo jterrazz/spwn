@@ -15,7 +15,7 @@ describe('after-down', () => {
         // Then - one running container and no stray .codex in the agent's home
         expect(result.exitCode).toBe(0);
         expect({
-            codex: result.file('spwn/agents/neo/.codex').exists,
+            codex: result.file('agents/neo/.codex').exists,
             running: result.container('neo').running,
         }).toStrictEqual({ codex: false, running: true });
     });

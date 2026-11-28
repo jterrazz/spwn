@@ -26,7 +26,7 @@ func outsideProject(t *testing.T) (root, outside string) {
 		t.Fatalf("Init: %v", err)
 	}
 	outside = filepath.Join(dir, "outside")
-	agent := filepath.Join(outside, "proj", "spwn", "agents", "secret")
+	agent := filepath.Join(outside, "proj", "agents", "secret")
 	for _, d := range []string{filepath.Join(agent, "playbooks"), filepath.Join(agent, "journal"), filepath.Join(outside, "knowledge"), filepath.Join(outside, "watched")} {
 		if err := os.MkdirAll(d, 0o755); err != nil {
 			t.Fatal(err)
@@ -59,7 +59,7 @@ func replaceIn(t *testing.T, path, old, new string) {
 // existence: plan time asks nothing of it, whether it is there, missing
 // or a file, and behind a folder no one may search.
 func TestAWatchPathOutsideTheProjectIsOnlyAnAdvice(t *testing.T) {
-	const world = "    knowledge: ./spwn/knowledge"
+	const world = "    knowledge: ./knowledge"
 	const field = "spwn.yaml#worlds.neo.automations.watch.on.fs.path"
 	for name, path := range map[string]func(outside string) string{
 		"absolute": func(o string) string { return filepath.Join(o, "watched") },
@@ -119,7 +119,7 @@ func TestAWatchPathOutsideTheProjectIsOnlyAnAdvice(t *testing.T) {
 // and nothing outside the project is read, listed or asked to exist: the
 // issues are the same whether the outside path is there or not.
 func TestEachPathOfTheDeclarationThatLeavesTheProjectIsSaidAndNeverOpened(t *testing.T) {
-	const world = "    knowledge: ./spwn/knowledge"
+	const world = "    knowledge: ./knowledge"
 	type edit struct{ file, old, new string }
 	for name, tc := range map[string]struct {
 		edits func(outside string) []edit
@@ -130,10 +130,10 @@ func TestEachPathOfTheDeclarationThatLeavesTheProjectIsSaidAndNeverOpened(t *tes
 		"agent-dotdot": {func(string) []edit { return []edit{{"spwn.yaml", "agents: [neo]", `agents: [neo, ".."]`}} },
 			"spwn.yaml#worlds.neo.agents[1]", LevelError, "leaves the project"},
 		"agent-climbing": {func(string) []edit {
-			return []edit{{"spwn.yaml", "agents: [neo]", `agents: [neo, "../../../outside/proj/spwn/agents/secret"]`}}
+			return []edit{{"spwn.yaml", "agents: [neo]", `agents: [neo, "../../../outside/proj/agents/secret"]`}}
 		}, "spwn.yaml#worlds.neo.agents[1]", LevelError, "leaves the project"},
 		"agent-absolute": {func(o string) []edit {
-			return []edit{{"spwn.yaml", "agents: [neo]", fmt.Sprintf("agents: [neo, %q]", filepath.Join(o, "proj", "spwn", "agents", "secret"))}}
+			return []edit{{"spwn.yaml", "agents: [neo]", fmt.Sprintf("agents: [neo, %q]", filepath.Join(o, "proj", "agents", "secret"))}}
 		}, "spwn.yaml#worlds.neo.agents[1]", LevelError, "leaves the project"},
 		"agent-separator": {func(string) []edit { return []edit{{"spwn.yaml", "agents: [neo]", `agents: [neo, "neo/journal"]`}} },
 			"spwn.yaml#worlds.neo.agents[1]", LevelError, "leaves the project"},
@@ -154,13 +154,13 @@ func TestEachPathOfTheDeclarationThatLeavesTheProjectIsSaidAndNeverOpened(t *tes
 			return []edit{{"spwn.yaml", "worlds:", "dependencies: [\"tool/..\"]\n\nworlds:"}}
 		}, "spwn.yaml#deps", LevelError, "is invalid"},
 		"agent-dependency": {func(string) []edit {
-			return []edit{{"spwn/agents/neo/agent.yaml", `  - "spwn:unix"`, `  - "spwn:unix"` + "\n" + `  - "skill/.."`}}
-		}, "spwn/agents/neo/agent.yaml#deps", LevelError, "is invalid"},
+			return []edit{{"agents/neo/agent.yaml", `  - "spwn:unix"`, `  - "spwn:unix"` + "\n" + `  - "skill/.."`}}
+		}, "agents/neo/agent.yaml#deps", LevelError, "is invalid"},
 		"import-climbing": {func(string) []edit {
-			return []edit{{"spwn/agents/neo/AGENTS.md", "\n", "\nread @../../../../outside/notes.md\n"}}
-		}, "spwn/agents/neo/AGENTS.md @../../../../outside/notes.md", LevelError, "leaves the project"},
+			return []edit{{"agents/neo/AGENTS.md", "\n", "\nread @../../../../outside/notes.md\n"}}
+		}, "agents/neo/AGENTS.md @../../../../outside/notes.md", LevelError, "leaves the project"},
 		"import-absolute": {func(o string) []edit {
-			return []edit{{"spwn/agents/neo/AGENTS.md", "\n", "\nread @" + filepath.Join(o, "abs.md") + "\n"}}
+			return []edit{{"agents/neo/AGENTS.md", "\n", "\nread @" + filepath.Join(o, "abs.md") + "\n"}}
 		}, "", LevelError, "@-import"},
 	} {
 		t.Run(name, func(t *testing.T) {

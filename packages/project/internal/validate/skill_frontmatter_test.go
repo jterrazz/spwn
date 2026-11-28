@@ -8,11 +8,11 @@ import (
 )
 
 // TestRuleSkillFrontmatter_detectsMissingBlock: a skill without any
-// frontmatter is flagged with a fix-it hint. The spwn/skills/
+// frontmatter is flagged with a fix-it hint. The skills/
 // directory is the canonical bare-skill location.
 func TestRuleSkillFrontmatter_detectsMissingBlock(t *testing.T) {
 	root := t.TempDir()
-	writeSkill(t, root, "spwn/skills", "naked.md", "# naked skill\n\ncontent\n")
+	writeSkill(t, root, "skills", "naked.md", "# naked skill\n\ncontent\n")
 
 	issues := ruleSkillFrontmatter(Input{Root: root})
 	if len(issues) != 1 {
@@ -33,7 +33,7 @@ func TestRuleSkillFrontmatter_detectsMissingBlock(t *testing.T) {
 // issues, whatever extra fields are present.
 func TestRuleSkillFrontmatter_passes(t *testing.T) {
 	root := t.TempDir()
-	writeSkill(t, root, "spwn/skills", "good.md", `---
+	writeSkill(t, root, "skills", "good.md", `---
 name: good
 description: Use when the good path is required.
 version: "1.0"
@@ -51,7 +51,7 @@ version: "1.0"
 // name blank: error mentioning `name`.
 func TestRuleSkillFrontmatter_missingName(t *testing.T) {
 	root := t.TempDir()
-	writeSkill(t, root, "spwn/skills", "nameless.md", `---
+	writeSkill(t, root, "skills", "nameless.md", `---
 description: has everything but the name
 ---
 body
@@ -69,7 +69,7 @@ body
 // description is empty.
 func TestRuleSkillFrontmatter_missingDescription(t *testing.T) {
 	root := t.TempDir()
-	writeSkill(t, root, "spwn/skills", "mute.md", `---
+	writeSkill(t, root, "skills", "mute.md", `---
 name: mute
 ---
 body
@@ -84,13 +84,13 @@ body
 }
 
 // TestRuleSkillFrontmatter_walksAuthoredSkillRoots: the rule covers
-// every authoring location, project-wide (spwn/skills/) and per-tool
-// (spwn/tools/<name>/skills/), so a convention violation in either
+// every authoring location, project-wide (skills/) and per-tool
+// (tools/<name>/skills/), so a convention violation in either
 // produces an issue.
 func TestRuleSkillFrontmatter_walksAuthoredSkillRoots(t *testing.T) {
 	root := t.TempDir()
-	writeSkill(t, root, "spwn/skills", "project.md", "no header\n")
-	writeSkill(t, root, "spwn/tools/my-tool/skills", "tool.md", "no header\n")
+	writeSkill(t, root, "skills", "project.md", "no header\n")
+	writeSkill(t, root, "tools/my-tool/skills", "tool.md", "no header\n")
 
 	issues := ruleSkillFrontmatter(Input{Root: root})
 	if len(issues) != 2 {
@@ -103,7 +103,7 @@ func TestRuleSkillFrontmatter_walksAuthoredSkillRoots(t *testing.T) {
 		paths = append(paths, i.Path)
 	}
 	joined := strings.Join(paths, "|")
-	for _, want := range []string{"spwn/skills/project.md", "spwn/tools/my-tool/skills/tool.md"} {
+	for _, want := range []string{"skills/project.md", "tools/my-tool/skills/tool.md"} {
 		if !strings.Contains(joined, want) {
 			t.Errorf("missing coverage of %s in paths: %v", want, paths)
 		}
@@ -111,10 +111,10 @@ func TestRuleSkillFrontmatter_walksAuthoredSkillRoots(t *testing.T) {
 }
 
 // TestRuleSkillFrontmatter_nestedSkills: a nested skill file (e.g.
-// spwn/skills/reviewing/code.md) is still a skill. Walk is recursive.
+// skills/reviewing/code.md) is still a skill. Walk is recursive.
 func TestRuleSkillFrontmatter_nestedSkills(t *testing.T) {
 	root := t.TempDir()
-	writeSkill(t, root, "spwn/skills/reviewing", "code.md", "# no header\n")
+	writeSkill(t, root, "skills/reviewing", "code.md", "# no header\n")
 
 	issues := ruleSkillFrontmatter(Input{Root: root})
 	if len(issues) != 1 {
@@ -131,7 +131,7 @@ func TestRuleSkillFrontmatter_nestedSkills(t *testing.T) {
 // missing fields.
 func TestRuleSkillFrontmatter_malformedYAML(t *testing.T) {
 	root := t.TempDir()
-	writeSkill(t, root, "spwn/skills", "bad.md", `---
+	writeSkill(t, root, "skills", "bad.md", `---
 name: [not-a-scalar
 ---
 `)

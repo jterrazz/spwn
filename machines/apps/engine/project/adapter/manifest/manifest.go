@@ -670,8 +670,8 @@ func rendered(root string) []project.Issue {
 		}
 		for _, a := range input.Agents {
 			if have, ok := prompts[a.Name]; ok && !have {
-				out = append(out, project.Issue{Level: project.Error, Path: "spwn/agents/" + a.Name + "/AGENTS.md", Message: "agent prompt is missing or empty",
-					Hint: "write spwn/agents/" + a.Name + "/AGENTS.md with the agent's system prompt", Source: project.SourceCompile})
+				out = append(out, project.Issue{Level: project.Error, Path: "agents/" + a.Name + "/AGENTS.md", Message: "agent prompt is missing or empty",
+					Hint: "write agents/" + a.Name + "/AGENTS.md with the agent's system prompt", Source: project.SourceCompile})
 			}
 		}
 		refused := map[string]bool{}
@@ -688,7 +688,7 @@ func rendered(root string) []project.Issue {
 			}
 			if len(files) == 0 {
 				out = append(out, project.Issue{Level: project.Warning, Path: "agents/" + a.Name, Message: "agent renders no file",
-					Hint: "spwn/agents/" + a.Name + "/ lacks its AGENTS.md or its agent.yaml", Source: project.SourceCompile})
+					Hint: "agents/" + a.Name + "/ lacks its AGENTS.md or its agent.yaml", Source: project.SourceCompile})
 			}
 		}
 	}

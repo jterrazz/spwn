@@ -61,10 +61,10 @@ dependencies:
 	}
 }
 
-// 3. rulePacksExist where agent.yaml has a tool/<name> ref that exists in spwn/tools/
+// 3. rulePacksExist where agent.yaml has a tool/<name> ref that exists in tools/
 func TestEdge_PacksExist_LocalPackDir(t *testing.T) {
 	root := t.TempDir()
-	packDir := filepath.Join(root, "spwn", "tools", "my-local-dependency")
+	packDir := filepath.Join(root, "tools", "my-local-dependency")
 	if err := os.MkdirAll(packDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -82,10 +82,10 @@ dependencies:
 }
 
 // 4. rulePacksExist where agent.yaml has a skill/<name> ref that exists
-// as spwn/skills/<name>.md
+// as skills/<name>.md
 func TestEdge_PacksExist_LocalSkillFile(t *testing.T) {
 	root := t.TempDir()
-	skillDir := filepath.Join(root, "spwn", "skills")
+	skillDir := filepath.Join(root, "skills")
 	if err := os.MkdirAll(skillDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -111,7 +111,7 @@ dependencies:
 // here to prevent.
 func TestEdge_PacksExist_BareRefRejected(t *testing.T) {
 	root := t.TempDir()
-	skillDir := filepath.Join(root, "spwn", "skills")
+	skillDir := filepath.Join(root, "skills")
 	if err := os.MkdirAll(skillDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -142,10 +142,10 @@ dependencies:
 }
 
 // TestEdge_PacksExist_LocalHookFile: hook/<name> resolves to
-// spwn/hooks/<name>.yaml with no fallback to other kinds.
+// hooks/<name>.yaml with no fallback to other kinds.
 func TestEdge_PacksExist_LocalHookFile(t *testing.T) {
 	root := t.TempDir()
-	hookDir := filepath.Join(root, "spwn", "hooks")
+	hookDir := filepath.Join(root, "hooks")
 	if err := os.MkdirAll(hookDir, 0o755); err != nil {
 		t.Fatal(err)
 	}

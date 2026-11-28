@@ -22,7 +22,7 @@ worlds:
     workspaces: [.]
 `)
 
-	agentDir := filepath.Join(root, "spwn", "agents", "neo")
+	agentDir := filepath.Join(root, "agents", "neo")
 	mustMkdir(t, agentDir)
 	writeFile(t, filepath.Join(agentDir, "SOUL.md"), "test")
 	writeFile(t, filepath.Join(agentDir, "AGENTS.md"), "test")
@@ -37,7 +37,7 @@ dependencies:
 `)
 
 	// Local tool directory that exists on disk.
-	mustMkdir(t, filepath.Join(root, "spwn", "tools", "local-tool"))
+	mustMkdir(t, filepath.Join(root, "tools", "local-tool"))
 
 	p, err := Load(filepath.Join(root, "spwn.yaml"))
 	if err != nil {

@@ -1,5 +1,5 @@
 // Package transpile turns a provider-neutral spwn project
-// (spwn.yaml + spwn/agents/* + skills + hooks) into a runtime-
+// (spwn.yaml + agents/* + skills + hooks) into a runtime-
 // specific file layout (Tree) that can then be materialised to
 // disk or handed to packages/compile for the build step:
 // linking the tree with tools into a Docker image.

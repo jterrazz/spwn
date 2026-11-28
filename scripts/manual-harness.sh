@@ -98,7 +98,7 @@ s3() {
     scenario 3 "a project from the matrix example"
     run "s3.create-matrix" expect_zero "$STATION" project create --from matrix
     cd matrix || return
-    if [ -d "spwn/agents/neo" ]; then
+    if [ -d "agents/neo" ]; then
         PASS=$((PASS+1)); RESULTS+=("PASS  s3.neo-present")
     else
         FAIL=$((FAIL+1)); RESULTS+=("FAIL  s3.neo-present")
@@ -171,7 +171,7 @@ s9() {
 s10() {
     scenario 10 "invalid dep ref in agent.yaml"
     start_project > /dev/null 2>&1
-    local f="spwn/agents/neo/agent.yaml"
+    local f="agents/neo/agent.yaml"
     python3 -c "
 import sys
 with open('$f') as fh: t = fh.read()
@@ -185,7 +185,7 @@ s11() {
     scenario 11 "agents create"
     start_project > /dev/null 2>&1
     run "s11.new" expect_zero "$STATION" agents create bob
-    [ -f "spwn/agents/bob/agent.yaml" ] && [ -f "spwn/agents/bob/SOUL.md" ] \
+    [ -f "agents/bob/agent.yaml" ] && [ -f "agents/bob/SOUL.md" ] \
         && { PASS=$((PASS+1)); RESULTS+=("PASS  s11.files-exist"); } \
         || { FAIL=$((FAIL+1)); RESULTS+=("FAIL  s11.files-exist"); }
 }
@@ -272,12 +272,12 @@ s20() {
     scenario 20 "skills create / list / delete"
     start_project > /dev/null 2>&1
     run "s20.skill-new" expect_zero "$STATION" skills create daily-standup
-    [ -f "spwn/skills/daily-standup.md" ] \
+    [ -f "skills/daily-standup.md" ] \
         && { PASS=$((PASS+1)); RESULTS+=("PASS  s20.file-exists"); } \
         || { FAIL=$((FAIL+1)); RESULTS+=("FAIL  s20.file-exists"); }
     run "s20.skill-ls"  expect_zero "$STATION" skills
     run "s20.skill-rm"  expect_zero "$STATION" skills delete daily-standup --confirm=daily-standup
-    [ ! -f "spwn/skills/daily-standup.md" ] \
+    [ ! -f "skills/daily-standup.md" ] \
         && { PASS=$((PASS+1)); RESULTS+=("PASS  s20.file-gone"); } \
         || { FAIL=$((FAIL+1)); RESULTS+=("FAIL  s20.file-gone"); }
 }
@@ -286,7 +286,7 @@ s21() {
     scenario 21 "install python globally"
     start_project > /dev/null 2>&1
     run "s21.install" expect_zero "$SPWN" install python
-    grep -q "spwn:python" spwn/agents/neo/agent.yaml \
+    grep -q "spwn:python" agents/neo/agent.yaml \
         && { PASS=$((PASS+1)); RESULTS+=("PASS  s21.in-agent-yaml"); } \
         || { FAIL=$((FAIL+1)); RESULTS+=("FAIL  s21.in-agent-yaml"); }
     grep -q "spwn:python" spwn.lock \
@@ -299,10 +299,10 @@ s22() {
     start_project > /dev/null 2>&1
     "$STATION" agents create bob > /dev/null 2>&1
     run "s22.install-agent" expect_zero "$SPWN" install node --agent bob
-    grep -q "spwn:node" spwn/agents/bob/agent.yaml \
+    grep -q "spwn:node" agents/bob/agent.yaml \
         && { PASS=$((PASS+1)); RESULTS+=("PASS  s22.bob-has"); } \
         || { FAIL=$((FAIL+1)); RESULTS+=("FAIL  s22.bob-has"); }
-    grep -q "spwn:node" spwn/agents/neo/agent.yaml \
+    grep -q "spwn:node" agents/neo/agent.yaml \
         && { FAIL=$((FAIL+1)); RESULTS+=("FAIL  s22.neo-clean (bled over)"); } \
         || { PASS=$((PASS+1)); RESULTS+=("PASS  s22.neo-clean"); }
 }
@@ -312,7 +312,7 @@ s23() {
     start_project > /dev/null 2>&1
     "$SPWN" install python > /dev/null 2>&1
     run "s23.uninstall" expect_zero "$SPWN" uninstall python
-    grep -q "spwn:python" spwn/agents/neo/agent.yaml \
+    grep -q "spwn:python" agents/neo/agent.yaml \
         && { FAIL=$((FAIL+1)); RESULTS+=("FAIL  s23.still-present"); } \
         || { PASS=$((PASS+1)); RESULTS+=("PASS  s23.removed"); }
 }
@@ -336,7 +336,7 @@ s26() {
     scenario 26 "install bare name → spwn: scheme"
     start_project > /dev/null 2>&1
     run "s26.install-bare" expect_zero "$SPWN" install node
-    grep -qE "spwn:node|node" spwn/agents/neo/agent.yaml \
+    grep -qE "spwn:node|node" agents/neo/agent.yaml \
         && { PASS=$((PASS+1)); RESULTS+=("PASS  s26.resolved-to-spwn-node"); } \
         || { FAIL=$((FAIL+1)); RESULTS+=("FAIL  s26.resolved-to-spwn-node"); }
 }
@@ -356,7 +356,7 @@ s27() {
 s28() {
     scenario 28 "install local ref without --agent requires --agent"
     start_project > /dev/null 2>&1
-    echo "# test" > spwn/skills/myskill.md
+    echo "# test" > skills/myskill.md
     run "s28.local-no-agent" expect_nonzero "$SPWN" install skill:myskill
 }
 
@@ -405,7 +405,7 @@ s32() {
     fi
     if [ -n "$id" ]; then
         local out; out=$("$SPWN" world inspect "$id" 2>&1)
-        if echo "$out" | grep -qE "/tmp/qa-50/s32/spwn/agents|qa-50.*spwn/agents"; then
+        if echo "$out" | grep -qE "/tmp/qa-50/s32/agents|qa-50.*agents"; then
             PASS=$((PASS+1)); RESULTS+=("PASS  s32.home-is-project-path")
         else
             FAIL=$((FAIL+1)); RESULTS+=("FAIL  s32.home-is-project-path")
@@ -585,7 +585,7 @@ s43() {
 s44() {
     scenario 44 "empty dependencies list"
     start_project > /dev/null 2>&1
-    cat > spwn/agents/neo/agent.yaml <<'YAML'
+    cat > agents/neo/agent.yaml <<'YAML'
 name: neo
 description: minimal agent with no deps
 runtime:

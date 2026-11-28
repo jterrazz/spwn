@@ -7,7 +7,7 @@ runs:
       exit: 0
       stdout: |
           	On linux-1:
-          ●	neo	created	/srv/work/site/spwn/agents/neo
+          ●	neo	created	/srv/work/site/agents/neo
     - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"linux-1\"].stores.agents | keys" world.json'
       exit: 0
       stdout: |

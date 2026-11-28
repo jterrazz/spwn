@@ -1,5 +1,5 @@
 // Package transpile is the spwn transpiler: provider-neutral source
-// (spwn.yaml + spwn/agents/* + skills + hooks) into runtime-specific
+// (spwn.yaml + agents/* + skills + hooks) into runtime-specific
 // file layout a concrete agent runtime can boot from.
 //
 // Phase 1, Compile(name, input), is a pure function: given an

@@ -29,7 +29,7 @@ Thumbs.db
 # `!` lines had to rescue them.
 /.claude/
 /.spwn/
-/spwn/agents/
+/agents/
 /specs/spwn/
 /specs/spwn.yaml
 

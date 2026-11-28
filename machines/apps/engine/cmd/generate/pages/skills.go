@@ -9,8 +9,8 @@ import (
 // one without frontmatter.
 func skillList() []skills.Skill {
 	return []skills.Skill{
-		{Name: "paper-reading", Path: "~/Developer/site/spwn/skills/paper-reading.md", Description: "How to read a paper and keep its claims."},
-		{Name: "refactoring", Path: "~/Developer/site/spwn/skills/refactoring.md"},
+		{Name: "paper-reading", Path: "~/Developer/site/skills/paper-reading.md", Description: "How to read a paper and keep its claims."},
+		{Name: "refactoring", Path: "~/Developer/site/skills/refactoring.md"},
 	}
 }
 

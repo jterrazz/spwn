@@ -19,7 +19,7 @@ func scaffoldProject(t *testing.T, manifest string, agents map[string]string) st
 
 	// Create agent directories with agent.yaml.
 	for name, agentYAML := range agents {
-		dir := filepath.Join(root, "spwn", "agents", name)
+		dir := filepath.Join(root, "agents", name)
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			t.Fatal(err)
 		}

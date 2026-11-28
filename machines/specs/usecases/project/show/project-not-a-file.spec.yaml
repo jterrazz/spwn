@@ -7,10 +7,10 @@ runs:
       exit: 0
       stdout: |
           ●	site	created	{{workdir}}/site
-    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" fifo spwn/commands/wait.md'
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" fifo commands/wait.md'
       exit: 0
     - command: '--version >/dev/null; /bin/mkdir -p site && cd site &&"$STATION" project'
       exit: 2
       stderr: |
-          Error: spwn/commands/wait.md is neither a file nor a folder: a project's declaration holds only those
+          Error: commands/wait.md is neither a file nor a folder: a project's declaration holds only those
           Hint: move it away, then station project plan

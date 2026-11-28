@@ -51,7 +51,7 @@ func TestALinkOnTheWayToTheSkillsIsNeverFollowed(t *testing.T) {
 	if err := disk.MkdirAll(filepath.Join(root, "spwn"), 0o750); err != nil {
 		t.Fatal(err)
 	}
-	if err := disk.Symlink(away, filepath.Join(root, "spwn", "skills")); err != nil {
+	if err := disk.Symlink(away, filepath.Join(root, "skills")); err != nil {
 		t.Fatal(err)
 	}
 	skillsOf := open(t)
@@ -91,7 +91,7 @@ func TestAProjectKeepsItsSkillsUnderItsSpwnFolder(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := filepath.Join(root, "spwn", "skills", "focus"+skills.Suffix); made.Path != want {
+	if want := filepath.Join(root, "skills", "focus"+skills.Suffix); made.Path != want {
 		t.Errorf("Path = %q; want %q", made.Path, want)
 	}
 	if _, err := os.ReadFile(made.Path); err != nil {
@@ -101,7 +101,7 @@ func TestAProjectKeepsItsSkillsUnderItsSpwnFolder(t *testing.T) {
 
 func TestOnlyMarkdownFilesAreSkills(t *testing.T) {
 	root := t.TempDir()
-	dir := filepath.Join(root, "spwn", "skills")
+	dir := filepath.Join(root, "skills")
 	if err := os.MkdirAll(filepath.Join(dir, "nested"), 0o750); err != nil {
 		t.Fatal(err)
 	}

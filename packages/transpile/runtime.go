@@ -57,7 +57,7 @@ type Input struct {
 	// agent's native skill directory (`.claude/skills/<n>/` for
 	// claude-code, `.agents/skills/<n>/` for codex). Union of two
 	// sources:
-	//   - user-authored under spwn/skills/<n>/SKILL.md (loaded by
+	//   - user-authored under skills/<n>/SKILL.md (loaded by
 	//     packages/transpile/source)
 	//   - tool-shipped skills resolved from each agent's `deps:`
 	//     (collected by the architect at spawn time via the
@@ -67,7 +67,7 @@ type Input struct {
 	Skills []SkillEntry
 
 	// Hooks is every runtime hook the project declares under
-	// spwn/hooks/<name>.yaml. This is the project-wide pool: agents
+	// hooks/<name>.yaml. This is the project-wide pool: agents
 	// receive only the subset they explicitly select via `hook/<name>`
 	// in their agent.yaml#dependencies. Per-agent selection lands on
 	// each AgentInput.Hooks; renderers should consume that, not this
@@ -76,7 +76,7 @@ type Input struct {
 	Hooks []HookEntry
 
 	// Commands is every slash-invoked prompt shortcut the project
-	// declares under spwn/commands/<name>.md. Project-wide pool;
+	// declares under commands/<name>.md. Project-wide pool;
 	// agents receive only the subset they select via `command/<name>`
 	// in agent.yaml#dependencies. Per-agent selection lands on
 	// AgentInput.Commands.
@@ -127,14 +127,14 @@ type AgentInput struct {
 	Name string
 	Role string
 
-	// Soul is the raw bytes of spwn/agents/<name>/SOUL.md. Renderers
+	// Soul is the raw bytes of agents/<name>/SOUL.md. Renderers
 	// that can @-import (claude-code) ignore this; renderers that
 	// must inline everything into a single boot prompt (codex) read
 	// it as the agent's identity body. Nil when SOUL.md is missing:
 	// renderers that rely on it treat a nil Soul as "agent has no
 	// declared identity".
 	Soul []byte
-	// AgentMD is the raw bytes of spwn/agents/<name>/AGENTS.md, the
+	// AgentMD is the raw bytes of agents/<name>/AGENTS.md, the
 	// user-authored provider-neutral prompt body. Renderers that
 	// consume it inline it at the bottom of the per-agent boot prompt
 	// (codex) so the user's own instructions survive transpilation.
@@ -144,7 +144,7 @@ type AgentInput struct {
 	AgentMD []byte
 
 	// Playbooks lists the agent's promotable playbooks, the subset of
-	// files under spwn/agents/<name>/playbooks/ that carry valid
+	// files under agents/<name>/playbooks/ that carry valid
 	// `name:` + `description:` frontmatter. The renderer emits the list
 	// as a discoverability index in the entry file (CLAUDE.md for
 	// claude-code, AGENTS.md for codex) so the runtime sees which

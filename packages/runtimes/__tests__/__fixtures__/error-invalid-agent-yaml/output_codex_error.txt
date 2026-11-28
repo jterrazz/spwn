@@ -1,1 +1,1 @@
-parse {{fixtures}}/error-invalid-agent-yaml/input/spwn/agents/neo/agent.yaml: yaml: line 1: did not find expected ',' or ']'
+parse {{fixtures}}/error-invalid-agent-yaml/input/agents/neo/agent.yaml: yaml: line 1: did not find expected ',' or ']'

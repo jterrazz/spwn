@@ -16,7 +16,7 @@ func treeBeside(t *testing.T) (*Tree, string) {
 	t.Helper()
 	dir := t.TempDir()
 	project := filepath.Join(dir, "project")
-	if err := os.MkdirAll(filepath.Join(project, "spwn", "agents", "neo"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(project, "agents", "neo"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	for at, body := range map[string]string{
@@ -57,7 +57,7 @@ func TestATreeRefusesEveryPathThatLeavesItByItsNameAlone(t *testing.T) {
 			t.Errorf("ReadDir(%q) = %v; want ErrOutside", p, err)
 		}
 	}
-	for _, p := range []string{"spwn.yaml", "spwn/agents/../../spwn.yaml", filepath.Join(tree.Dir(), "spwn.yaml")} {
+	for _, p := range []string{"spwn.yaml", "agents/../../spwn.yaml", filepath.Join(tree.Dir(), "spwn.yaml")} {
 		if data, err := tree.ReadFile(p); err != nil || string(data) != "version: 1\n" {
 			t.Errorf("ReadFile(%q) = %q, %v; want the project's file", p, data, err)
 		}
@@ -112,7 +112,7 @@ func TestATreeWalksAsWalkDirDoes(t *testing.T) {
 		got = append(got, rel)
 		return nil
 	})
-	want := []string{"spwn", filepath.Join("spwn", "agents"), filepath.Join("spwn", "agents", "neo")}
+	want := []string{"spwn", filepath.Join("agents"), filepath.Join("agents", "neo")}
 	if err != nil || len(got) != len(want) || got[0] != want[0] || got[1] != want[1] || got[2] != want[2] {
 		t.Errorf("WalkDir = %v, %v; want %v", got, err, want)
 	}
@@ -131,7 +131,7 @@ func TestAFileNamedAsAFolderIsNotRead(t *testing.T) {
 			t.Errorf("IsFile(%q) = true; want false", p)
 		}
 	}
-	for _, p := range []string{"spwn/", "spwn/.", "spwn/agents/./"} {
+	for _, p := range []string{"spwn/", "spwn/.", "agents/./"} {
 		if !tree.IsDir(p) {
 			t.Errorf("IsDir(%q) = false; want the folder", p)
 		}
@@ -186,8 +186,8 @@ func TestATreesFSRefusesWhatTheTreeRefuses(t *testing.T) {
 	case <-time.After(10 * time.Second):
 		t.Fatal("ReadFile of the FS waited on a FIFO")
 	}
-	if entries, err := fs.ReadDir(fsys, "spwn/agents"); err != nil || len(entries) != 1 || entries[0].Name() != "neo" {
-		t.Errorf("ReadDir(spwn/agents) = %v, %v; want [neo]", entries, err)
+	if entries, err := fs.ReadDir(fsys, "agents"); err != nil || len(entries) != 1 || entries[0].Name() != "neo" {
+		t.Errorf("ReadDir(agents) = %v, %v; want [neo]", entries, err)
 	}
 	if info, err := fs.Stat(fsys, "spwn"); err != nil || !info.IsDir() {
 		t.Errorf("Stat(spwn) = %v, %v; want a folder", info, err)

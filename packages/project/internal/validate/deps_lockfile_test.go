@@ -18,13 +18,13 @@ func writeLockfile(t *testing.T, root string, l *dependency.Lockfile) {
 }
 
 // TestRulePackagesExist_localSkillFileForm verifies the skill/<name>
-// form: spwn/skills/<name>.md counts as a valid local dependency.
+// form: skills/<name>.md counts as a valid local dependency.
 func TestRulePackagesExist_localSkillFileForm(t *testing.T) {
 	root := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(root, "spwn", "skills"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(root, "skills"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	if err := os.WriteFile(filepath.Join(root, "spwn", "skills", "focus.md"), []byte("# focus"), 0o644); err != nil {
+	if err := os.WriteFile(filepath.Join(root, "skills", "focus.md"), []byte("# focus"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 
@@ -146,7 +146,7 @@ dependencies:
 
 func TestRuleLockfileConsistent_ignoresLocalRefs(t *testing.T) {
 	root := t.TempDir()
-	if err := os.MkdirAll(filepath.Join(root, "spwn", "tools", "my-tool"), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Join(root, "tools", "my-tool"), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	ref := scaffoldAgent(t, root, "neo", `name: neo

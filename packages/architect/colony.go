@@ -26,7 +26,7 @@ type AgentSpec struct {
 // world that's already running with other agents.
 //
 // Hot-deploy uses the same docker-cp mechanism as cold spawn: the
-// host-side spwn/agents/<name>/ tree is copied into the container at
+// host-side agents/<name>/ tree is copied into the container at
 // /agents/<name>/ once, and per-agent compile output (CLAUDE.md,
 // role.md) is docker-cp'd on top. Subsequent writes inside the
 // container are only flushed back on graceful world destroy.

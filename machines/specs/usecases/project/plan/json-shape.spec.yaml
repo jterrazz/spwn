@@ -3,7 +3,7 @@ env:
     - two-macs
     - engine
 runs:
-    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" error spwn/agents/neo/agent.yaml "agent.yaml does not parse"'
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" error agents/neo/agent.yaml "agent.yaml does not parse"'
       exit: 0
     - command: '--version >/dev/null; /bin/mkdir site && cd site && "$STATION" project plan --json'
       exit: 2
@@ -29,7 +29,7 @@ runs:
             "issues": [
               {
                 "level": "error",
-                "path": "spwn/agents/neo/agent.yaml",
+                "path": "agents/neo/agent.yaml",
                 "message": "agent.yaml does not parse",
                 "source": "manifest"
               }

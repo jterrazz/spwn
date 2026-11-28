@@ -29,7 +29,7 @@ var (
 
 func writeHook(t *testing.T, root, name, body string) {
 	t.Helper()
-	dir := filepath.Join(root, "spwn", "hooks")
+	dir := filepath.Join(root, "hooks")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatalf("mkdir hooks: %v", err)
 	}

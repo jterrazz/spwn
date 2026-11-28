@@ -120,8 +120,8 @@ func refusedOrBare(err error, code fail.Code, why error, rel string) bool {
 
 func TestALinkInTheDeclarationIsRefusedAndNothingItPointsToIsRead(t *testing.T) {
 	for _, rel := range []string{
-		"spwn.yaml", "spwn.lock", "spwn", "spwn/commands/refactor.md", "spwn/skills", "spwn/skills/focus.md",
-		"spwn/agents/" + project.Starter, "spwn/agents/" + project.Starter + "/agent.yaml", "spwn/agents/" + project.Starter + "/AGENTS.md",
+		"spwn.yaml", "spwn.lock", "spwn", "commands/refactor.md", "skills", "skills/focus.md",
+		"agents/" + project.Starter, "agents/" + project.Starter + "/agent.yaml", "agents/" + project.Starter + "/AGENTS.md",
 	} {
 		t.Run(strings.ReplaceAll(rel, "/", "_"), func(t *testing.T) {
 			d, _, root := applying(t)
@@ -139,7 +139,7 @@ func TestALinkInTheDeclarationIsRefusedAndNothingItPointsToIsRead(t *testing.T) 
 }
 
 func TestAFIFOInTheDeclarationIsRefusedAndNoReadWaitsOnIt(t *testing.T) {
-	for _, rel := range []string{"spwn/commands/wait.md", "spwn.lock"} {
+	for _, rel := range []string{"commands/wait.md", "spwn.lock"} {
 		t.Run(strings.ReplaceAll(rel, "/", "_"), func(t *testing.T) {
 			d, _, root := applying(t)
 			at := filepath.Join(root, filepath.FromSlash(rel))

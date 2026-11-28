@@ -17,7 +17,7 @@ import (
 
 func TestCommandFileResolver_ReadsBody(t *testing.T) {
 	root := t.TempDir()
-	cmdDir := filepath.Join(root, "spwn", "commands")
+	cmdDir := filepath.Join(root, "commands")
 	if err := os.MkdirAll(cmdDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -182,7 +182,7 @@ func TestNewAutomationEngine_AssemblesCorrectly(t *testing.T) {
 	arc, _ := newTestArchitect(t, mb)
 
 	root := t.TempDir()
-	cmdDir := filepath.Join(root, "spwn", "commands")
+	cmdDir := filepath.Join(root, "commands")
 	if err := os.MkdirAll(cmdDir, 0o755); err != nil {
 		t.Fatal(err)
 	}

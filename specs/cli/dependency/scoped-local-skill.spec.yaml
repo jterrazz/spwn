@@ -7,4 +7,4 @@ runs:
             ✓  installed skill/refine
                1 agent updated, spwn.lock pinned
       files:
-          spwn/agents/dylan/agent.yaml: { contains: skill/refine }
+          agents/dylan/agent.yaml: { contains: skill/refine }

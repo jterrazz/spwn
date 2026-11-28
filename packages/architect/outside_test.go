@@ -53,7 +53,7 @@ type projectReads struct {
 func readProject(project string) projectReads {
 	tree := platform.Within(project)
 	defer tree.Close()
-	home := filepath.Join(project, "spwn", "agents", "neo")
+	home := filepath.Join(project, "agents", "neo")
 	body, err := NewCommandFileResolver(project).Resolve("command/evil")
 	reads := projectReads{
 		skills:    fmt.Sprintf("%q", collectRuntimeSkills(tree, nil)),
@@ -83,22 +83,22 @@ func projectLinkingOut(t *testing.T) (project, outside string) {
 	})
 	writeFiles(t, project, map[string]string{
 		"spwn.yaml":                         "version: 1\n",
-		"spwn/skills/kept/SKILL.md":         "---\nname: kept\n---\nkept\n",
-		"spwn/agents/neo/playbooks/.keep":   "",
-		"spwn/commands/.keep":               "",
-		"spwn/hooks/.keep":                  "",
-		"spwn/skills/half/SKILL.md":         "---\nname: half\n---\nhalf\n",
-		"spwn/agents/neo/playbooks/keep.md": "---\nname: keep\n---\n",
+		"skills/kept/SKILL.md":         "---\nname: kept\n---\nkept\n",
+		"agents/neo/playbooks/.keep":   "",
+		"commands/.keep":               "",
+		"hooks/.keep":                  "",
+		"skills/half/SKILL.md":         "---\nname: half\n---\nhalf\n",
+		"agents/neo/playbooks/keep.md": "---\nname: keep\n---\n",
 	})
 	linkAll(t, project, map[string]string{
-		"spwn/skills/notes.md":                filepath.Join(outside, "secret.md"),
-		"spwn/skills/climb.md":                filepath.Join("..", "..", "..", "outside", "secret.md"),
-		"spwn/skills/away":                    filepath.Join(outside, "skill"),
-		"spwn/skills/half/refs/secret.md":     filepath.Join(outside, "secret.md"),
-		"spwn/hooks/evil.yaml":                filepath.Join(outside, "hook.yaml"),
-		"spwn/commands/evil.md":               filepath.Join(outside, "secret.md"),
-		"spwn/agents/neo/SOUL.md":             filepath.Join(outside, "secret.md"),
-		"spwn/agents/neo/playbooks/linked.md": filepath.Join(outside, "playbook", "p.md"),
+		"skills/notes.md":                filepath.Join(outside, "secret.md"),
+		"skills/climb.md":                filepath.Join("..", "..", "..", "outside", "secret.md"),
+		"skills/away":                    filepath.Join(outside, "skill"),
+		"skills/half/refs/secret.md":     filepath.Join(outside, "secret.md"),
+		"hooks/evil.yaml":                filepath.Join(outside, "hook.yaml"),
+		"commands/evil.md":               filepath.Join(outside, "secret.md"),
+		"agents/neo/SOUL.md":             filepath.Join(outside, "secret.md"),
+		"agents/neo/playbooks/linked.md": filepath.Join(outside, "playbook", "p.md"),
 	})
 	return project, outside
 }
@@ -128,13 +128,13 @@ func TestAFIFOInAProjectNeverHoldsItsReads(t *testing.T) {
 	project := filepath.Join(dir, "project")
 	writeFiles(t, project, map[string]string{
 		"spwn.yaml":                       "version: 1\n",
-		"spwn/skills/s/SKILL.md":          "---\nname: s\n---\n",
-		"spwn/agents/neo/.keep":           "",
-		"spwn/agents/neo/playbooks/.keep": "",
+		"skills/s/SKILL.md":          "---\nname: s\n---\n",
+		"agents/neo/.keep":           "",
+		"agents/neo/playbooks/.keep": "",
 	})
 	fifos := []string{
-		"spwn/skills/pipe.md", "spwn/skills/s/extra.md", "spwn/hooks/pipe.yaml", "spwn/commands/evil.md",
-		"spwn/agents/neo/SOUL.md", "spwn/agents/neo/playbooks/pipe.md",
+		"skills/pipe.md", "skills/s/extra.md", "hooks/pipe.yaml", "commands/evil.md",
+		"agents/neo/SOUL.md", "agents/neo/playbooks/pipe.md",
 	}
 	for _, rel := range fifos {
 		at := filepath.Join(project, rel)
@@ -185,16 +185,16 @@ func TestAnHonestProjectReadsAsAPlainReadDoes(t *testing.T) {
 	writeFiles(t, project, map[string]string{
 		"spwn.yaml":                         "version: 1\n",
 		"shared/style.md":                   "shared style\n",
-		"spwn/skills/review/SKILL.md":       "---\nname: review\ndescription: review\n---\nReview.\n",
-		"spwn/skills/review/refs/a.md":      "a\n",
-		"spwn/skills/review/refs/deep/b.sh": "#!/bin/sh\necho b\n",
-		"spwn/skills/quick.md":              "Quick.\n",
-		"spwn/hooks/lint.yaml":              "event: PostToolUse\nmatcher: Edit\ncommand: make lint\n",
-		"spwn/commands/morning.md":          "Brief: {{ .Now }}.\n",
-		"spwn/agents/neo/SOUL.md":           "I am neo.\n",
+		"skills/review/SKILL.md":       "---\nname: review\ndescription: review\n---\nReview.\n",
+		"skills/review/refs/a.md":      "a\n",
+		"skills/review/refs/deep/b.sh": "#!/bin/sh\necho b\n",
+		"skills/quick.md":              "Quick.\n",
+		"hooks/lint.yaml":              "event: PostToolUse\nmatcher: Edit\ncommand: make lint\n",
+		"commands/morning.md":          "Brief: {{ .Now }}.\n",
+		"agents/neo/SOUL.md":           "I am neo.\n",
 	})
 	linkAll(t, project, map[string]string{
-		"spwn/skills/review/style.md": filepath.Join("..", "..", "..", "shared", "style.md"),
+		"skills/review/style.md": filepath.Join("..", "..", "..", "shared", "style.md"),
 	})
 	tree := platform.Within(project)
 	defer tree.Close()
@@ -203,7 +203,7 @@ func TestAnHonestProjectReadsAsAPlainReadDoes(t *testing.T) {
 	for _, s := range skills {
 		byName[s.Name] = s.Files
 	}
-	if want := plainFiles(t, filepath.Join(project, "spwn", "skills", "review")); !reflect.DeepEqual(byName["review"], want) {
+	if want := plainFiles(t, filepath.Join(project, "skills", "review")); !reflect.DeepEqual(byName["review"], want) {
 		t.Errorf("the nested skill = %q; want the plain read %q", byName["review"], want)
 	}
 	if want := ensureSkillFrontmatter([]byte("Quick.\n"), "quick"); !reflect.DeepEqual(byName["quick"], map[string][]byte{"SKILL.md": want}) {
@@ -221,7 +221,7 @@ func TestAnHonestProjectReadsAsAPlainReadDoes(t *testing.T) {
 	if body, err := NewCommandFileResolver(project).Resolve("command/morning"); err != nil || body != "Brief: {{ .Now }}.\n" {
 		t.Errorf("Resolve(command/morning) = %q, %v; want its body", body, err)
 	}
-	if soul := readAgentFile(tree, filepath.Join(project, "spwn", "agents", "neo"), "SOUL.md"); string(soul) != "I am neo.\n" {
+	if soul := readAgentFile(tree, filepath.Join(project, "agents", "neo"), "SOUL.md"); string(soul) != "I am neo.\n" {
 		t.Errorf("SOUL.md = %q; want the agent's", soul)
 	}
 }
@@ -232,7 +232,7 @@ func TestAnAgentsFolderThatLinksOutIsNotCopiedIn(t *testing.T) {
 	outside := filepath.Join(dir, "outside")
 	writeFiles(t, outside, map[string]string{"neo/SOUL.md": outsideSecret + "\n"})
 	writeFiles(t, project, map[string]string{"spwn.yaml": "version: 1\n"})
-	linkAll(t, project, map[string]string{"spwn/agents": outside})
+	linkAll(t, project, map[string]string{"agents": outside})
 	t.Setenv("SPWN_HOME", t.TempDir())
 	mb := newMockBackend()
 	_, err := platform.WithProjectRoot(project, func() (struct{}, error) {

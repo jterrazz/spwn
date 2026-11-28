@@ -104,7 +104,7 @@ func TestWalk_requiresMdExtension(t *testing.T) {
 func TestWalk_anImportThatLeavesTheProjectIsNeverRead(t *testing.T) {
 	base := t.TempDir()
 	project := filepath.Join(base, "project")
-	agent := filepath.Join(project, "spwn", "agents", "neo")
+	agent := filepath.Join(project, "agents", "neo")
 	entry := filepath.Join(agent, "AGENTS.md")
 	outside := filepath.Join(base, "outside", "notes.md")
 	mustWrite(t, outside, "@secret-token.md\n")

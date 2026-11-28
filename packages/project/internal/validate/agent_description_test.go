@@ -85,7 +85,7 @@ func TestRuleAgentDescription_skipsMissingDir(t *testing.T) {
 	root := t.TempDir()
 	issues := ruleAgentDescription(Input{
 		Root:      root,
-		AgentRefs: []AgentRef{{Name: "ghost", Path: filepath.Join(root, "spwn/agents/ghost"), Exists: false}},
+		AgentRefs: []AgentRef{{Name: "ghost", Path: filepath.Join(root, "agents/ghost"), Exists: false}},
 	})
 	if len(issues) != 0 {
 		t.Errorf("missing dirs should be skipped, got %d issues", len(issues))
@@ -133,7 +133,7 @@ func TestRuleAgentDescription_multipleAgents(t *testing.T) {
 
 func writeAgentYAML(t *testing.T, root, name, body string) string {
 	t.Helper()
-	dir := filepath.Join(root, "spwn", "agents", name)
+	dir := filepath.Join(root, "agents", name)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
