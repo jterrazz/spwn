@@ -94,6 +94,10 @@ L1 starts once the owner has read ADR-073: mode A gives one Local Network row, i
 - **M8, automatic login only from a Machinefile**: a Mac setting that turns automatic login on for a headless Mac, never on by default, declared in the owner's own Machinefile (the Mac mini as an always-on Mac, below). Proof: a story for default off and for applied, drift and undo.
 - **M9, `spwn uninstall`** (below) removes the link, the engine's registration and the app, leaving no BTM row after the Trash. The owner's `sudo sfltool resetbtm` and the (-) on old Local Network rows stay his, once per Mac.
 
+## The automation concept is deleted (owner, 2026-11-28)
+
+The owner: "le concept d'automation n'existe pas dans le produit, on devra delete" (2026-11-28). The concept goes, with no rename and no alias: the `spwn automation` commands (`automation` and `automation daemon`), `station automations`, the engine's automations family, and the inline `automations:` of `spwn.yaml`, with the packages behind them (`packages/automation`). What replaces them is one file per workflow under the project's `workflows/` folder, `workflows/<name>.yaml`, the part of a project that runs without a human. Not implemented: neither the deletion nor `workflows/` has landed.
+
 ## The engine and a panic: the lots after L2b (2026-11-27)
 
 ADR-108 lists the lots; L1, L2 and L2b are done. What a verification of L2 found (2026-11-27) and each lot owes:
