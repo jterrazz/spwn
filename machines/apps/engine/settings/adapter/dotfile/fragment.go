@@ -24,7 +24,7 @@ func (a *Applier) ours(from, refusal string) ([]byte, error) {
 	if info.Size() > maxFragment {
 		return nil, fmt.Errorf("the fragment %s is past 256 KiB: %s", from, refusal)
 	}
-	data, err := fs.ReadFile(a.o.Ours, from)
+	data, err := atMost(a.o.Ours.Open, from, maxFragment)
 	if err == nil && len(data) > maxFragment {
 		return nil, fmt.Errorf("the fragment %s is past 256 KiB: %s", from, refusal)
 	}

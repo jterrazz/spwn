@@ -97,7 +97,7 @@ func (a *Applier) read() (record, error) {
 	if info.Size() > maxRecord {
 		return record{}, a.untrusted(errors.New("it is past 1 MiB"))
 	}
-	data, err := a.files.ReadFile(a.o.Record)
+	data, err := atMost(a.files.Open, a.o.Record, maxRecord)
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
 		return record{}, nil

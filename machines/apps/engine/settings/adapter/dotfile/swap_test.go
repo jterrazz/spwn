@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"testing/fstest"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -97,15 +98,19 @@ type writerAfterRead struct {
 	wrote        *bool
 }
 
-func (w writerAfterRead) ReadFile(p string) ([]byte, error) {
-	data, err := w.disk.ReadFile(p)
-	if p == w.file && !*w.wrote {
-		*w.wrote = true
-		if werr := os.WriteFile(p, []byte(w.theirs), 0o600); werr != nil {
-			return nil, werr
-		}
+func (w writerAfterRead) Open(p string) (fs.File, error) {
+	if p != w.file || *w.wrote {
+		return w.disk.Open(p)
 	}
-	return data, err
+	data, err := os.ReadFile(p)
+	if err != nil {
+		return nil, err
+	}
+	*w.wrote = true
+	if werr := os.WriteFile(p, []byte(w.theirs), 0o600); werr != nil {
+		return nil, werr
+	}
+	return fstest.MapFS{"read": {Data: data}}.Open("read")
 }
 
 func TestOffNeverRemovesAFileItMadeThatAnotherWriterChangedAfterItsRead(t *testing.T) {

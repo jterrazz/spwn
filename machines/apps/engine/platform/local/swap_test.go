@@ -4,7 +4,10 @@ import (
 	"errors"
 	"os"
 	"slices"
+	"strings"
+	"syscall"
 	"testing"
+	"time"
 )
 
 func TestASwapLandsWhileTheFileHoldsWhatWasSeen(t *testing.T) {
@@ -89,6 +92,43 @@ func TestASwapOfAFileSeenNotThereLandsOnlyWhereNoNameIsThere(t *testing.T) {
 	}
 	if left := names(t, dir); !slices.Equal(left, []string{".zshrc"}) {
 		t.Errorf("left %v beside the file", left)
+	}
+}
+
+func TestASwapReadsTheFileAgainNoFurtherThanWhatWasSeen(t *testing.T) {
+	_, at := oldFile(t)
+	if err := os.Remove(at); err != nil {
+		t.Fatal(err)
+	}
+	if err := syscall.Mkfifo(at, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	endless := make(chan *os.File, 1)
+	go func() {
+		w, err := os.OpenFile(at, os.O_WRONLY, 0)
+		endless <- w
+		for i := 0; err == nil && i < 16<<10; i++ {
+			_, err = w.WriteString(strings.Repeat("x", 4096))
+		}
+	}()
+	done := make(chan error, 1)
+	go func() { done <- unchanged(at, Seen{Data: []byte("old\n"), There: true}) }()
+	closeWriter := func() {
+		if w := <-endless; w != nil {
+			_ = w.Close()
+		}
+	}
+	var err error
+	select {
+	case err = <-done:
+		closeWriter()
+	case <-time.After(5 * time.Second):
+		t.Error("the file was read on past what was seen")
+		closeWriter()
+		err = <-done
+	}
+	if !errors.Is(err, ErrChanged) {
+		t.Errorf("unchanged = %v, want ErrChanged", err)
 	}
 }
 

@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"path"
 	"slices"
@@ -20,6 +21,8 @@ import (
 )
 
 type Files interface {
+	// value: the file opened to be read, so a read stops at its bound.
+	Open(path string) (fs.File, error)
 	ReadFile(path string) ([]byte, error)
 	WriteFile(path string, data []byte, perm fs.FileMode) error
 	// value: the file replaced whole, at once, with its own mode and
@@ -403,14 +406,31 @@ func (a *Applier) target(to string, mode catalog.WriteMode) (at string, data []b
 		return at, nil, false, nil
 	case err != nil:
 		return "", nil, false, err
+	case !info.Mode().IsRegular():
+		return "", nil, false, fmt.Errorf("%s is no regular file: Machines writes no fragment into it", to)
 	case info.Size() > maxTarget:
 		return "", nil, false, fmt.Errorf("%s is past 1 MiB: Machines writes no fragment into a file that large", to)
 	}
-	data, err = a.files.ReadFile(at)
-	if errors.Is(err, fs.ErrNotExist) {
+	data, err = atMost(a.files.Open, at, maxTarget)
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
 		return at, nil, false, nil
+	case err == nil && len(data) > maxTarget:
+		return "", nil, false, fmt.Errorf("%s is past 1 MiB: Machines writes no fragment into a file that large", to)
 	}
 	return at, data, err == nil, err
+}
+
+// invariant: a file measured before its read is read through a reader
+// that stops one byte past its bound, so one grown since is refused
+// without being read whole.
+func atMost(open func(string) (fs.File, error), name string, bound int) ([]byte, error) {
+	f, err := open(name)
+	if err != nil {
+		return nil, err
+	}
+	data, err := io.ReadAll(io.LimitReader(f, int64(bound)+1))
+	return data, errors.Join(err, f.Close())
 }
 
 // invariant: a file a fragment makes is the owner's from then on: made
@@ -463,7 +483,7 @@ func (a *Applier) unmake(w written, at string, seen []byte) error {
 	// invariant: the file is read again just before it is removed, and one
 	// that no longer holds what the step read is left (local.ErrChanged), so
 	// swapped judges it again: off never removes another writer's change.
-	now, err := a.files.ReadFile(at)
+	now, err := atMost(a.files.Open, at, maxTarget)
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
 	case err != nil:

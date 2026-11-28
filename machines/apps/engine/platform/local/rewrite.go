@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -129,8 +130,15 @@ func (d durable) swap(path string, seen Seen, data []byte, perm fs.FileMode) err
 	return d.syncFolder(dir)
 }
 
+// invariant: the file is read no further than one byte past what was
+// seen: one longer is changed, and is never read whole.
 func unchanged(path string, seen Seen) error {
-	now, err := os.ReadFile(path) //nolint:gosec // outside: the file the caller swaps.
+	f, err := os.Open(path) //nolint:gosec // outside: the file the caller swaps.
+	var now []byte
+	if err == nil {
+		now, err = io.ReadAll(io.LimitReader(f, int64(len(seen.Data))+1))
+		err = errors.Join(err, f.Close())
+	}
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
 		return ErrChanged
