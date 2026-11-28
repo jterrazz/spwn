@@ -1,0 +1,17 @@
+description: 'rtk over an owner''s hooks that is no object: its then row says the hook is kept, never applied'
+fixture: ../../settings/__fixtures__/rtk/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p .claude; printf ''{\n  "hooks": "x"\n}\n'' > .claude/settings.json'
+      exit: 0
+    - command: 'apps install rtk'
+      exit: 0
+      stdout: |
+          ●	rtk	1.0.0	brew
+          ◐	rtk-claude-hook			~/.claude/settings.json /hooks: kept: still yours, not this setting's value, so it does not hold
+    - command: '--version >/dev/null; /bin/cat .claude/settings.json'
+      exit: 0
+      stdout: |
+          {
+            "hooks": "x"
+          }
