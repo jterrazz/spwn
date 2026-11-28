@@ -221,8 +221,12 @@ work in workspaces.
 - **Layers**: `base`, then one per role (the owner's Mac, an always-on Mac, a
   Linux workspace, a macOS workspace, a server), then one machine's overrides.
   The last layer wins, and the app shows where each line comes from.
-- **Where they live**: open. Not a git repository of their own (the owner
-  declined, 2026-11-10); the engine reads them from one path.
+- **Where they live**: one git repository, the fleet, `studio-fleet` for the
+  owner ("studio-fleet parfait je pense", 2026-11-28), its folders at its
+  root ([ADR-109](docs/decisions/109-one-repository-declares-every-machine.md), Proposed).
+  Its reader is still to land: the fleet's layout read as the shared source,
+  a VM's template carrying its chain's packages and files, and host-scoped
+  machine names.
 - **Plan, then apply**: `station machinefile plan` prints the difference between the
   blueprint and the machine (to install, to set, extra), and `station machinefile apply`
   does it, idempotent and check-first like `init`. Removing what a blueprint
