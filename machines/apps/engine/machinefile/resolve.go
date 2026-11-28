@@ -756,11 +756,11 @@ func mergeSettings(m *merged, s catalog.SettingList, o Origin, unit string) {
 // invariant: a computer takes the shared source's newest commit every
 // night, unattended, so no file of that source its chain reads carries
 // run.upgrade (ADR-109): whoever pushes to the source would run lines on
-// it with nobody there. The computer is this machine as its profile says
-// it, whatever kind the files say, as much as a chain that says one. A
-// VM's chain may: a VM never upgrades by itself.
-func upgradesShared(name string, files []Placed, kind, this catalog.MachineRole) error {
-	if kind != catalog.RoleComputer && this != catalog.RoleComputer {
+// it with nobody there. The chain says the computer: a profile that is one
+// resolves a computer's chain alone, refused before. A VM's chain may: a
+// VM never upgrades by itself.
+func upgradesShared(name string, files []Placed, kind catalog.MachineRole) error {
+	if kind != catalog.RoleComputer {
 		return nil
 	}
 	for _, f := range files {
@@ -796,7 +796,7 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 	if this.Kind == catalog.RoleComputer && kind != catalog.RoleComputer {
 		return Resolved{}, &OtherKindError{Name: name, This: this.Name, Kind: string(kind)}
 	}
-	if refused := upgradesShared(name, files, kind, this.Kind); refused != nil {
+	if refused := upgradesShared(name, files, kind); refused != nil {
 		return Resolved{}, refused
 	}
 	if said := m.values["machine.system.os"].Text; said == "" || said == string(this.System.OS) {
