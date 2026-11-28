@@ -23,7 +23,7 @@ runs:
       stdout: |
           ●	fmt
           ●	~/.oxfmtrc.json	merged
-          ◐	~/.oxfmtrc.json /tabWidth	yours, kept
+          ◐	~/.oxfmtrc.json /tabWidth	kept: still yours, not this setting's value, so it does not hold
     - command: '--version >/dev/null; /bin/cat .oxfmtrc.json'
       exit: 0
       stdout: |
@@ -39,4 +39,4 @@ runs:
     - command: 'settings fmt | /usr/bin/sed -n 1p'
       exit: 0
       stdout: |
-          ●	fmt	applied · ~/.oxfmtrc.json
+          ○	fmt	not applied	station settings apply fmt

@@ -140,6 +140,10 @@ const owners = `{
 }
 `
 
+// value: what apply says of a value of the owner's the fragment sets
+// otherwise: kept, and the setting not in effect there.
+const unapplied = "kept: still yours, not this setting's value, so it does not hold"
+
 const hook = `{
   "editor": {"tabSize": 4, "wrap": true},
   "hooks": {"PreToolUse": [{"matcher": "Bash", "command": "rtk"}], "Stop": [{"command": "rtk"}]}
@@ -148,7 +152,7 @@ const hook = `{
 func TestAMergeKeepsTheOwnersKeysAndOffGivesBackHisBytes(t *testing.T) {
 	b := newBench(t, catalog.WriteMerge, hook, ".claude/settings.json")
 	b.write(owners, 0o644)
-	if got := b.apply(); !reflect.DeepEqual(got, []string{"~/.claude/settings.json: merged", "~/.claude/settings.json /editor/tabSize: yours, kept"}) {
+	if got := b.apply(); !reflect.DeepEqual(got, []string{"~/.claude/settings.json: merged", "~/.claude/settings.json /editor/tabSize: " + unapplied}) {
 		t.Errorf("apply said %q", got)
 	}
 	want := `{
@@ -250,7 +254,7 @@ func TestAValueTheOwnerPutWhereMachinesMadeAContainerIsHisAfterOffAndApply(t *te
 					want := []string{"~/.x.json: nothing of Machines' left", "~/.x.json /x: yours, kept"}
 					got := b.off
 					if then == "apply" {
-						want[0], got = "~/.x.json: as Machines wrote it: nothing written", b.apply
+						want, got = []string{"~/.x.json: as Machines wrote it: nothing written", "~/.x.json /x: " + unapplied}, b.apply
 					}
 					if said := got(); !reflect.DeepEqual(said, want) {
 						t.Errorf("%s said %q, want %q", then, said, want)
@@ -327,13 +331,13 @@ func TestAFragmentThatChangesAKeysShapeLeavesWhatTheOwnerPutInIt(t *testing.T) {
 	b.write("{\n  \"keep\": 1,\n  \"a\": {\n    \"b\": 1,\n    \"c\": 2\n  }\n}\n", 0o600)
 	b.ours["pkg/fragment.json"].Data = []byte(`{"a": 7}`)
 	want := "{\n  \"keep\": 1,\n  \"a\": {\n    \"c\": 2\n  }\n}\n"
-	if said := b.apply(); !reflect.DeepEqual(said, []string{"~/.x.json: merged", "~/.x.json /a: yours, kept"}) {
+	if said := b.apply(); !reflect.DeepEqual(said, []string{"~/.x.json: merged", "~/.x.json /a: " + unapplied}) {
 		t.Errorf("the new version's apply said %q", said)
 	}
 	if got := b.read(); got != want {
 		t.Errorf("the new version wrote %q, want %q", got, want)
 	}
-	if said := b.apply(); !reflect.DeepEqual(said, []string{"~/.x.json: as Machines wrote it: nothing written", "~/.x.json /a: yours, kept"}) || b.read() != want {
+	if said := b.apply(); !reflect.DeepEqual(said, []string{"~/.x.json: as Machines wrote it: nothing written", "~/.x.json /a: " + unapplied}) || b.read() != want {
 		t.Errorf("the new version applied again said %q and left %q", said, b.read())
 	}
 }
