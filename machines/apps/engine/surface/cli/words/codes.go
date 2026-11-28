@@ -327,7 +327,7 @@ func Codes() map[fail.Code]Wording {
 			return "the source " + e.Subject + " reads " + strconv.Quote(e.Detail["at"]) + " outside its clone: " + e.Detail["problem"], "Machines reads a shared source inside its clone alone: check the source's `path` in ~/.config/station/preferences.json, and take the link out of its repository"
 		},
 		machinefilecalls.UpgradeOnComputer: func(e *fail.Error) (string, string) {
-			return e.Detail["says"] + " (" + e.Detail["file"] + ") says run.upgrade, which " + e.Subject + "'s chain reads: a computer runs no line of the shared source at night", "remove run.upgrade from " + e.Detail["says"] + ": a computer's nights run what its packages say"
+			return e.Detail["says"] + " (" + e.Detail["file"] + ") says run.upgrade, which " + e.Subject + "'s chain reads: a computer's chain takes no run.upgrade line from the shared source", "remove run.upgrade from " + e.Detail["says"] + ": a computer's nights run what its packages say"
 		},
 		machinefilecalls.AnotherKind: func(e *fail.Error) (string, string) {
 			return e.Subject + " is a " + e.Detail["kind"] + "'s Machinefile and " + e.Detail["this"] + " is a computer: a computer applies and upgrades a computer's Machinefile alone", "plan and explain read it here; a VM made from it applies it: station machines create --from " + e.Subject

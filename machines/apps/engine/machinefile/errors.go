@@ -91,7 +91,7 @@ type UpgradeOnComputerError struct {
 }
 
 func (e *UpgradeOnComputerError) Error() string {
-	return e.Says + " (" + e.File + ") says run.upgrade, which " + e.Name + "'s chain reads: a computer runs no line of the shared source at night"
+	return e.Says + " (" + e.File + ") says run.upgrade, which " + e.Name + "'s chain reads: a computer's chain takes no run.upgrade line from the shared source"
 }
 
 // value: a Machinefile of another kind than this computer, resolved on

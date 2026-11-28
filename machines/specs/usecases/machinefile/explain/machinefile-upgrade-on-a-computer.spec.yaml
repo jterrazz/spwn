@@ -6,7 +6,7 @@ runs:
     - command: 'machinefile explain apps'
       exit: 2
       stderr: |
-          Error: nightly (studio@1a2b3c4/kits/nightly.kit.yaml) says run.upgrade, which macbook-pro's chain reads: a computer runs no line of the shared source at night
+          Error: nightly (studio@1a2b3c4/kits/nightly.kit.yaml) says run.upgrade, which macbook-pro's chain reads: a computer's chain takes no run.upgrade line from the shared source
           Hint: remove run.upgrade from nightly: a computer's nights run what its packages say
     - command: 'machinefile plan --json'
       exit: 2
@@ -16,12 +16,12 @@ runs:
             "type": "refused",
             "code": "machinefile.upgrade-on-a-computer",
             "subject": "macbook-pro",
-            "message": "nightly (studio@1a2b3c4/kits/nightly.kit.yaml) says run.upgrade, which macbook-pro's chain reads: a computer runs no line of the shared source at night",
+            "message": "nightly (studio@1a2b3c4/kits/nightly.kit.yaml) says run.upgrade, which macbook-pro's chain reads: a computer's chain takes no run.upgrade line from the shared source",
             "hint": "remove run.upgrade from nightly: a computer's nights run what its packages say",
             "fix": null
           }
       stderr: |
-          Error: nightly (studio@1a2b3c4/kits/nightly.kit.yaml) says run.upgrade, which macbook-pro's chain reads: a computer runs no line of the shared source at night
+          Error: nightly (studio@1a2b3c4/kits/nightly.kit.yaml) says run.upgrade, which macbook-pro's chain reads: a computer's chain takes no run.upgrade line from the shared source
           Hint: remove run.upgrade from nightly: a computer's nights run what its packages say
     - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
