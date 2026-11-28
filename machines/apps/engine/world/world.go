@@ -804,3 +804,15 @@ func (w *World) Holder(vm string) string {
 	}
 	return ""
 }
+
+func (w *World) HolderFrom(mac, vm string) string {
+	// value: the Mac whose VM of that name a guest dialed from mac is: mac's
+	// own when it holds one, as a dial reaches the address its own
+	// hypervisor gave, else Holder's.
+	if m, ok := w.Macs[mac]; ok {
+		if _, held := m.VMs[vm]; held {
+			return mac
+		}
+	}
+	return w.Holder(vm)
+}

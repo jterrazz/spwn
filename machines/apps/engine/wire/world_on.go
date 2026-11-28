@@ -428,7 +428,7 @@ func (m *worldMac) agent() func(context.Context) (func(context.Context) error, e
 }
 
 func (m *worldMac) guests() contract.GuestDialer {
-	return worldGuests{GuestDialer: machinesfake.GuestsOf(m.run.w).Serving(engine.GuestSession), r: m.run}
+	return worldGuests{GuestDialer: machinesfake.GuestsOf(m.run.w, m.name).Serving(engine.GuestSession), r: m.run, mac: m.name}
 }
 func (m *worldMac) imageSource(hypervisor string) imagescontract.ImageSource {
 	return imagesfake.SourceOf(m.run.w, hypervisor)
@@ -1693,7 +1693,8 @@ func (c worldClock) Sleep(ctx context.Context, d time.Duration) error {
 // and that one while a Guest.Serve fault is scripted, is the scripted guest's.
 type worldGuests struct {
 	contract.GuestDialer
-	r *worldRun
+	r   *worldRun
+	mac string
 }
 
 type worldGuest struct {
@@ -1720,7 +1721,7 @@ func (g worldGuests) Dial(ctx context.Context, t contract.GuestTarget) (contract
 func (g worldGuests) hostKey(t contract.GuestTarget) error {
 	g.r.w.Lock()
 	upstream := g.r.w.UpstreamLogin != nil
-	mac := g.r.w.Holder(t.VM)
+	mac := g.r.w.HolderFrom(g.mac, t.VM)
 	var guest *world.Guest
 	if mac != "" {
 		guest = g.r.w.Macs[mac].VMs[t.VM].Guest

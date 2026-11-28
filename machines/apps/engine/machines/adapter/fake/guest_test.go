@@ -37,7 +37,7 @@ func TestAFakeGuestPowersItsVMOffByItsSystemsPoweroffLine(t *testing.T) {
 	for _, kind := range []catalog.MachineKind{catalog.Linux, catalog.MacOS} {
 		w := &world.World{ThisMac: "this-mac"}
 		w.Mac("this-mac").VMs["dev"] = &world.VM{PID: 1001, Guest: &world.Guest{}}
-		g, err := GuestsOf(w).Dial(t.Context(), contract.GuestTarget{VM: "dev"})
+		g, err := GuestsOf(w, "this-mac").Dial(t.Context(), contract.GuestTarget{VM: "dev"})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -48,5 +48,24 @@ func TestAFakeGuestPowersItsVMOffByItsSystemsPoweroffLine(t *testing.T) {
 		if v := w.Macs["this-mac"].VMs["dev"]; v.Running() || v.Ended == nil || v.Ended.Reason != machines.GuestPoweroff {
 			t.Errorf("%s: the VM is %+v after its poweroff line, want it ended by a guest poweroff", kind, v)
 		}
+	}
+}
+
+func TestAFakeGuestIsItsOwnMacsVMNeverAnotherMacsOfItsName(t *testing.T) {
+	w := &world.World{ThisMac: "air"}
+	w.Mac("macbook").VMs["dev"] = &world.VM{PID: 1001, Guest: &world.Guest{}}
+	w.Mac("mini").VMs["dev"] = &world.VM{PID: 2001, Guest: &world.Guest{}}
+	g, err := GuestsOf(w, "mini").Dial(t.Context(), contract.GuestTarget{VM: "dev"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := g.Exec(t.Context(), contract.GuestCommand{Line: catalog.PoweroffLine(catalog.Linux)}); err != nil {
+		t.Fatal(err)
+	}
+	if v := w.Macs["mini"].VMs["dev"]; v.Running() {
+		t.Errorf("mini's dev is %+v after its poweroff line, want it ended", v)
+	}
+	if v := w.Macs["macbook"].VMs["dev"]; v.PID != 1001 || v.Ended != nil {
+		t.Errorf("macbook's dev is %+v after mini's dev powered off, want it running as pid 1001", v)
 	}
 }

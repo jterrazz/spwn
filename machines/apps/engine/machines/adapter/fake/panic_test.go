@@ -39,7 +39,7 @@ func TestAGuestDialTheWorldScriptsToPanicLeavesTheWorldFree(t *testing.T) {
 			w.Mac("this-mac").VMs["dev"] = &world.VM{PID: 1001, Guest: &world.Guest{}}
 			w.Script = []world.Fault{{Call: call, Times: 1, Panic: true}}
 			dial := func() error {
-				_, err := GuestsOf(w).Dial(t.Context(), contract.GuestTarget{VM: "dev"})
+				_, err := GuestsOf(w, "this-mac").Dial(t.Context(), contract.GuestTarget{VM: "dev"})
 				return err
 			}
 			if !panics(func() { _ = dial() }) {

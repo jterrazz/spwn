@@ -88,8 +88,10 @@ func (v *VM) File(path string) (File, bool) {
 
 type Guests struct {
 	// invariant: the guests of the world's VMs: a VM whose slice has a guest
-	// answers what it says, one with none is not reached.
+	// answers what it says, one with none is not reached. A name the Mac
+	// dialing holds is its own VM, whoever else holds one of that name.
 	w   *world.World
+	mac string
 	mu  sync.Mutex
 	vms map[string]*VM
 	// value: the line station's own session runs on in a guest.
@@ -101,16 +103,18 @@ func (g *Guests) Serving(session string) *Guests {
 	return g
 }
 
-func GuestsOf(w *world.World) *Guests { return &Guests{w: w, vms: map[string]*VM{}} }
+func GuestsOf(w *world.World, mac string) *Guests {
+	return &Guests{w: w, mac: mac, vms: map[string]*VM{}}
+}
 
-func NewGuests() *Guests { return GuestsOf(&world.World{ThisMac: "this-mac"}) }
+func NewGuests() *Guests { return GuestsOf(&world.World{ThisMac: "this-mac"}, "this-mac") }
 
 func (g *Guests) Add(vm string) *VM {
 	g.w.Lock()
-	if g.w.Holder(vm) == "" {
+	if g.w.HolderFrom(g.mac, vm) == "" {
 		g.w.Mac(g.w.ThisMac).VMs[vm] = &world.VM{}
 	}
-	g.w.Macs[g.w.Holder(vm)].VMs[vm].Guest = &world.Guest{}
+	g.w.Macs[g.w.HolderFrom(g.mac, vm)].VMs[vm].Guest = &world.Guest{}
 	g.w.Unlock()
 	g.mu.Lock()
 	defer g.mu.Unlock()
@@ -122,14 +126,14 @@ func (g *Guests) Add(vm string) *VM {
 func (g *Guests) notApproved(vm string) bool {
 	g.w.Lock()
 	defer g.w.Unlock()
-	mac := g.w.Holder(vm)
+	mac := g.w.HolderFrom(g.mac, vm)
 	return mac != "" && g.w.Macs[mac].LocalNetwork == machines.LocalNetworkNotApproved
 }
 
 func (g *Guests) answering(vm string) (*world.Guest, bool) {
 	g.w.Lock()
 	defer g.w.Unlock()
-	mac := g.w.Holder(vm)
+	mac := g.w.HolderFrom(g.mac, vm)
 	if mac == "" || g.w.Macs[mac].VMs[vm].Guest == nil {
 		return nil, false
 	}
@@ -177,12 +181,13 @@ func (g *Guests) Dial(_ context.Context, t contract.GuestTarget) (contract.Guest
 	if wg.Replaced {
 		serving = ""
 	}
-	return &guest{vm: v, name: t.VM, w: g.w, serving: serving, fresh: wg.Fresh, done: make(chan struct{})}, nil
+	return &guest{vm: v, name: t.VM, mac: g.mac, w: g.w, serving: serving, fresh: wg.Fresh, done: make(chan struct{})}, nil
 }
 
 type guest struct {
 	vm   *VM
 	name string
+	mac  string
 	w    *world.World
 	// value: the line of station's own session, which this guest runs as its
 	// image installs it; empty when its tooling replaced station's guest.
@@ -259,7 +264,7 @@ func (c *guest) fails() bool {
 // poweroff, and the connection with it.
 func (c *guest) poweroff() {
 	c.w.Lock()
-	if mac := c.w.Holder(c.name); mac != "" {
+	if mac := c.w.HolderFrom(c.mac, c.name); mac != "" {
 		if v := c.w.Macs[mac].VMs[c.name]; v.Running() {
 			v.PID, v.Ended = 0, &machines.RunEnd{Reason: machines.GuestPoweroff}
 		}
@@ -413,7 +418,7 @@ func HostKey(vm string, n int) string {
 }
 
 func (c *guest) state() *world.Guest {
-	if mac := c.w.Holder(c.name); mac != "" {
+	if mac := c.w.HolderFrom(c.mac, c.name); mac != "" {
 		return c.w.Macs[mac].VMs[c.name].Guest
 	}
 	return nil
@@ -422,7 +427,7 @@ func (c *guest) state() *world.Guest {
 func (c *guest) ran(line string) {
 	c.w.Lock()
 	defer c.w.Unlock()
-	if mac := c.w.Holder(c.name); mac != "" {
+	if mac := c.w.HolderFrom(c.mac, c.name); mac != "" {
 		if g := c.w.Macs[mac].VMs[c.name].Guest; g != nil {
 			g.Ran = append(g.Ran, line)
 		}
