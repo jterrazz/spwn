@@ -108,7 +108,7 @@ func (r *Router) Invoke(ctx context.Context, target machine.Ref, name string, in
 		call.Set(out, v)
 		return nil
 	}
-	l, err := r.endpoint(ctx, t, name, raw)
+	l, version, err := r.endpoint(ctx, t, name, raw)
 	if err != nil {
 		return r.named(t, err)
 	}
@@ -121,12 +121,25 @@ func (r *Router) Invoke(ctx context.Context, target machine.Ref, name string, in
 		r.broke(t.Mac(), l, err)
 		return r.named(t, r.labeled(t.Mac(), err))
 	}
-	if decoded := call.Decode(answer, out); decoded != nil {
-		e := fail.New(fail.FarTooOld, call.FarTooOld, t.Name, map[string]string{"document": name})
-		e.Cause = decoded
-		return e
+	return r.decoded(t, name, version, answer, out)
+}
+
+// invariant: an answer this station cannot read is another release's
+// document only when the far side said another version than this one's:
+// its call's shape may have moved, and the repair is a rebuild. From the
+// same version it is a failure of the answer itself (cut short, mangled),
+// said as bad output, never hidden behind a rebuild.
+func (r *Router) decoded(t machine.Ref, name, version string, answer json.RawMessage, out any) error {
+	decoded := call.Decode(answer, out)
+	if decoded == nil {
+		return nil
 	}
-	return nil
+	e := fail.New(fail.Failed, call.BadOutput, name, map[string]string{"out": name})
+	if version != r.reach.Version {
+		e = fail.New(fail.FarTooOld, call.FarTooOld, t.Name, map[string]string{"document": name, "version": version})
+	}
+	e.Cause = decoded
+	return e
 }
 
 func (r *Router) Watch(ctx context.Context, target machine.Ref, name string, in any, p call.Progress) (<-chan call.Update[any], error) {
@@ -145,7 +158,7 @@ func (r *Router) Watch(ctx context.Context, target machine.Ref, name string, in 
 		return nil, err
 	}
 	guest := func() (<-chan call.Update[any], error) {
-		l, err := r.endpoint(ctx, t, name, raw)
+		l, _, err := r.endpoint(ctx, t, name, raw)
 		if err != nil {
 			return nil, r.named(t, err)
 		}
@@ -236,12 +249,13 @@ func (r *Router) inEngine(name string) bool {
 	return ok && h.Meta().Where == call.InEngine
 }
 
-func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string, in json.RawMessage) (*link, error) {
+func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string, in json.RawMessage) (*link, string, error) {
 	// invariant: a call the far Hello lacks, an ability its input asks that
 	// the far Hello does not list, or a far station on another release, is
 	// asked again of a fresh connection, so a Mac upgraded since its
 	// connection was opened serves it; another release, and a call or
 	// ability the fresh Hello still lacks, is refused before any call is sent.
+	// The link comes with the version its Hello said.
 	asks := r.registry.Asks(name, in)
 	l, hello, fresh, err := r.connect(ctx, t)
 	if err == nil && !fresh && (hello.Lacks(name, asks) != "" || api.SkewOf(r.reach.Version, hello.Version) != api.Speaks) {
@@ -250,7 +264,7 @@ func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string, in js
 		l, hello, _, err = r.connect(ctx, t)
 	}
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	detail := map[string]string{"version": hello.Version}
 	if r.reach.Label != nil {
@@ -259,18 +273,18 @@ func (r *Router) endpoint(ctx context.Context, t machine.Ref, name string, in js
 	switch api.SkewOf(r.reach.Version, hello.Version) {
 	case api.FarBehind:
 		r.release(l)
-		return nil, fail.New(fail.FarTooOld, call.FarTooOld, t.Mac(), detail)
+		return nil, "", fail.New(fail.FarTooOld, call.FarTooOld, t.Mac(), detail)
 	case api.HereBehind:
 		r.release(l)
-		return nil, fail.New(fail.Refused, call.CallerTooOld, t.Mac(), detail)
+		return nil, "", fail.New(fail.Refused, call.CallerTooOld, t.Mac(), detail)
 	case api.Speaks:
 	}
 	if lacked := hello.Lacks(name, asks); lacked != "" {
 		r.release(l)
 		detail["call"] = lacked
-		return nil, fail.New(fail.FarTooOld, call.FarTooOld, t.Mac(), detail)
+		return nil, "", fail.New(fail.FarTooOld, call.FarTooOld, t.Mac(), detail)
 	}
-	return l, nil
+	return l, hello.Version, nil
 }
 
 func (r *Router) connect(ctx context.Context, t machine.Ref) (l *link, hello contract.Hello, fresh bool, err error) {
@@ -428,7 +442,7 @@ func (r *Router) Serve(ctx context.Context, target machine.Ref, name string, in 
 	if v, ok := r.stopped(ctx, vm, name, in); ok {
 		return v, nil
 	}
-	l, err := r.endpoint(ctx, vm, name, in)
+	l, _, err := r.endpoint(ctx, vm, name, in)
 	if err != nil {
 		return nil, err
 	}
@@ -447,7 +461,7 @@ func (r *Router) ServeWatch(ctx context.Context, target machine.Ref, name string
 		return serve.Local(r.registry, r.thisMac, r.reach.Version).Watch(ctx, target, name, in, p)
 	}
 	guest := func() (<-chan call.Update[any], error) {
-		l, err := r.endpoint(ctx, vm, name, in)
+		l, _, err := r.endpoint(ctx, vm, name, in)
 		if err != nil {
 			return nil, err
 		}

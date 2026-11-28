@@ -88,8 +88,17 @@ func TestAFarAnswerInAnotherShapeIsAnotherReleasesDocument(t *testing.T) {
 	r, _, _, _ := laptopReaching(t, "dev")
 	_, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, call.Call[struct{}, contracttest.InstallIn, []string]{Name: farInstall.Name}, contracttest.InstallIn{App: "jq"}, nil)
 	var e *fail.Error
-	if !errors.As(err, &e) || e.Code != call.FarTooOld || e.Subject != mini || e.Detail["document"] != farInstall.Name {
-		t.Errorf("an answer this station cannot read: %v, want far-too-old naming the mini and the call's document", err)
+	if !errors.As(err, &e) || e.Code != call.FarTooOld || e.Subject != mini || e.Detail["document"] != farInstall.Name || e.Detail["version"] != "dev" {
+		t.Errorf("an answer this station cannot read from another version: %v, want far-too-old naming the mini, its version and the call's document", err)
+	}
+}
+
+func TestAnUnreadableAnswerFromTheSameReleaseIsBadOutput(t *testing.T) {
+	r, _, _, _ := laptopReaching(t, "v0.21.0")
+	_, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, call.Call[struct{}, contracttest.InstallIn, []string]{Name: farInstall.Name}, contracttest.InstallIn{App: "jq"}, nil)
+	var e *fail.Error
+	if !errors.As(err, &e) || e.Code != call.BadOutput || e.Subject != farInstall.Name {
+		t.Errorf("an answer the same release cannot read: %v, want bad output naming the call, never a rebuild", err)
 	}
 }
 
