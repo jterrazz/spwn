@@ -46,6 +46,20 @@ func TestAudiencesAreCheckedAndCountTheirPublicPorts(t *testing.T) {
 
 // invariant: an overlay overrides a Machinefile by its name: its own file's,
 // or, for a machine's own changes, the one that machine follows.
+func TestAFileExtendsEachMachinefileOnce(t *testing.T) {
+	machinefileRefused(t, "top.machine.yaml", "name: top\nextends: ["+strings.Repeat("kit, ", 99)+"kit]\n", "extends kit twice")
+	if _, err := decodeMachinefile(t, "top.machine.yaml", "name: top\nextends: [a, b]\n"); err != nil {
+		t.Errorf("two files extended once each: %v", err)
+	}
+}
+
+func TestAnEmptyAccountsListIsSaidAndAnAbsentOneIsNot(t *testing.T) {
+	mf, err := decodeMachinefile(t, "top.machine.yaml", "name: top\naccounts: { signins: [] }\n")
+	if err != nil || mf.Accounts == nil || mf.Accounts.SignIns == nil || len(mf.Accounts.SignIns) != 0 || mf.Accounts.Grants != nil {
+		t.Errorf("signins: [] decoded %+v, %v; want signins said empty and grants not said", mf.Accounts, err)
+	}
+}
+
 func TestAnOverlayOverridesItsFileOrTheOneItsMachineFollows(t *testing.T) {
 	for _, overrides := range []string{"linux-1", "linux-dev"} {
 		if mf, err := decodeMachinefile(t, "linux-1.local.yaml", "overrides: "+overrides+"\nports: { except: [3306] }\n"); err != nil || mf.Overrides != overrides {

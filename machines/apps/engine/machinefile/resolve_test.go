@@ -187,12 +187,13 @@ func TestACycleIsPrintedAroundItsLoop(t *testing.T) {
 	}
 }
 
-// invariant: a Machinefile's accounts join those it extends and its ports
-// replace theirs whole; an overlay's change them key by key, audiences
-// port by port, and a merge that cannot be read is refused at the overlay.
+// invariant: a Machinefile's accounts join those it extends, a program it
+// lists under the other key moved there, and its ports replace theirs
+// whole; an overlay's change them key by key, audiences port by port, and
+// a merge that cannot be read is refused at the overlay.
 func TestAnOverlayChangesAccountsAndPortsKeyByKey(t *testing.T) {
 	base := "machinefile: station.machinefile/v1\nname: base\naccounts: { signins: [wrangler] }\nports: { open: [1, 2], to: public }\n"
-	a := machine("a", "{ os: macos }", "[]") + "extends: [base]\naccounts: { signins: [gh], grants: [claude] }\nports: { open: 3000-9999, to: private, except: [22], audiences: { 5432: local } }\n"
+	a := machine("a", "{ os: macos }", "[]") + "extends: [base]\naccounts: { signins: [gh], grants: [claude, wrangler] }\nports: { open: 3000-9999, to: private, except: [22], audiences: { 5432: local } }\n"
 	overlay := "machinefile: station.machinefile/v1\noverrides: a\naccounts: { grants: [claude] }\nports: { except: [3306], audiences: { 8080: public } }\n"
 	lib := library(t, map[string]string{"machinefiles/a.machine.yaml": a, "machinefiles/a.local.yaml": overlay, "machinefiles/base.machine.yaml": base}, nil)
 	r, err := machinefile.Resolve(lib, "a", machinefile.Machine{}, machinefile.Lock{})
@@ -205,23 +206,20 @@ func TestAnOverlayChangesAccountsAndPortsKeyByKey(t *testing.T) {
 			got = append(got, v.Key+"="+v.Text+"@"+string(v.Origin.Kind))
 		}
 	}
-	want := []string{"accounts.signins.wrangler=signs in@user", "accounts.signins.gh=signs in@user", "accounts.grants.claude=granted@overlay", "ports.open=3000-9999@user", "ports.to=private@user", "ports.audiences.5432=local@user", "ports.except=3306@overlay", "ports.audiences.8080=public@overlay"}
+	want := []string{"accounts.signins.gh=signs in@user", "accounts.grants.claude=granted@overlay", "ports.open=3000-9999@user", "ports.to=private@user", "ports.audiences.5432=local@user", "ports.except=3306@overlay", "ports.audiences.8080=public@overlay"}
 	if !slices.Equal(got, want) {
-		t.Errorf("read %v\nwant a's whole, the overlay's keys over it: %v", got, want)
+		t.Errorf("read %v\nwant a's whole, base's sign-in moved to a's grant, the overlay's keys over it: %v", got, want)
 	}
 	given, err := machinefile.GivenOf(lib, "a", "")
-	if err != nil || given.Ports.To != catalog.AudiencePrivate || !slices.Equal(given.Ports.Except, []int{3306}) || len(given.Ports.Audiences) != 2 || fmt.Sprint(given.SignIns, given.Grants) != "[wrangler gh] [claude]" {
-		t.Errorf("given %+v %+v, %v; want a's ports with the overlay's except and audiences, the chain's sign-ins kept", given, given.Ports, err)
+	if err != nil || given.Ports.To != catalog.AudiencePrivate || !slices.Equal(given.Ports.Except, []int{3306}) || len(given.Ports.Audiences) != 2 || fmt.Sprint(given.SignIns, given.Grants) != "[gh] [claude]" {
+		t.Errorf("given %+v %+v, %v; want a's ports with the overlay's except and audiences, its sign-in kept", given, given.Ports, err)
 	}
-	clash := "machinefile: station.machinefile/v1\noverrides: a\naccounts: { grants: [gh] }\nports: { to: public }\n"
-	lib = library(t, map[string]string{"machinefiles/a.machine.yaml": a, "machinefiles/a.local.yaml": clash, "machinefiles/base.machine.yaml": base}, nil)
+	moved := "machinefile: station.machinefile/v1\noverrides: a\naccounts: { grants: [gh] }\n"
+	lib = library(t, map[string]string{"machinefiles/a.machine.yaml": a, "machinefiles/a.local.yaml": moved, "machinefiles/base.machine.yaml": base}, nil)
+	if given, err := machinefile.GivenOf(lib, "a", ""); err != nil || fmt.Sprint(given.SignIns, given.Grants) != "[] [gh]" {
+		t.Errorf("an overlay granting what its file signs in to reads %+v, %v; want gh moved to the grants, the overlay's alone", given, err)
+	}
 	var refused *machinefile.RefusedFileError
-	if _, err := machinefile.Resolve(lib, "a", machinefile.Machine{}, machinefile.Lock{}); !errors.As(err, &refused) || !strings.Contains(err.Error(), "a.local.yaml: its accounts with those of a's chain: gh is both signed in and granted") {
-		t.Errorf("a grant the chain signs in to reads %v; want the overlay refused", err)
-	}
-	if _, err := machinefile.GivenOf(lib, "a", ""); !errors.As(err, &refused) {
-		t.Errorf("given of a refused merge reads %v; want the refusal", err)
-	}
 	wide := "machinefile: station.machinefile/v1\noverrides: a\nports: { to: public }\n"
 	lib = library(t, map[string]string{"machinefiles/a.machine.yaml": a, "machinefiles/a.local.yaml": wide, "machinefiles/base.machine.yaml": base}, nil)
 	if _, err := machinefile.Resolve(lib, "a", machinefile.Machine{}, machinefile.Lock{}); !errors.As(err, &refused) || !strings.Contains(err.Error(), "a.local.yaml: its ports with those of a's chain: public opens ports one by one") {

@@ -1,6 +1,7 @@
 package machinefile
 
 import (
+	"errors"
 	"slices"
 	"strings"
 
@@ -9,7 +10,8 @@ import (
 
 func RightsOf(trees []Tree, name, machine string) (rights *catalog.PortRights, by string, err error) {
 	// invariant: the ports a Machinefile names are read from its own files
-	// alone: itself, what it extends (depth first, a file read once), and the
+	// alone, within the chain's bounds (walkChain), each decoded once:
+	// itself, what it extends (depth first, a file read once), and the
 	// owner's overlay after each, then the machine's own changes when it
 	// names none of them, the last file that says ports winning whole and an
 	// overlay changing them key by key, as the resolution merges them. A file
@@ -35,35 +37,26 @@ func RightsOf(trees []Tree, name, machine string) (rights *catalog.PortRights, b
 		rights, by = &changed, strings.TrimSuffix(file, ".yaml")
 		return nil
 	}
-	var walk func(name string, stack []string) error
-	walk = func(name string, stack []string) error {
-		if i := slices.Index(stack, name); i >= 0 {
-			return &CycleError{Path: append(slices.Clone(stack[i:]), name), Of: "extends"}
-		}
+	read := map[string]catalog.Machinefile{}
+	seen, err = walkChain(name, func(name string) ([]string, bool, error) {
 		mf, ok, decodeErr := decodeNamed(trees, name, false)
-		if decodeErr != nil || !ok {
-			if decodeErr == nil && len(stack) > 0 {
-				decodeErr = &NotFoundError{Name: name, By: stack[len(stack)-1]}
-			}
-			return decodeErr
-		}
-		stack = append(stack, name)
-		for _, e := range mf.Extends {
-			if walkErr := walk(e, stack); walkErr != nil {
-				return walkErr
-			}
-		}
-		if slices.Contains(seen, name) {
-			return nil
-		}
-		seen = append(seen, name)
-		if mf.Ports != nil {
-			whole := *mf.Ports
-			rights, by = &whole, name
-		}
-		return over(name, name)
+		read[name] = mf
+		return mf.Extends, ok, decodeErr
+	})
+	var none *NotFoundError
+	if errors.As(err, &none) && none.By == "" {
+		err = nil
 	}
-	err = walk(name, nil)
+	for _, n := range seen {
+		if p := read[n].Ports; p != nil {
+			whole := *p
+			rights, by = &whole, n
+		}
+		if overErr := over(n, n); overErr != nil {
+			err = overErr
+			break
+		}
+	}
 	if err == nil && len(seen) > 0 && machine != "" && !slices.Contains(seen, machine) {
 		err = over(name, machine)
 	}

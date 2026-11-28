@@ -50,12 +50,17 @@ func TemplateOf(lib Library, name string, lock []byte) (Template, error) {
 	// invariant: a template is a Machinefile of a VM (a workspace or a
 	// server) that says the image its disk starts from; a mixin, a
 	// computer's, or one that names no image is none. It carries the
-	// overlays of its files alone, never a machine's own changes.
+	// overlays of its files alone, never a machine's own changes. A chain
+	// the resolution refuses is refused here the same, before any image or
+	// VM is made from it.
 	files, err := lib.chain(name, "")
 	if err != nil {
 		return Template{}, err
 	}
 	m := merge(files)
+	if refused := m.judged(lib.Catalog, m.said()); refused != nil {
+		return Template{}, refused
+	}
 	kind := catalog.MachineRole(m.values["machine.kind"].Text)
 	from := m.values["vm.image.from"].Text
 	switch {
@@ -98,7 +103,8 @@ func TemplateOf(lib Library, name string, lock []byte) (Template, error) {
 }
 
 func (l Library) Templates() []string {
-	// value: the names of every template the library holds, in name order.
+	// value: the names of every template the library holds, in name order,
+	// a refused chain none.
 	var out []string
 	for _, name := range sortedNames(l.Machinefiles) {
 		if _, err := TemplateOf(l, name, nil); err == nil {
@@ -141,8 +147,8 @@ func GivenOf(lib Library, name, machine string) (Given, error) {
 		return Given{}, err
 	}
 	m := merge(files)
-	if m.refused != nil {
-		return Given{}, m.refused
+	if refused := m.judged(lib.Catalog, m.said()); refused != nil {
+		return Given{}, refused
 	}
 	return Given{Ports: m.ports, SignIns: m.programs(signInKey), Grants: m.programs(grantKey), Server: catalog.MachineRole(m.values["machine.kind"].Text) == catalog.RoleServer}, nil
 }
