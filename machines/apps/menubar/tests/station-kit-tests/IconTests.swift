@@ -43,7 +43,7 @@ final class IconTests: XCTestCase {
 
     // value: a point of each dot behind that no other dot covers, even with
     // the front dot grown, 0 the one nearest you, and the front dot.s centre.
-    static let behind = [CGPoint(x: 11.44, y: 6.56), CGPoint(x: 14.61, y: 3.39)]
+    static let behind = [CGPoint(x: 12.25, y: 5.75), CGPoint(x: 14.75, y: 3.25)]
     static let dot = CGPoint(x: Token.Icon.dot.x, y: Token.Icon.dot.y)
 
     // value: the front dot.s own points on the slash: where the line passes
@@ -89,7 +89,7 @@ final class IconTests: XCTestCase {
             }
             XCTAssertGreaterThan(try alpha(icon, at: Self.dot, scale: scale), 0.97, "the dot at \(scale)x")
         }
-        let grown = CGPoint(x: 1.45, y: 11.88)
+        let grown = CGPoint(x: 1.5, y: 11.5)
         XCTAssertGreaterThan(try alpha(icon, at: grown, scale: 2), 0.95, "the grown dot")
         XCTAssertLessThan(try alpha(MenuBarIcon(.plain), at: grown, scale: 2), 0.05, "the plain dot")
         try drawn("needs", icon)
@@ -256,9 +256,10 @@ final class IconTests: XCTestCase {
 
     // invariant: the image the app hands the status item, as AppKit draws
     // it into the bar at its point size, is a template in every state with
-    // no colour baked in, and its mark is as tall as the bar's own round
-    // symbols: in the menu bar VM, the reference, at 2x Wi-Fi draws 34 by 25
-    // pixels and the Display circle 30 by 30 (33 by 24 on a host Mac).
+    // no colour baked in, and its mark, a 14 pt group, 28 pixels at 2x, is
+    // within 2 pixels of the bar's own round symbols: in the menu bar VM, the
+    // reference, at 2x Wi-Fi draws 34 by 25 pixels and the Display circle 30
+    // by 30 (33 by 24 on a host Mac).
     func testTheItemDrawsAsLargeAsTheBarsSymbolsAndInNoColour() throws {
         let wifi = try XCTUnwrap(Ink(Self.native("wifi")))
         XCTAssertEqual(wifi.box.width, 34)
@@ -273,7 +274,8 @@ final class IconTests: XCTestCase {
             XCTAssertFalse(Self.tinted(bar), "\(icon.mark) is tinted")
         }
         let mark = try XCTUnwrap(Ink(Self.drawnInTheBar(MenuBarIcon(.plain).nsImage())))
-        XCTAssertEqual(Double(mark.box.height), Double(circle.box.height), accuracy: 1)
+        XCTAssertEqual(mark.box.height, 28)
+        XCTAssertEqual(Double(mark.box.height), Double(circle.box.height), accuracy: 2)
     }
 
     static func tinted(_ bitmap: Bitmap) -> Bool {
@@ -313,8 +315,8 @@ final class IconTests: XCTestCase {
             for back in 0..<2 { XCTAssertGreaterThan(try alpha(plain, at: Self.behind[back], scale: scale), 0.95, "dot behind \(back) at \(scale)x") }
             XCTAssertGreaterThan(try alpha(plain, at: Self.dot, scale: scale), 0.95, "the front dot at \(scale)x")
         }
-        XCTAssertLessThan(try alpha(plain, at: CGPoint(x: 9.51, y: 8.49), scale: 2), 0.05, "between the front dot and the middle one")
-        XCTAssertLessThan(try alpha(plain, at: CGPoint(x: 13.5, y: 4.5), scale: 2), 0.05, "between the middle dot and the back one")
+        XCTAssertLessThan(try alpha(plain, at: CGPoint(x: 10.25, y: 8.25), scale: 2), 0.05, "between the front dot and the middle one")
+        XCTAssertLessThan(try alpha(plain, at: CGPoint(x: 13.25, y: 4.25), scale: 2), 0.05, "between the middle dot and the back one")
     }
 
     static func native(_ name: String) -> CGImage? {

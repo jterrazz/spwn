@@ -145,11 +145,11 @@ public enum Token {
     public enum Icon {
         public static let box = CGSize(width: 18, height: 18)
         // value: the dot in front, you; while something needs you it grows to `needsDot`.
-        public static let dot = (x: CGFloat(6.12), y: CGFloat(11.88), r: CGFloat(4.62))
-        public static let needsDot = (x: CGFloat(6.12), y: CGFloat(11.88), r: CGFloat(5.5))
+        public static let dot = (x: CGFloat(6.5), y: CGFloat(11.5), r: CGFloat(4.5))
+        public static let needsDot = (x: CGFloat(6.5), y: CGFloat(11.5), r: CGFloat(5.5))
         // value: the dots behind it, nearest first, each a crescent: its
         // circle cut out of around the dot in front of it by a band `gap` wide.
-        public static let behind: [(x: CGFloat, y: CGFloat, r: CGFloat)] = [(10.73, 7.27, 3.46), (14.19, 3.81, 2.31)]
+        public static let behind: [(x: CGFloat, y: CGFloat, r: CGFloat)] = [(11, 7, 3), (14, 4, 2)]
         public static let gap: CGFloat = 1
         // value: the slash, one line across the box from `slashFrom` to
         // `slashTo`, round caps: the glyph is cut out of by a band `cut`
