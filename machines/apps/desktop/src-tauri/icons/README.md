@@ -7,8 +7,9 @@
 The overlapping dots: three dots one behind the other, shrinking away from the big one, the front one orange, flat, on a dark ground. The owner picked it on 2026-11-25: D, "Le verre", flat on a dark ground, in its setting 3, "Toi devant". Its parts follow Apple's layer rules: each layer is a square 1024 canvas with no tile, mask or shadow of its own, and the system draws those.
 
 - **Three groups**, one layer each, an SVG of one filled shape: `front`, `middle` and `back`. Each dot behind is a crescent: its circle with the dot in front of it, grown by a ring of ground, already cut out. No group has glass, specular light, shadow or translucency, so the drawing stays flat.
-- **In light**, a dark tile (`#26262A` to `#0C0C0E`) under an orange front dot (`#FF9F0A`), then `#E9E9EE` and `#8B8E98`.
-- **In dark**, a darker tile (`#1C1C20` to `#050506`) under the same orange, then `#C9CAD1` and `#6D707A`.
+- **In light**, a flat full-bleed tile (`#222226`) under an orange front dot (`#FF9F0A`), then `#E9E9EE` and `#8B8E98`.
+- **In dark**, a darker flat tile (`#141416`) under the same orange, then `#C9CAD1` and `#6D707A`.
+- **The placement** is the owner's "V1 · Recadré" of 2026-11-28 on the 1024 canvas, `[cx, cy, r]`: front `[422.4, 575.3, 207.5]`, middle `[628, 466, 145.2]`, back `[714, 328.3, 101.1]`, and a ring of 22.2 around the dot in front of each crescent.
 - **In clear and tinted**, the dots are white, `#E2E3E8` and `#B9BBC4`, and the system turns them to clear or tinted glass over its own ground.
 
 `icon.json` is edited by hand or in Icon Composer (inside Xcode); `fill` and `fill-specializations` exclude each other, so every colour is a specialization list whose entry with no `appearance` is the default.
