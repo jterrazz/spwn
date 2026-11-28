@@ -34,8 +34,7 @@ rules (network, filesystem, tools), and each agent keeps its Mind
 		if err := runMigrations(); err != nil {
 			return err
 		}
-		discoverProject()
-		return nil
+		return discoverProject()
 	},
 }
 
