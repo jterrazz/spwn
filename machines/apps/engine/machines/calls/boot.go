@@ -188,7 +188,9 @@ func (s *Machinist) applyBoot(ctx context.Context, name string, t model.Template
 // whose station, its image's, reads neither LeaveAsking nor Within is
 // refused before the call reaches it (machinefile.apply's abilities), and
 // Unapplied names its image's rebuild. A
-// package the image already holds is kept, and is neither.
+// package the image already holds is kept, and is neither. A `spwn`
+// skill the guest could not write is kept in SkillFailed, counted
+// nowhere.
 func (s *Machinist) applyAll(ctx context.Context, vm, file string, b *model.FirstStart) {
 	if s.o.Apply == nil {
 		return
@@ -213,6 +215,7 @@ func (s *Machinist) applyAll(ctx context.Context, vm, file string, b *model.Firs
 		b.Unapplied = firstLine(err.Error())
 		return
 	}
+	b.SkillFailed = applied.SkillFailed
 	for _, d := range applied.Done {
 		if !d.Line.Acts() {
 			continue

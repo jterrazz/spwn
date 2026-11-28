@@ -278,6 +278,9 @@
             "null"
           ]
         },
+        "SkillFailed": {
+          "type": "string"
+        },
         "Template": {
           "type": "string"
         },

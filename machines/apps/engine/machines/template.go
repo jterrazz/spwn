@@ -38,19 +38,21 @@ type TemplateFile struct {
 // phase (Failed, the first line of why its mounts, the Machinefile's copy
 // or the boot phase's apply did not end well), the packages the apply of
 // the whole file installed or set (Applied) and those it left unfinished,
-// why that apply answered for none (Unapplied), each program
+// why that apply answered for none (Unapplied), why it did not write the
+// machine's `spwn` skill (SkillFailed, absent when it did), each program
 // granted, each sign-in left to the owner, and the image's drift from the
 // Machinefile now, one line a package (hard case 17).
 
 type FirstStart struct {
-	Template   string
-	Failed     string
-	Applied    []FirstStartApp `json:",omitempty"`
-	Unfinished []FirstStartApp `json:",omitempty"`
-	Unapplied  string          `json:",omitempty"`
-	Grants     []FirstStartGrant
-	SignIns    []FirstStartSignIn
-	Drift      []string
+	Template    string
+	Failed      string
+	Applied     []FirstStartApp `json:",omitempty"`
+	Unfinished  []FirstStartApp `json:",omitempty"`
+	Unapplied   string          `json:",omitempty"`
+	SkillFailed string          `json:",omitempty"`
+	Grants      []FirstStartGrant
+	SignIns     []FirstStartSignIn
+	Drift       []string
 }
 
 // value: a package of the Machinefile its first start's apply carried out:

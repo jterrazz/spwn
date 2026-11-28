@@ -343,10 +343,13 @@ type CreatedBoot struct {
 	Applied    []CreatedPackage `json:"applied"`
 	Unfinished []CreatedPackage `json:"unfinished"`
 	// value: why that apply answered for no package; absent when it did.
-	Unapplied string          `json:"unapplied,omitempty"`
-	Grants    []CreatedGrant  `json:"grants"`
-	SignIns   []CreatedSignIn `json:"signins"`
-	Drift     []string        `json:"drift"`
+	Unapplied string `json:"unapplied,omitempty"`
+	// value: why that apply did not write the machine's `spwn` skill;
+	// absent when it did.
+	SkillFailed string          `json:"skill_failed,omitempty"`
+	Grants      []CreatedGrant  `json:"grants"`
+	SignIns     []CreatedSignIn `json:"signins"`
+	Drift       []string        `json:"drift"`
 }
 
 type CreatedPackage struct {
@@ -399,7 +402,7 @@ func CreatedContract(schema string, c model.Created) CreatedJSON {
 	}
 	if b := c.Boot; b != nil {
 		body.Template = b.Template
-		body.Boot = &CreatedBoot{Failed: b.Failed, Applied: createdPackages(b.Applied), Unfinished: createdPackages(b.Unfinished), Unapplied: b.Unapplied, Grants: []CreatedGrant{}, SignIns: []CreatedSignIn{}, Drift: append([]string{}, b.Drift...)}
+		body.Boot = &CreatedBoot{Failed: b.Failed, Applied: createdPackages(b.Applied), Unfinished: createdPackages(b.Unfinished), Unapplied: b.Unapplied, SkillFailed: b.SkillFailed, Grants: []CreatedGrant{}, SignIns: []CreatedSignIn{}, Drift: append([]string{}, b.Drift...)}
 		for _, g := range b.Grants {
 			body.Boot.Grants = append(body.Boot.Grants, CreatedGrant{Program: g.Program, Code: string(g.Code), Subject: g.Subject})
 		}
@@ -459,8 +462,10 @@ func Created(c model.Created, thisMac page.Context, refusal func(model.FirstStar
 // invariant: a first start's boot phase says what it did of its
 // Machinefile and what it left: how many apps its apply installed and
 // settings it set, each package it left with why, then how many are left
-// and the apply that finishes them; a boot phase, a package or a grant
-// that failed is attention, never a failed create, a refused grant in the
+// and the apply that finishes them, then the `spwn` skill when its apply
+// could not write it, counted among none of them; a boot phase, a
+// package, a skill or a grant that failed is attention, never a failed
+// create, a refused grant in the
 // words of its refusal, and the image's drift names each item with the
 // build that carries it.
 func bootRows(vm string, b *model.FirstStart, refusal func(model.FirstStartGrant) string) []page.Row {
@@ -492,6 +497,9 @@ func bootRows(vm string, b *model.FirstStart, refusal func(model.FirstStartGrant
 		rows = append(rows, attention("unapplied", b.Template, "not applied: "+b.Unapplied), attention("finish", "Apps to finish", finish))
 	case len(b.Unfinished) > 0:
 		rows = append(rows, attention("finish", packagesLeft(b.Unfinished)+" to finish", finish))
+	}
+	if b.SkillFailed != "" {
+		rows = append(rows, attention("skill/spwn", "spwn", "skill not written: "+b.SkillFailed))
 	}
 	for _, g := range b.Grants {
 		if g.Code != "" {

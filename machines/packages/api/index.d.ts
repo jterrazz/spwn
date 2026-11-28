@@ -2486,6 +2486,7 @@ export type MachinesFirstStart = {
     Failed: string;
     Grants: MachinesFirstStartGrant[] | null;
     SignIns: MachinesFirstStartSignIn[] | null;
+    SkillFailed?: string;
     Template: string;
     Unapplied?: string;
     Unfinished?: MachinesFirstStartApp[];
