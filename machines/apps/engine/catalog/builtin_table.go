@@ -2888,6 +2888,25 @@ func builtinCatalog() (Catalog, error) {
 						"~/.agent-browser/browsers"},
 					NoErase: "the browsers are the app: station apps remove agent-browser"}},
 			{
+				Name:        "agent-desktop",
+				Kind:        "app",
+				AppKind:     "app",
+				Description: "Desktop automation CLI for AI agents, which needs the macOS Accessibility approval that Machines names and never grants",
+				Category:    "AI Tooling",
+				Installs: []LivesOn{
+					{
+						Kinds: []MachineKind{
+							"mac"},
+						Install: BrewInstall{
+							Formula: "agent-desktop"}},
+					{
+						Kinds: []MachineKind{
+							"macos"},
+						Install: BrewInstall{
+							Formula: "agent-desktop"}}},
+				Provides: []string{
+					"agent-desktop"}},
+			{
 				Name:        "browser-use",
 				Kind:        "app",
 				AppKind:     "app",
@@ -7579,6 +7598,22 @@ func builtinCatalog() (Catalog, error) {
 						NoErase: "the browsers are the app: station apps remove agent-browser"}},
 				Folder: "ai-tooling",
 				File:   "packages/ai-tooling/agent-browser.yaml",
+				Origin: "built-in"},
+			{
+				Package: Package{
+					Package:     "station.package/v1",
+					Kind:        "app",
+					Name:        "agent-desktop",
+					Description: "Desktop automation CLI for AI agents, which needs the macOS Accessibility approval that Machines names and never grants",
+					Provides: []string{
+						"agent-desktop"},
+					Methods: []MethodSpec{
+						{
+							Selector: Selector{
+								OS: "macos"},
+							Brew: "agent-desktop"}}},
+				Folder: "ai-tooling",
+				File:   "packages/ai-tooling/agent-desktop.yaml",
 				Origin: "built-in"},
 			{
 				Package: Package{

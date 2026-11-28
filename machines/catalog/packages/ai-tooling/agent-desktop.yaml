@@ -1,0 +1,8 @@
+package: station.package/v1
+kind: app
+name: agent-desktop
+description: Desktop automation CLI for AI agents, which needs the macOS Accessibility approval that Machines names and never grants
+provides: [agent-desktop]
+methods:
+    - os: macos
+      brew: agent-desktop

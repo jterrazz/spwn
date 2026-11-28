@@ -130,6 +130,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 ### AI Tooling
 
 - **agent-browser**: Browser automation CLI for AI agents
+- **agent-desktop**: Desktop automation CLI for AI agents, which needs the macOS Accessibility approval that Machines names and never grants
 - **browser-use**: AI agent library for browser automation
 - **inferrs**: TurboQuant LLM inference server
 - **markitdown**: Convert files to Markdown for LLMs
