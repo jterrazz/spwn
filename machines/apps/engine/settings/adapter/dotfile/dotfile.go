@@ -105,9 +105,9 @@ type seen struct {
 	there, same bool
 	// value: the file and pointer of each value of the owner's the
 	// fragment sets otherwise, kept.
-	kept        []string
-	material    []byte
-	diff        string
+	kept     []string
+	material []byte
+	diff     string
 }
 
 func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Observation, error) {
