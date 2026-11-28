@@ -226,6 +226,13 @@ func (m *merged) drop(prefix string) {
 // a cycle of extends is refused. The machine it is resolved for, when it
 // names none of them, adds its own changes last: its overlay that
 // overrides the Machinefile asked, which no other machine reads.
+// value: how far a chain may reach: 8 Machinefiles deep, itself counted,
+// and 32 in all, its overlays not counted.
+const (
+	ChainDepth = 8
+	ChainFiles = 32
+)
+
 func (l Library) chain(name, machine string) ([]Placed, error) {
 	var out []Placed
 	seen := map[string]bool{}
@@ -239,6 +246,9 @@ func (l Library) chain(name, machine string) ([]Placed, error) {
 			return &NotFoundError{Name: name, By: by}
 		}
 		stack = append(stack, name)
+		if len(stack) > ChainDepth {
+			return &ChainTooLongError{Path: slices.Clone(stack), Deep: true}
+		}
 		for _, e := range p.File.Extends {
 			if err := walk(e, name, stack); err != nil {
 				return err
@@ -246,6 +256,9 @@ func (l Library) chain(name, machine string) ([]Placed, error) {
 		}
 		if seen[name] {
 			return nil
+		}
+		if len(seen) == ChainFiles {
+			return &ChainTooLongError{Path: []string{stack[0]}}
 		}
 		seen[name] = true
 		out = append(out, p)

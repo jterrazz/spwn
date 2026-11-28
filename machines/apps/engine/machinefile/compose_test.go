@@ -3,6 +3,7 @@ package machinefile_test
 import (
 	"errors"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -216,6 +217,60 @@ func TestAnOverlayIsTheWordOfTheFileItChanges(t *testing.T) {
 	user["machinefiles/a.local.yaml"] = "machinefile: station.machinefile/v1\noverrides: a\napps: { remove: [fd] }\n"
 	if _, err := machinefile.Resolve(library(t, user, nil), "top", machinefile.Machine{}, machinefile.Lock{}); !errors.As(err, &conflict) || conflict.First.At() != "~/.config/station/machinefiles/a.local.yaml" {
 		t.Errorf("a's overlay removing what b lists: %v, want refused at the overlay, which names no line", err)
+	}
+}
+
+func TestAChainIsAtMostEightDeepAndThirtyTwoFiles(t *testing.T) {
+	top := machine("top", "{ os: ubuntu }", "[]")
+	deep := func(n int) map[string]string {
+		named := map[string]string{"top": top + "extends: [k1]\n"}
+		for i := 1; i < n; i++ {
+			named["k"+strconv.Itoa(i)] = kit("k"+strconv.Itoa(i), "extends: [k"+strconv.Itoa(i+1)+"]\n")
+		}
+		named["k"+strconv.Itoa(n)] = kit("k"+strconv.Itoa(n), "")
+		return named
+	}
+	wide := func(n int) map[string]string {
+		named := map[string]string{}
+		var kits []string
+		for i := 1; i <= n; i++ {
+			named["k"+strconv.Itoa(i)] = kit("k"+strconv.Itoa(i), "")
+			kits = append(kits, "k"+strconv.Itoa(i))
+		}
+		named["top"] = top + "extends: [" + strings.Join(kits, ", ") + "]\n"
+		return named
+	}
+	for _, tc := range []struct {
+		how   string
+		files map[string]string
+		want  string
+	}{
+		{"eight deep, itself counted", deep(7), ""},
+		{"nine deep", deep(8), "top's chain is more than 8 Machinefiles deep: top extends k1 extends k2 extends k3 extends k4 extends k5 extends k6 extends k7 extends k8"},
+		{"thirty-two files", wide(31), ""},
+		{"thirty-three files", wide(32), "top's chain reads more than 32 Machinefiles"},
+		{"a diamond's file counts once", func() map[string]string {
+			named := wide(31)
+			named["k1"] = kit("k1", "extends: [k2]\n")
+			return named
+		}(), ""},
+	} {
+		t.Run(tc.how, func(t *testing.T) {
+			_, err := machinefile.Resolve(library(t, files(tc.files), nil), "top", machinefile.Machine{}, machinefile.Lock{})
+			var tooLong *machinefile.ChainTooLongError
+			if tc.want == "" && err != nil {
+				t.Fatal(err)
+			}
+			if tc.want != "" && (!errors.As(err, &tooLong) || err.Error() != tc.want) {
+				t.Fatalf("resolve: %v, want %s", err, tc.want)
+			}
+		})
+	}
+	named := wide(31)
+	user := files(named)
+	user["machinefiles/k1.local.yaml"] = "machinefile: station.machinefile/v1\noverrides: k1\n"
+	if _, err := machinefile.Resolve(library(t, user, nil), "top", machinefile.Machine{}, machinefile.Lock{}); err != nil {
+		t.Errorf("thirty-two files and an overlay: %v, want an overlay not counted", err)
 	}
 }
 

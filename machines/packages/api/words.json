@@ -901,6 +901,11 @@
       "Detail": "machinefile",
       "Tone": "plain"
     },
+    "machinefile.chain-too-long": {
+      "Word": "chain too long",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
     "machinefile.cycle": {
       "Word": "cycle",
       "Detail": "machinefile",

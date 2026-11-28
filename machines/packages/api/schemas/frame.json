@@ -402,6 +402,7 @@
             "machinefile.bad-phase",
             "machinefile.bad-value",
             "machinefile.busy",
+            "machinefile.chain-too-long",
             "machinefile.cycle",
             "machinefile.invalid",
             "machinefile.mixin",

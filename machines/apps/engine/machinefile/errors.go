@@ -35,6 +35,24 @@ func (e *MixinError) Error() string {
 	return e.Name + " is a mixin (it says no machine): it is extended, never applied"
 }
 
+// value: a chain past one of its bounds: too deep, Path the files from the
+// one resolved to the first past ChainDepth; or too many, Path the one
+// resolved alone.
+
+type ChainTooLongError struct {
+	Path []string
+	Deep bool
+}
+
+func (e *ChainTooLongError) Error() string { return e.Path[0] + "'s chain " + e.Said() }
+
+func (e *ChainTooLongError) Said() string {
+	if e.Deep {
+		return "is more than " + strconv.Itoa(ChainDepth) + " Machinefiles deep: " + strings.Join(e.Path, " extends ")
+	}
+	return "reads more than " + strconv.Itoa(ChainFiles) + " Machinefiles"
+}
+
 // value: a Machinefile that says something, at its file and line (none
 // for a name it removes).
 

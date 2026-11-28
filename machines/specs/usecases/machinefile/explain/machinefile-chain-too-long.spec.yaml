@@ -1,0 +1,68 @@
+description: 'a chain more than 8 Machinefiles deep is refused along its path, and resolves once cut'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/layer-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: layer-1
+          extends: [layer-2]
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/layer-2.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: layer-2
+          extends: [layer-3]
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/layer-3.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: layer-3
+          extends: [layer-4]
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/layer-4.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: layer-4
+          extends: [layer-5]
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/layer-5.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: layer-5
+          extends: [layer-6]
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/layer-6.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: layer-6
+          extends: [layer-7]
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/layer-7.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: layer-7
+          extends: [layer-8]
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/layer-8.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: layer-8
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          extends: [layer-1]
+      exit: 0
+    - command: 'machinefile explain'
+      exit: 2
+      stderr: |
+          Error: linux-1's chain is more than 8 Machinefiles deep: linux-1 extends layer-1 extends layer-2 extends layer-3 extends layer-4 extends layer-5 extends layer-6 extends layer-7 extends layer-8
+          Hint: a chain is at most 8 Machinefiles deep and 32 in all: extend fewer
+    - command: 'world edit linux-1 machinefiles/layer-7.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: layer-7
+      exit: 0
+    - command: 'machinefile explain >/dev/null'
+      exit: 0

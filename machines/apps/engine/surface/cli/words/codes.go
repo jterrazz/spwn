@@ -282,6 +282,9 @@ func Codes() map[fail.Code]Wording {
 		machinefilecalls.SiblingsDiffer: func(e *fail.Error) (string, string) {
 			return e.Detail["kind"] + " " + e.Subject + " is given two ways, by " + e.Detail["first"] + " (" + e.Detail["first_at"] + ") and " + e.Detail["second"] + " (" + e.Detail["second_at"] + "), neither extending the other", "say " + e.Subject + " in " + e.Detail["top"] + ", which extends both"
 		},
+		machinefilecalls.ChainTooLong: func(e *fail.Error) (string, string) {
+			return e.Subject + "'s chain " + e.Detail["said"], "a chain is at most " + strconv.Itoa(machinefile.ChainDepth) + " Machinefiles deep and " + strconv.Itoa(machinefile.ChainFiles) + " in all: extend fewer"
+		},
 		machinefilecalls.NoMethod: func(e *fail.Error) (string, string) {
 			by := ""
 			if m := e.Detail["manager"]; m != "" {
