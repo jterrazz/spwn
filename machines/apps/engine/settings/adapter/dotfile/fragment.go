@@ -24,7 +24,7 @@ func (a *Applier) ours(from, refusal string) ([]byte, error) {
 	if info.Size() > maxFragment {
 		return nil, fmt.Errorf("the fragment %s is past 256 KiB: %s", from, refusal)
 	}
-	data, err := fs.ReadFile(a.o.Ours, from)
+	data, err := atMost(a.o.Ours.Open, from, maxFragment)
 	if err == nil && len(data) > maxFragment {
 		return nil, fmt.Errorf("the fragment %s is past 256 KiB: %s", from, refusal)
 	}
@@ -52,8 +52,13 @@ func (a *Applier) fragment(c catalog.Copy) (*node, error) {
 // read whole as strict JSON, or past the bound, is refused and never
 // rewritten.
 func parseTarget(to string, data []byte) (*node, error) {
-	if len(data) > maxTarget {
+	switch {
+	case len(data) > maxTarget:
 		return nil, fmt.Errorf("%s is past 1 MiB: Machines merges into no file that large", to)
+	case len(bytes.TrimSpace(data)) == 0:
+		return nil, fmt.Errorf("%s is empty: Machines merges only into a JSON object; write {} in it, or delete it, and apply again", to)
+	case bytes.HasPrefix(data, []byte{0xEF, 0xBB, 0xBF}):
+		return nil, fmt.Errorf("%s starts with a byte order mark, which strict JSON has not: Machines writes nothing into it", to)
 	}
 	if _, err := layoutOf(to, data); err != nil {
 		return nil, err
@@ -158,13 +163,16 @@ func (a *Applier) applyMerge(r *record, setting string, c catalog.Copy) ([]setti
 		return nil, err
 	}
 	step := settings.ChangeStep{Label: c.To, State: catalog.StateOK, Detail: "as Machines wrote it: nothing written"}
+	w.Values = m.now
+	if err := a.fits(r, w); err != nil {
+		return nil, err
+	}
 	if !there || !bytes.Equal(out, data) {
-		if err := a.land(&w, at, out, seenAs(data, there)); err != nil {
+		if err := a.land(r, &w, at, out, seenAs(data, there)); err != nil {
 			return nil, err
 		}
 		step.Detail = "merged"
 	}
-	w.Values = m.now
 	if len(w.Values) > 0 || w.Made {
 		r.put(w)
 	} else {
@@ -194,7 +202,7 @@ func (a *Applier) undoMerge(r *record, setting string, c catalog.Copy) ([]settin
 	step := settings.ChangeStep{Label: c.To, State: catalog.StateOK, Detail: "taken back"}
 	switch out := encoded(tree, data, true); {
 	case w.Made && len(tree.keys) == 0 && a.direct(c.To):
-		if err := a.unmake(w, at); err != nil {
+		if err := a.unmake(w, at, data); err != nil {
 			return nil, err
 		}
 		step.Detail = "removed"
@@ -307,16 +315,25 @@ func (a *Applier) applyBlock(r *record, setting string, c catalog.Copy) ([]setti
 		return nil, fmt.Errorf("%s holds the block %s damaged (a start with no end, or the id twice): left as it is; delete it and apply again", c.To, id)
 	}
 	label := c.To + " [" + id + "]"
-	w, _ := r.of(setting, c.To)
+	w, held := r.of(setting, c.To)
 	after, changed := settings.UpsertPackageBlock(text, id, body)
 	step := settings.ChangeStep{Label: label, State: catalog.StateOK, Detail: "as Machines wrote it: nothing written"}
+	// invariant: a block already as Machines writes it, with no record,
+	// is the owner's: apply records nothing, as a merge never adopts an
+	// equal value, so off leaves it.
+	if !changed && held < 0 {
+		return []settings.ChangeStep{step}, nil
+	}
+	w.Block = textDigest(body)
+	if err := a.fits(r, w); err != nil {
+		return nil, err
+	}
 	if changed {
-		if err := a.land(&w, at, []byte(after), seenAs(data, there)); err != nil {
+		if err := a.land(r, &w, at, []byte(after), seenAs(data, there)); err != nil {
 			return nil, err
 		}
 		step.Detail = "written"
 	}
-	w.Block = textDigest(body)
 	r.put(w)
 	return []settings.ChangeStep{step}, nil
 }
@@ -351,7 +368,7 @@ func (a *Applier) undoBlock(r *record, setting string, c catalog.Copy) ([]settin
 	after, _ := textblock.Remove(text, id)
 	step := settings.ChangeStep{Label: label, State: catalog.StateOK, Detail: "removed"}
 	if w.Made && after == "" && a.direct(c.To) {
-		err = a.unmake(w, at)
+		err = a.unmake(w, at, data)
 	} else {
 		err = a.files.Swap(at, seenAs(data, true), []byte(after), 0o600)
 	}

@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"path"
 	"slices"
@@ -20,6 +21,8 @@ import (
 )
 
 type Files interface {
+	// value: the file opened to be read, so a read stops at its bound.
+	Open(path string) (fs.File, error)
 	ReadFile(path string) ([]byte, error)
 	WriteFile(path string, data []byte, perm fs.FileMode) error
 	// value: the file replaced whole, at once, with its own mode and
@@ -49,6 +52,9 @@ type Options struct {
 	Ours fs.FS
 	// value: the record of what each fragment wrote, beside the ledger.
 	Record string
+	// value: station's own folders on this run, absolute, where its XDG
+	// variables put them; no setting writes in one.
+	Own []string
 }
 
 type Applier struct {
@@ -63,20 +69,32 @@ func New(files Files, run Runner, o Options) *Applier { return &Applier{files: f
 
 func (*Applier) Kind() catalog.EffectKind { return catalog.EffectDotfile }
 
-func of(it catalog.Setting) (catalog.Dotfiles, error) {
+func (a *Applier) of(it catalog.Setting) (catalog.Dotfiles, error) {
 	d, ok := it.Effect.(catalog.Dotfiles)
 	if !ok || len(d.Files) == 0 {
 		return catalog.Dotfiles{}, errors.New(it.Name + " is not files Machines writes")
 	}
 	// invariant: decode confines every file, and so does each call here
 	// again, so a setting built past decode still writes nothing out of
-	// the home or into station's own.
+	// the home or into station's own, where this run's XDG variables put
+	// it too.
 	for _, c := range d.Files {
 		if problem := catalog.Confined(c.To, d.Mode); problem != "" {
 			return catalog.Dotfiles{}, errors.New(it.Name + ": " + problem)
 		}
+		for _, own := range a.o.Own {
+			if within(expand(a.o.Home, c.To), own) {
+				return catalog.Dotfiles{}, fmt.Errorf("%s: file %s is in %s, station's own: no setting writes there", it.Name, c.To, own)
+			}
+		}
 	}
 	return d, nil
+}
+
+// value: whether p is root or in it, without case, as a macOS volume
+// opens names.
+func within(p, root string) bool {
+	return root != "" && (strings.EqualFold(p, root) || len(p) > len(root) && strings.EqualFold(p[:len(root)+1], root+"/"))
 }
 
 // value: what one file of a setting holds of it now: there at all, exactly
@@ -96,7 +114,7 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 	// setting otherwise as station last wrote it reads as station's to write.
 	// A fragment's covers only what it writes there: the owner's other keys
 	// and lines never move it.
-	d, err := of(it)
+	d, err := a.of(it)
 	if err != nil {
 		return settings.Observation{}, err
 	}
@@ -164,7 +182,7 @@ func (a *Applier) see(setting string, mode catalog.WriteMode, c catalog.Copy, r 
 }
 
 func (a *Applier) Apply(ctx context.Context, it catalog.Setting, _ map[string]string) (settings.Change, error) {
-	d, err := of(it)
+	d, err := a.of(it)
 	if err != nil {
 		return settings.Change{}, err
 	}
@@ -228,7 +246,7 @@ func (a *Applier) Undo(ctx context.Context, it catalog.Setting) (settings.Change
 	// invariant: Undo removes a file only while it is still exactly station's,
 	// and from a file of the owner's only the fragment station wrote and he
 	// left as it is: off never destroys a change of the owner's.
-	d, err := of(it)
+	d, err := a.of(it)
 	if err != nil {
 		return settings.Change{}, err
 	}
@@ -353,8 +371,11 @@ func (a *Applier) real(p string) (string, error) {
 // when it is not there yet.
 func (a *Applier) target(to string, mode catalog.WriteMode) (at string, data []byte, there bool, err error) {
 	// invariant: a fragment lands in the file its links really name, and
-	// only inside the real home and out of what Confined keeps it from:
-	// a link out of either is refused, never followed.
+	// only inside the real home and out of what Confined keeps it from and
+	// station's own folders of this run, each compared by its own real
+	// path: a link out of the home, or to a kept file or folder, or a kept
+	// folder that is itself a link to the one named, is refused, never
+	// followed.
 	home, err := a.real(a.o.Home)
 	if err != nil {
 		return "", nil, false, err
@@ -369,26 +390,53 @@ func (a *Applier) target(to string, mode catalog.WriteMode) (at string, data []b
 	case catalog.Confined("~/"+rest, mode) != "":
 		return "", nil, false, fmt.Errorf("%s leads through its links to ~/%s: %s", to, rest, catalog.Confined("~/"+rest, mode))
 	}
+	for _, k := range append(catalog.Kept(mode), a.o.Own...) {
+		// invariant: a kept path whose links name nothing keeps its name.
+		really, unreal := a.real(expand(a.o.Home, k))
+		if unreal != nil {
+			really = expand(a.o.Home, k)
+		}
+		if within(at, really) {
+			return "", nil, false, fmt.Errorf("%s is really %s, in %s: Machines writes no fragment there", to, at, k)
+		}
+	}
 	info, err := a.files.Stat(at)
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
 		return at, nil, false, nil
 	case err != nil:
 		return "", nil, false, err
+	case !info.Mode().IsRegular():
+		return "", nil, false, fmt.Errorf("%s is no regular file: Machines writes no fragment into it", to)
 	case info.Size() > maxTarget:
 		return "", nil, false, fmt.Errorf("%s is past 1 MiB: Machines writes no fragment into a file that large", to)
 	}
-	data, err = a.files.ReadFile(at)
-	if errors.Is(err, fs.ErrNotExist) {
+	data, err = atMost(a.files.Open, at, maxTarget)
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
 		return at, nil, false, nil
+	case err == nil && len(data) > maxTarget:
+		return "", nil, false, fmt.Errorf("%s is past 1 MiB: Machines writes no fragment into a file that large", to)
 	}
 	return at, data, err == nil, err
+}
+
+// invariant: a file measured before its read is read through a reader
+// that stops one byte past its bound, so one grown since is refused
+// without being read whole.
+func atMost(open func(string) (fs.File, error), name string, bound int) ([]byte, error) {
+	f, err := open(name)
+	if err != nil {
+		return nil, err
+	}
+	data, err := io.ReadAll(io.LimitReader(f, int64(bound)+1))
+	return data, errors.Join(err, f.Close())
 }
 
 // invariant: a file a fragment makes is the owner's from then on: made
 // 0600 with the folders it lacks, which are recorded with it, so off takes
 // them back only once they are empty.
-func (a *Applier) land(w *written, at string, data []byte, seen local.Seen) error {
+func (a *Applier) land(r *record, w *written, at string, data []byte, seen local.Seen) error {
 	home, err := a.real(a.o.Home)
 	if err != nil {
 		return err
@@ -400,19 +448,47 @@ func (a *Applier) land(w *written, at string, data []byte, seen local.Seen) erro
 		}
 		made = append(made, dir)
 	}
+	next := *w
+	next.Made = w.Made || !seen.There
+	next.Folders = slices.Clone(w.Folders)
+	for _, dir := range made {
+		if !slices.Contains(next.Folders, dir) {
+			next.Folders = append(next.Folders, dir)
+		}
+	}
+	// invariant: the record is measured with all the landing adds to it,
+	// the file and the folders made, before anything is made.
+	if err := a.fits(r, next); err != nil {
+		return err
+	}
 	if err := a.files.MkdirAll(path.Dir(at), 0o750); err != nil {
 		return err
 	}
 	if err := a.files.Swap(at, seen, data, 0o600); err != nil {
+		// invariant: a swap that fails once the file has landed (its
+		// folder's sync) leaves it written: it is recorded, so off takes it
+		// back.
+		if !errors.Is(err, local.ErrChanged) && a.holds(at, data) {
+			*w = next
+			r.put(next)
+			return fmt.Errorf("%s is written, and recorded so off takes it back, but its write did not end: %w", at, err)
+		}
+		// invariant: a try that does not land takes back the folders it
+		// made, deepest first, while they are empty, so the next try makes
+		// and records them again.
+		for _, dir := range made {
+			_ = a.files.Remove(dir)
+		}
 		return err
 	}
-	w.Made = w.Made || !seen.There
-	for _, dir := range made {
-		if !slices.Contains(w.Folders, dir) {
-			w.Folders = append(w.Folders, dir)
-		}
-	}
+	*w = next
 	return nil
+}
+
+// value: whether the file at holds exactly data.
+func (a *Applier) holds(at string, data []byte) bool {
+	now, err := atMost(a.files.Open, at, maxTarget)
+	return err == nil && bytes.Equal(now, data)
 }
 
 // value: whether the file a setting names is itself no link, so the record
@@ -424,7 +500,7 @@ func (a *Applier) direct(to string) bool {
 
 // value: a file Machines made, and the folders it made for it, removed
 // once nothing of the owner's is in them.
-func (a *Applier) unmake(w written, at string) error {
+func (a *Applier) unmake(w written, at string, seen []byte) error {
 	// invariant: the record says which folders Machines made, and only one
 	// that holds the file, inside the real home and not the home itself, is
 	// taken at its word: any other the record names is left.
@@ -432,8 +508,20 @@ func (a *Applier) unmake(w written, at string) error {
 	if err != nil {
 		return err
 	}
-	if err := a.files.Remove(at); err != nil && !errors.Is(err, fs.ErrNotExist) {
+	// invariant: the file is read again just before it is removed, and one
+	// that no longer holds what the step read is left (local.ErrChanged), so
+	// swapped judges it again: off never removes another writer's change.
+	now, err := atMost(a.files.Open, at, maxTarget)
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+	case err != nil:
 		return err
+	case !bytes.Equal(now, seen):
+		return local.ErrChanged
+	default:
+		if err := a.files.Remove(at); err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
 	}
 	for _, dir := range w.Folders {
 		if !strings.HasPrefix(at, dir+"/") || !strings.HasPrefix(dir, home+"/") {

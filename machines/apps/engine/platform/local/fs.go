@@ -56,14 +56,14 @@ func (d disk) Append(path string, data []byte, perm fs.FileMode) error {
 }
 
 func (d disk) Replace(path string, data []byte, perm fs.FileMode) error {
-	if err := (durable{sync: (*os.File).Sync}).replace(path, data, perm); err != nil {
+	if err := (durable{sync: (*os.File).Sync, link: os.Link}).replace(path, data, perm); err != nil {
 		return err
 	}
 	return d.owner.give(path)
 }
 
 func (d disk) Swap(path string, seen Seen, data []byte, perm fs.FileMode) error {
-	if err := (durable{sync: (*os.File).Sync}).swap(path, seen, data, perm); err != nil {
+	if err := (durable{sync: (*os.File).Sync, link: os.Link}).swap(path, seen, data, perm); err != nil {
 		return err
 	}
 	return d.owner.give(path)

@@ -8,14 +8,25 @@ import (
 )
 
 // value: the folders and files of the home a setting's `file` method never writes:
-// station's own state and configuration in every mode; in mode merge or
-// block also the files another part of Machines writes, `~/.zshrc` (the
-// main block and the packages' shell blocks) and `~/.ssh` (the authorized
-// keys and their folder).
+// station's own state and configuration and the bare engine's launchd
+// agent in every mode; in mode merge or block also the files another part
+// of Machines writes, `~/.zshrc` (the main block and the packages' shell
+// blocks) and `~/.ssh` (the authorized keys and their folder). Where a
+// run's XDG variables move station's folders, its applier refuses those
+// too.
 var (
-	stationsOwn = []string{"~/.local/state/station", "~/.config/station"}
+	stationsOwn = []string{"~/.local/state/station", "~/.config/station", EnginePlist("~")}
 	othersOwn   = []string{"~/.zshrc", "~/.ssh"}
 )
+
+func Kept(mode WriteMode) []string {
+	// value: the folders and files of the home Confined keeps a setting in
+	// mode from, each as it names them under `~/`.
+	if mode == WriteBlock || mode == WriteMerge {
+		return append(slices.Clone(stationsOwn), othersOwn...)
+	}
+	return slices.Clone(stationsOwn)
+}
 
 func Confined(to string, mode WriteMode) string {
 	// invariant: why a setting may not write the file `to` in mode, empty

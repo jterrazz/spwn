@@ -4,7 +4,10 @@ import (
 	"errors"
 	"os"
 	"slices"
+	"strings"
+	"syscall"
 	"testing"
+	"time"
 )
 
 func TestASwapLandsWhileTheFileHoldsWhatWasSeen(t *testing.T) {
@@ -60,6 +63,75 @@ func TestASwapReadsTheFileAgainJustBeforeItsRename(t *testing.T) {
 	}
 }
 
+func TestASwapOfAFileSeenNotThereLandsOnlyWhereNoNameIsThere(t *testing.T) {
+	dir, at := oldFile(t)
+	if err := os.Remove(at); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("gone", at); err != nil {
+		t.Fatal(err)
+	}
+	if err := (disk{}).Swap(at, Seen{}, []byte("new\n"), 0o600); !errors.Is(err, ErrChanged) {
+		t.Errorf("Swap = %v, want ErrChanged for a name made there since, which a read finds nothing behind", err)
+	}
+	if to, err := os.Readlink(at); err != nil || to != "gone" {
+		t.Errorf("the name there is now %q, %v; want the other writer's link", to, err)
+	}
+	if left := names(t, dir); !slices.Equal(left, []string{".zshrc"}) {
+		t.Errorf("left %v beside the file", left)
+	}
+	if err := os.Remove(at); err != nil {
+		t.Fatal(err)
+	}
+	if err := (disk{}).Swap(at, Seen{}, []byte("new\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Lstat(at)
+	if data, _ := os.ReadFile(at); err != nil || string(data) != "new\n" || info.Mode().Perm() != 0o600 || !info.Mode().IsRegular() {
+		t.Errorf("made %q, %v, %v; want the new file, 0600", data, info, err)
+	}
+	if left := names(t, dir); !slices.Equal(left, []string{".zshrc"}) {
+		t.Errorf("left %v beside the file", left)
+	}
+}
+
+func TestASwapReadsTheFileAgainNoFurtherThanWhatWasSeen(t *testing.T) {
+	_, at := oldFile(t)
+	if err := os.Remove(at); err != nil {
+		t.Fatal(err)
+	}
+	if err := syscall.Mkfifo(at, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	endless := make(chan *os.File, 1)
+	go func() {
+		w, err := os.OpenFile(at, os.O_WRONLY, 0)
+		endless <- w
+		for i := 0; err == nil && i < 16<<10; i++ {
+			_, err = w.WriteString(strings.Repeat("x", 4096))
+		}
+	}()
+	done := make(chan error, 1)
+	go func() { done <- unchanged(at, Seen{Data: []byte("old\n"), There: true}) }()
+	closeWriter := func() {
+		if w := <-endless; w != nil {
+			_ = w.Close()
+		}
+	}
+	var err error
+	select {
+	case err = <-done:
+		closeWriter()
+	case <-time.After(5 * time.Second):
+		t.Error("the file was read on past what was seen")
+		closeWriter()
+		err = <-done
+	}
+	if !errors.Is(err, ErrChanged) {
+		t.Errorf("unchanged = %v, want ErrChanged", err)
+	}
+}
+
 func TestASwapInAFolderStationMayNotWriteInRefusesAndNeverOverwrites(t *testing.T) {
 	if os.Geteuid() == 0 {
 		t.Skip("root writes in any folder")
@@ -74,5 +146,26 @@ func TestASwapInAFolderStationMayNotWriteInRefusesAndNeverOverwrites(t *testing.
 	}
 	if data, _ := os.ReadFile(at); string(data) != "old\n" {
 		t.Errorf("the file holds %q, want it untouched", data)
+	}
+}
+
+func TestASwapOfANewFileOnAVolumeWithoutHardLinksIsRefusedInItsOwnWords(t *testing.T) {
+	for name, refusal := range map[string]error{"EPERM": syscall.EPERM, "ENOTSUP": syscall.ENOTSUP} {
+		t.Run(name, func(t *testing.T) {
+			dir, at := oldFile(t)
+			if err := os.Remove(at); err != nil {
+				t.Fatal(err)
+			}
+			d := durable{sync: (*os.File).Sync, link: func(from, to string) error {
+				return &os.LinkError{Op: "link", Old: from, New: to, Err: refusal}
+			}}
+			err := d.swap(at, Seen{}, []byte("new\n"), 0o600)
+			if err == nil || !strings.Contains(err.Error(), "this volume refuses hard links: Machines makes a file only where it can") || !errors.Is(err, refusal) {
+				t.Errorf("swap = %v; want the volume's refusal said", err)
+			}
+			if left := names(t, dir); len(left) != 0 {
+				t.Errorf("left %v; want nothing written", left)
+			}
+		})
 	}
 }

@@ -97,7 +97,7 @@ func (a *Applier) read() (record, error) {
 	if info.Size() > maxRecord {
 		return record{}, a.untrusted(errors.New("it is past 1 MiB"))
 	}
-	data, err := a.files.ReadFile(a.o.Record)
+	data, err := atMost(a.files.Open, a.o.Record, maxRecord)
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
 		return record{}, nil
@@ -178,6 +178,35 @@ func (e entry) untrusted() string {
 	return ""
 }
 
+// value: the record as save writes it, and whether read would take it
+// back: past maxRecord it would not.
+func (r record) encoded() (data []byte, fits bool, err error) {
+	r.Files = slices.Clone(r.Files)
+	slices.SortFunc(r.Files, func(x, y written) int {
+		return strings.Compare(x.Setting+"\x00"+x.Path, y.Setting+"\x00"+y.Path)
+	})
+	r.V = recordVersion
+	data, err = json.MarshalIndent(r, "", "  ")
+	data = append(data, '\n')
+	return data, len(data) <= maxRecord, err
+}
+
+// invariant: a fragment is written only once the record that would hold
+// it is measured: one past maxRecord, which read would refuse forever,
+// refuses the apply, nothing written.
+func (a *Applier) fits(r *record, w written) error {
+	next := record{Files: slices.Clone(r.Files)}
+	next.put(w)
+	_, fits, err := next.encoded()
+	switch {
+	case err != nil:
+		return err
+	case !fits:
+		return fmt.Errorf("%s would pass 1 MiB with what %s writes into %s: nothing written, since Machines keeps no record it could not read back", a.o.Record, w.Setting, w.Path)
+	}
+	return nil
+}
+
 // invariant: a record with no file left is no record: its file is removed.
 func (a *Applier) save(r record) error {
 	if len(r.Files) == 0 {
@@ -187,18 +216,17 @@ func (a *Applier) save(r record) error {
 		}
 		return err
 	}
-	slices.SortFunc(r.Files, func(x, y written) int {
-		return strings.Compare(x.Setting+"\x00"+x.Path, y.Setting+"\x00"+y.Path)
-	})
-	r.V = recordVersion
-	data, err := json.MarshalIndent(r, "", "  ")
-	if err != nil {
+	data, fits, err := r.encoded()
+	switch {
+	case err != nil:
 		return err
+	case !fits:
+		return &store.UnwritableError{Path: a.o.Record, Cause: errors.New("it would pass 1 MiB")}
 	}
 	if err := a.files.MkdirAll(path.Dir(a.o.Record), 0o700); err != nil {
 		return &store.UnwritableError{Path: a.o.Record, Cause: err}
 	}
-	if err := a.files.Replace(a.o.Record, append(data, '\n'), 0o600); err != nil {
+	if err := a.files.Replace(a.o.Record, data, 0o600); err != nil {
 		return &store.UnwritableError{Path: a.o.Record, Cause: err}
 	}
 	return nil

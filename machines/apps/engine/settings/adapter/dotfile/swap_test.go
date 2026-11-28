@@ -2,11 +2,14 @@ package dotfile_test
 
 import (
 	"context"
+	"errors"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
+	"testing/fstest"
 	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
@@ -86,6 +89,79 @@ func TestAFileAnotherWriterKeepsChangingIsRefusedAfterThreeTries(t *testing.T) {
 				t.Error("a record was written for a fragment never written")
 			}
 		})
+	}
+}
+
+// value: the bench's disk with another writer that writes the file once,
+// right after Machines read it.
+type writerAfterRead struct {
+	disk
+	file, theirs string
+	wrote        *bool
+}
+
+func (w writerAfterRead) Open(p string) (fs.File, error) {
+	if p != w.file || *w.wrote {
+		return w.disk.Open(p)
+	}
+	data, err := os.ReadFile(p)
+	if err != nil {
+		return nil, err
+	}
+	*w.wrote = true
+	if werr := os.WriteFile(p, []byte(w.theirs), 0o600); werr != nil {
+		return nil, werr
+	}
+	return fstest.MapFS{"read": {Data: data}}.Open("read")
+}
+
+func TestOffNeverRemovesAFileItMadeThatAnotherWriterChangedAfterItsRead(t *testing.T) {
+	for _, mode := range []catalog.WriteMode{catalog.WriteMerge, catalog.WriteBlock} {
+		t.Run(string(mode), func(t *testing.T) {
+			frag, to, theirs, want := `{"a": 1}`, ".x.json", "{\n  \"a\": 1,\n  \"editor\": 1\n}\n", "{\n  \"editor\": 1\n}\n"
+			if mode == catalog.WriteBlock {
+				frag, to = "set a 1\n", ".x.conf"
+				theirs = "# >>> station setting:fmt >>>\nset a 1\n# <<< station setting:fmt <<<\nset editor 1\n"
+				want = "set editor 1\n"
+			}
+			b := newBench(t, mode, frag, to)
+			b.apply()
+			wrote := false
+			b.over(writerAfterRead{disk: b.files, file: b.file, theirs: theirs, wrote: &wrote}, b.ours)
+			b.off()
+			if got := b.read(); !wrote || got != want {
+				t.Errorf("off left %q; want the other writer's key, with nothing of Machines' left in it, %q", got, want)
+			}
+		})
+	}
+}
+
+// value: the bench's disk where the first swap finds the file changed,
+// and writes nothing.
+type changedOnce struct {
+	disk
+	tried *bool
+}
+
+func (c changedOnce) Swap(p string, seen local.Seen, data []byte, perm fs.FileMode) error {
+	if !*c.tried {
+		*c.tried = true
+		return local.ErrChanged
+	}
+	return c.disk.Swap(p, seen, data, perm)
+}
+
+func TestTheFoldersATryThatDidNotLandMadeAreTakenBackByOff(t *testing.T) {
+	b := newBench(t, catalog.WriteMerge, `{"a": 1}`, ".config/new/deep/x.json")
+	if err := os.MkdirAll(filepath.Join(b.home, ".config"), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	tried := false
+	b.over(changedOnce{disk: b.files, tried: &tried}, b.ours)
+	b.apply()
+	b.off()
+	if _, err := b.files.Stat(filepath.Join(b.home, ".config", "new")); !tried || !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("a folder Machines made on a try that did not land stayed after off: %v", err)
 	}
 }
 

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -32,6 +33,11 @@ func (c counted) ReadFile(p string) ([]byte, error) {
 	return c.disk.ReadFile(p)
 }
 
+func (c counted) Open(p string) (fs.File, error) {
+	c.reads[p]++
+	return c.disk.Open(p)
+}
+
 // value: embedded fragments, counting each read whole.
 type countedFS struct {
 	fstest.MapFS
@@ -41,6 +47,11 @@ type countedFS struct {
 func (c countedFS) ReadFile(name string) ([]byte, error) {
 	c.reads[name]++
 	return c.MapFS.ReadFile(name)
+}
+
+func (c countedFS) Open(name string) (fs.File, error) {
+	c.reads[name]++
+	return c.MapFS.Open(name)
 }
 
 // value: the record as JSON, edited by hand, then written back.
@@ -148,6 +159,94 @@ func TestAMadeFileTheRecordClaimsThroughALinkIsNeverRemoved(t *testing.T) {
 	}
 	if to, err := b.files.Readlink(b.file); err != nil || to != "dotfiles/x.json" {
 		t.Errorf("the link is now %q, %v", to, err)
+	}
+}
+
+// value: the bench's disk where one file grew past its bound once
+// measured: its Stat says 2 bytes, and every byte read of it is counted.
+type grown struct {
+	disk
+	file string
+	read *int
+}
+
+type twoBytes struct{ fs.FileInfo }
+
+func (twoBytes) Size() int64 { return 2 }
+
+func (g grown) Stat(p string) (fs.FileInfo, error) {
+	info, err := g.disk.Stat(p)
+	if p == g.file && err == nil {
+		return twoBytes{info}, nil
+	}
+	return info, err
+}
+
+func (g grown) ReadFile(p string) ([]byte, error) {
+	data, err := g.disk.ReadFile(p)
+	if p == g.file {
+		*g.read += len(data)
+	}
+	return data, err
+}
+
+func (g grown) Open(p string) (fs.File, error) {
+	f, err := g.disk.Open(p)
+	if p != g.file || err != nil {
+		return f, err
+	}
+	return countedFile{File: f, read: g.read}, nil
+}
+
+type countedFile struct {
+	fs.File
+	read *int
+}
+
+func (c countedFile) Read(b []byte) (int, error) {
+	n, err := c.File.Read(b)
+	*c.read += n
+	return n, err
+}
+
+func TestAFileThatGrewPastItsBoundOnceMeasuredIsReadNoFurther(t *testing.T) {
+	for name, record := range map[string]bool{"the file": false, "the record": true} {
+		t.Run(name, func(t *testing.T) {
+			b := newBench(t, catalog.WriteMerge, `{"a": 1}`, ".x.json")
+			big, file := `{"b": "`+strings.Repeat("x", 2<<20)+`"}`, b.file
+			if record {
+				b.put(b.record, big)
+				file = b.record
+			} else {
+				b.write(big, 0o600)
+			}
+			read := 0
+			b.over(grown{disk: b.files, file: file, read: &read}, b.ours)
+			if _, err := b.applier.Apply(t.Context(), b.setting, nil); err == nil || !strings.Contains(err.Error(), "past 1 MiB") {
+				t.Errorf("Apply: %v; want it refused past 1 MiB", err)
+			}
+			if read > 1<<20+1 {
+				t.Errorf("read %d bytes of a file bounded at 1 MiB", read)
+			}
+		})
+	}
+}
+
+func TestAFragmentWhoseRecordWouldPassItsBoundIsRefusedUnwritten(t *testing.T) {
+	elements := make([]string, 8000)
+	for i := range elements {
+		elements[i] = strconv.Itoa(i)
+	}
+	b := newBench(t, catalog.WriteMerge, `{"a": [`+strings.Join(elements, ",")+`]}`, ".x.json")
+	b.write("{}\n", 0o600)
+	if _, err := b.applier.Apply(t.Context(), b.setting, nil); err == nil || !strings.Contains(err.Error(), "merged.json would pass 1 MiB") {
+		t.Errorf("Apply: %v; want the apply refused by the record it would write", err)
+	}
+	if got := b.read(); got != "{}\n" {
+		t.Errorf("the file was written: %d bytes", len(got))
+	}
+	if _, err := b.files.Stat(b.record); !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("a record was written: %v", err)
 	}
 }
 

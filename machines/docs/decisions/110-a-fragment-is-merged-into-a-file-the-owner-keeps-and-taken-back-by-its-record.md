@@ -11,7 +11,7 @@ ADR-052's failure was a hook written into an agent's settings whose command was 
 
 ## Decision
 
-Two modes beside `file`: `block`, the package block's marker scheme in any text file, and `merge`, a JSON fragment merged into a `.json` file.
+Two modes beside `file`: `block`, the package block's marker scheme in a text file whose format reads a `#` line as a comment (an allow-list, below), and `merge`, a JSON fragment merged into a `.json` file.
 
 ### How a merge merges
 
@@ -23,7 +23,7 @@ The tree is held in the file's own order with each key's and scalar's raw bytes,
 
 ### The record is the adapter's own
 
-What a merge wrote (per setting and file: each JSON pointer and the digest of its canonical value, a block's digest, the file and folders Machines made) is kept in `~/.local/state/station/merged.json`, beside the ledger and not in it. The ledger is the Machinefile family's store, and one store has one owner; the authorized-keys record set that precedent. Off removes a value only while its digest is the recorded one, and a container only when it is empty, of the very shape it made (an object, an array) and Machines made it: anything else at that pointer is the owner's.
+What a merge wrote (per setting and file: each JSON pointer and the digest of its canonical value, a block's digest, the file and folders Machines made) is kept in `merged.json` in station's state folder (`~/.local/state/station`, or where `XDG_STATE_HOME` puts it), beside the ledger and not in it. The ledger is the Machinefile family's store, and one store has one owner; the authorized-keys record set that precedent. Off removes a value only while its digest is the recorded one, and a container only when it is empty, of the very shape it made (an object, an array) and Machines made it: anything else at that pointer is the owner's.
 
 ### The guard is `requires`
 
@@ -34,4 +34,6 @@ No new key: the package's existing `requires` is the guard. A setting in either 
 - Deleting `merged.json` makes off take back nothing: Machines' values stay as the owner's.
 - An element of an array the owner edited cannot be told from one he deleted, so off leaves it without a word.
 - A block goes only into a file known to read a `#` line as a comment, by an allow-list of extensions and names held in the catalog's code; a format outside it (Vim's, Lua's) takes no block until the list names it.
+- A file a fragment makes lands by a hard link, so a fragment makes a file only on a volume that takes hard links; on one that refuses them (EPERM, ENOTSUP) the apply is refused in those words, nothing written.
 - The guard checks the app is installed, not that the hook's command is on the PATH of the app that runs it.
+- The next lot, which reads a source's own `files/`, must guarantee: `from` confined inside the source root with no link out (`os.Root`), bounds on mode `file`, the real-path and `othersOwn` checks extended to mode `file`, and consent or a deny-list for code-execution targets.

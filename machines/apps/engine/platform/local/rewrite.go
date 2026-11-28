@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -40,8 +41,12 @@ func Rewrite(files FS, at string, edit func(old []byte) (data []byte, write bool
 
 // value: how a replace pushes a file, then its folder, to the disk itself:
 // (*os.File).Sync, which is fcntl(F_FULLFSYNC) on darwin (Go's
-// internal/poll, fsync where the volume refuses it) and fsync(2) elsewhere.
-type durable struct{ sync func(*os.File) error }
+// internal/poll, fsync where the volume refuses it) and fsync(2) elsewhere;
+// and how a swap lands a file seen not there, os.Link.
+type durable struct {
+	sync func(*os.File) error
+	link func(oldname, newname string) error
+}
 
 // invariant: a replace lands at once and survives a power cut: the data is
 // written to a file of its own in the target's folder, given the target's
@@ -80,10 +85,14 @@ func (d durable) replace(path string, data []byte, perm fs.FileMode) error {
 }
 
 // invariant: a swap is a replace that never lands over another writer's
-// change: the file is read again after the new one is synced, just before
-// the rename, and one that no longer holds what was seen is left as it is
-// (ErrChanged). A swap never overwrites in place: where a replace would
-// fall back to it, a swap refuses.
+// change: a file seen there is read again after the new one is synced,
+// just before the rename, and one that no longer holds what was seen is
+// left as it is (ErrChanged); a write landing between that read and the
+// rename is not caught, so the window is narrowed, not closed. A file seen
+// not there lands by a hard link of the new one, which the system refuses
+// over any name there, so one made since is never replaced (ErrChanged).
+// A swap never overwrites in place: where a replace would fall back to
+// it, a swap refuses.
 func (d durable) swap(path string, seen Seen, data []byte, perm fs.FileMode) error {
 	was, err := os.Stat(path)
 	switch {
@@ -98,11 +107,19 @@ func (d durable) swap(path string, seen Seen, data []byte, perm fs.FileMode) err
 		return err
 	}
 	err = d.fill(tmp, data, perm, was)
-	if err == nil {
-		err = unchanged(path, seen)
-	}
-	if err == nil {
-		err = os.Rename(tmp.Name(), path)
+	switch {
+	case err != nil:
+	case seen.There:
+		if err = unchanged(path, seen); err == nil {
+			err = os.Rename(tmp.Name(), path)
+		}
+	default:
+		switch err = d.link(tmp.Name(), path); {
+		case errors.Is(err, fs.ErrExist):
+			err = ErrChanged
+		case err != nil:
+			err = fmt.Errorf("%s: this volume refuses hard links: Machines makes a file only where it can: %w", path, err)
+		}
 	}
 	if err != nil {
 		_ = os.Remove(tmp.Name())
@@ -111,19 +128,30 @@ func (d durable) swap(path string, seen Seen, data []byte, perm fs.FileMode) err
 		}
 		return err
 	}
+	if !seen.There {
+		// invariant: the new file has landed under its name; the one
+		// beside it is the same file, and one left by a failed remove
+		// holds nothing but Machines' own bytes.
+		_ = os.Remove(tmp.Name())
+	}
 	return d.syncFolder(dir)
 }
 
+// invariant: the file is read no further than one byte past what was
+// seen: one longer is changed, and is never read whole.
 func unchanged(path string, seen Seen) error {
-	now, err := os.ReadFile(path) //nolint:gosec // outside: the file the caller swaps.
+	f, err := os.Open(path) //nolint:gosec // outside: the file the caller swaps.
+	var now []byte
+	if err == nil {
+		now, err = io.ReadAll(io.LimitReader(f, int64(len(seen.Data))+1))
+		err = errors.Join(err, f.Close())
+	}
 	switch {
-	case errors.Is(err, fs.ErrNotExist) && !seen.There:
-		return nil
 	case errors.Is(err, fs.ErrNotExist):
 		return ErrChanged
 	case err != nil:
 		return err
-	case !seen.There || !bytes.Equal(now, seen.Data):
+	case !bytes.Equal(now, seen.Data):
 		return ErrChanged
 	}
 	return nil

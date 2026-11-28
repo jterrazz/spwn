@@ -24,6 +24,13 @@ func (m *memory) ReadFile(p string) ([]byte, error) {
 	return nil, &fs.PathError{Op: "open", Path: p, Err: fs.ErrNotExist}
 }
 
+func (m *memory) Open(p string) (fs.File, error) {
+	if b, ok := m.files[p]; ok {
+		return fstest.MapFS{"f": {Data: b}}.Open("f")
+	}
+	return nil, &fs.PathError{Op: "open", Path: p, Err: fs.ErrNotExist}
+}
+
 func (m *memory) Stat(p string) (fs.FileInfo, error) {
 	if _, ok := m.files[p]; ok {
 		return fstest.MapFS{"f": {}}.Stat("f")
