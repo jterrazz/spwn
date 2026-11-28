@@ -112,6 +112,7 @@ func Declared(folders []string, p string) bool {
 // its root holds the old layout's spwn/ folder; else Key, the folders:
 // entry of its spwn.yaml that names no folder. Said is the root module's
 // own sentence.
+
 type LayoutRefused struct {
 	Old  bool
 	Key  string

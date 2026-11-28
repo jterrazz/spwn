@@ -34,6 +34,7 @@ func Starter() project.File {
 // value: the folders of a project held as files, agents first, out of its
 // spwn.yaml (nil when it has none) and every path it holds, refused as the
 // real disk refuses them: the real adapter's own reading, handed in.
+
 type Folders func(spwnYAML []byte, paths []string) ([]string, error)
 
 func New(folders Folders) *Projects { return Of(&world.World{}, "this-mac", folders) }

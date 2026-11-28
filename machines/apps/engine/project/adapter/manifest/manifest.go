@@ -112,6 +112,7 @@ func (p Projects) declared(root string) error {
 // none, and paths every slash path it holds; refused as declared refuses
 // the same project on a disk. A fake world takes it, so the layout it
 // tells is the root module's own.
+
 func Folders(spwnYAML []byte, paths []string) ([]string, error) {
 	l, err := spwnproject.LayoutOfFiles(spwnYAML, paths)
 	if err != nil {
