@@ -1,0 +1,14 @@
+description: 'station agents import refuses a project whose folders: names the old spwn/ folder'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit spwn.yaml "$(printf "name: site\nfolders:\n  agents: spwn/agents\n")" && /bin/mkdir -p site && /usr/bin/touch site/spwn.yaml && cd site && "$STATION" agents import backups/neo.tar.gz'
+      exit: 2
+      stderr: |
+          Error: folders.agents in spwn.yaml is "spwn/agents", the old layout's folder, spwn/: a folder is a path of the project from its root, its names lowercase letters, digits, - and _
+          Hint: fix folders: in spwn.yaml, then station project plan

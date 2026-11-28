@@ -10,6 +10,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/call"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	projectcalls "github.com/jterrazz/studio-station/apps/engine/project/calls"
 )
 
 type Deps struct {
@@ -63,7 +64,7 @@ func coded(err error, name string) error {
 	case errors.Is(err, agents.ErrBadArchive):
 		return fail.New(fail.Refused, BadArchive, name, nil)
 	}
-	return err
+	return projectcalls.Refusal(err)
 }
 
 func named(name string) error {

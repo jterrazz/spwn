@@ -9,6 +9,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/confirm"
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
+	projectcalls "github.com/jterrazz/studio-station/apps/engine/project/calls"
 )
 
 // value: every call's Project is the root of the project its agents belong
@@ -20,8 +21,10 @@ type ListIn struct {
 
 var List = call.Call[Deps, ListIn, []agents.Agent]{
 	Name: "agents.list", Where: call.AtTarget, Applies: machine.Anywhere,
+	Errors: []fail.Code{projectcalls.OldLayout, projectcalls.FoldersInvalid},
 	Run: func(ctx context.Context, d Deps, in ListIn, _ call.Progress) ([]agents.Agent, error) {
-		return d.Minds.List(ctx, d.root(in.Project))
+		all, err := d.Minds.List(ctx, d.root(in.Project))
+		return all, coded(err, "")
 	},
 }
 
@@ -32,7 +35,7 @@ type ShowIn struct {
 
 var Show = call.Call[Deps, ShowIn, agents.Mind]{
 	Name: "agents.show", Where: call.AtTarget, Applies: machine.Anywhere,
-	Errors: []fail.Code{NotFound},
+	Errors: []fail.Code{NotFound, projectcalls.OldLayout, projectcalls.FoldersInvalid},
 	Run: func(ctx context.Context, d Deps, in ShowIn, _ call.Progress) (agents.Mind, error) {
 		m, err := d.Minds.Mind(ctx, d.root(in.Project), in.Agent)
 		return m, coded(err, in.Agent)
@@ -48,7 +51,7 @@ type CreateIn struct {
 
 var Create = call.Call[Deps, CreateIn, agents.Mind]{
 	Name: "agents.create", Where: call.AtTarget, Applies: machine.Anywhere,
-	Errors: []fail.Code{BadName, Exists, UnknownHarness},
+	Errors: []fail.Code{BadName, Exists, UnknownHarness, projectcalls.OldLayout, projectcalls.FoldersInvalid},
 	Run: func(ctx context.Context, d Deps, in CreateIn, _ call.Progress) (agents.Mind, error) {
 		e := agents.Edit{Team: in.Team, Harness: in.Harness}
 		if err := named(in.Agent); err != nil {
@@ -71,7 +74,7 @@ type EditIn struct {
 
 var Edit = call.Call[Deps, EditIn, agents.Agent]{
 	Name: "agents.edit", Where: call.AtTarget, Applies: machine.Anywhere,
-	Errors: []fail.Code{NothingAsked, NotFound, UnknownHarness},
+	Errors: []fail.Code{NothingAsked, NotFound, UnknownHarness, projectcalls.OldLayout, projectcalls.FoldersInvalid},
 	Run: func(ctx context.Context, d Deps, in EditIn, _ call.Progress) (agents.Agent, error) {
 		e := agents.Edit{Team: in.Team, Harness: in.Harness}
 		if e == (agents.Edit{}) {
@@ -93,7 +96,7 @@ type DeleteIn struct {
 
 var Delete = call.Call[Deps, DeleteIn, agents.Agent]{
 	Name: "agents.delete", Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.DeleteAgent,
-	Errors: []fail.Code{NotFound, confirm.Needed, confirm.Mismatch},
+	Errors: []fail.Code{NotFound, confirm.Needed, confirm.Mismatch, projectcalls.OldLayout, projectcalls.FoldersInvalid},
 	Run: func(ctx context.Context, d Deps, in DeleteIn, _ call.Progress) (agents.Agent, error) {
 		// invariant: an agent's Mind is gone for good, so its name is typed
 		// first; a name no agent has is refused before the question.
@@ -116,7 +119,7 @@ type ForkIn struct {
 
 var Fork = call.Call[Deps, ForkIn, agents.Forked]{
 	Name: "agents.fork", Where: call.AtTarget, Applies: machine.Anywhere,
-	Errors: []fail.Code{NotFound, BadName, Exists},
+	Errors: []fail.Code{NotFound, BadName, Exists, projectcalls.OldLayout, projectcalls.FoldersInvalid},
 	Run: func(ctx context.Context, d Deps, in ForkIn, _ call.Progress) (agents.Forked, error) {
 		if err := named(in.As); err != nil {
 			return agents.Forked{}, err
@@ -138,7 +141,7 @@ type ExportIn struct {
 
 var Export = call.Call[Deps, ExportIn, agents.Exported]{
 	Name: "agents.export", Where: call.AtTarget, Applies: machine.Anywhere,
-	Errors: []fail.Code{NotFound},
+	Errors: []fail.Code{NotFound, projectcalls.OldLayout, projectcalls.FoldersInvalid},
 	Run: func(ctx context.Context, d Deps, in ExportIn, _ call.Progress) (agents.Exported, error) {
 		x, err := d.Minds.Export(ctx, d.root(in.Project), in.Agent, in.To)
 		return x, coded(err, in.Agent)
@@ -155,7 +158,7 @@ type ImportIn struct {
 
 var Import = call.Call[Deps, ImportIn, agents.Mind]{
 	Name: "agents.import", Where: call.AtTarget, Applies: machine.Anywhere,
-	Errors: []fail.Code{BadName, Exists, BadArchive},
+	Errors: []fail.Code{BadName, Exists, BadArchive, projectcalls.OldLayout, projectcalls.FoldersInvalid},
 	Run: func(ctx context.Context, d Deps, in ImportIn, _ call.Progress) (agents.Mind, error) {
 		as := in.As
 		if as == "" {
@@ -179,7 +182,7 @@ type DreamIn struct {
 
 var Dream = call.Call[Deps, DreamIn, agents.Dreamed]{
 	Name: "agents.dream", Where: call.AtTarget, Applies: machine.Anywhere,
-	Errors: []fail.Code{NotFound},
+	Errors: []fail.Code{NotFound, projectcalls.OldLayout, projectcalls.FoldersInvalid},
 	Run: func(ctx context.Context, d Deps, in DreamIn, _ call.Progress) (agents.Dreamed, error) {
 		r, err := d.Minds.Dream(ctx, d.root(in.Project), in.Agent)
 		return r, coded(err, in.Agent)
@@ -193,7 +196,7 @@ type SleepIn struct {
 
 var Sleep = call.Call[Deps, SleepIn, agents.Slept]{
 	Name: "agents.sleep", Where: call.AtTarget, Applies: machine.Anywhere,
-	Errors: []fail.Code{NotFound},
+	Errors: []fail.Code{NotFound, projectcalls.OldLayout, projectcalls.FoldersInvalid},
 	Run: func(ctx context.Context, d Deps, in SleepIn, _ call.Progress) (agents.Slept, error) {
 		r, err := d.Minds.Sleep(ctx, d.root(in.Project), in.Agent)
 		return r, coded(err, in.Agent)

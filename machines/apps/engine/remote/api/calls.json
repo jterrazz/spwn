@@ -102,7 +102,9 @@
       "errors": [
         "agents.bad-name",
         "agents.exists",
-        "agents.unknown-harness"
+        "agents.unknown-harness",
+        "project.folders-invalid",
+        "project.old-layout"
       ],
       "in": "CreateIn",
       "out": "Mind"
@@ -116,7 +118,9 @@
       "errors": [
         "agents.not-found",
         "confirm.mismatch",
-        "confirm.needed"
+        "confirm.needed",
+        "project.folders-invalid",
+        "project.old-layout"
       ],
       "in": "DeleteIn",
       "out": "Agent"
@@ -126,7 +130,9 @@
       "schema": "station.agents.dream/v1",
       "where": "at-target",
       "errors": [
-        "agents.not-found"
+        "agents.not-found",
+        "project.folders-invalid",
+        "project.old-layout"
       ],
       "in": "DreamIn",
       "out": "Dreamed"
@@ -138,7 +144,9 @@
       "errors": [
         "agents.not-found",
         "agents.nothing-asked",
-        "agents.unknown-harness"
+        "agents.unknown-harness",
+        "project.folders-invalid",
+        "project.old-layout"
       ],
       "in": "EditIn",
       "out": "Agent"
@@ -148,7 +156,9 @@
       "schema": "station.agents.export/v1",
       "where": "at-target",
       "errors": [
-        "agents.not-found"
+        "agents.not-found",
+        "project.folders-invalid",
+        "project.old-layout"
       ],
       "in": "ExportIn",
       "out": "Exported"
@@ -160,7 +170,9 @@
       "errors": [
         "agents.bad-name",
         "agents.exists",
-        "agents.not-found"
+        "agents.not-found",
+        "project.folders-invalid",
+        "project.old-layout"
       ],
       "in": "ForkIn",
       "out": "Forked"
@@ -172,7 +184,9 @@
       "errors": [
         "agents.bad-archive",
         "agents.bad-name",
-        "agents.exists"
+        "agents.exists",
+        "project.folders-invalid",
+        "project.old-layout"
       ],
       "in": "ImportIn",
       "out": "Mind"
@@ -181,6 +195,10 @@
       "name": "agents.list",
       "schema": "station.agents.list/v1",
       "where": "at-target",
+      "errors": [
+        "project.folders-invalid",
+        "project.old-layout"
+      ],
       "in": "ListIn"
     },
     {
@@ -188,7 +206,9 @@
       "schema": "station.agents.show/v1",
       "where": "at-target",
       "errors": [
-        "agents.not-found"
+        "agents.not-found",
+        "project.folders-invalid",
+        "project.old-layout"
       ],
       "in": "ShowIn",
       "out": "Mind"
@@ -198,7 +218,9 @@
       "schema": "station.agents.sleep/v1",
       "where": "at-target",
       "errors": [
-        "agents.not-found"
+        "agents.not-found",
+        "project.folders-invalid",
+        "project.old-layout"
       ],
       "in": "SleepIn",
       "out": "Slept"
