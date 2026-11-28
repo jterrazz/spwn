@@ -28,6 +28,10 @@ func PrettyHome(p string) string {
 // Folders is where, from a project's root, the folder of each kind of what
 // it declares sits, as a slash path: what packages/project's Layout says,
 // handed to the packages below it, which never read a manifest.
+//
+// invariant: a field left empty is the kind's own name, agents for
+// Agents and so on, as a project whose spwn.yaml renames no folder lays
+// them out; so the zero Folders is that default, never the root itself.
 type Folders struct {
 	Agents   string
 	Skills   string
@@ -35,6 +39,21 @@ type Folders struct {
 	Hooks    string
 	Commands string
 	Profiles string
+}
+
+func (f Folders) named() Folders {
+	for _, field := range []struct {
+		at   *string
+		name string
+	}{
+		{&f.Agents, "agents"}, {&f.Skills, "skills"}, {&f.Tools, "tools"},
+		{&f.Hooks, "hooks"}, {&f.Commands, "commands"}, {&f.Profiles, "profiles"},
+	} {
+		if *field.at == "" {
+			*field.at = field.name
+		}
+	}
+	return f
 }
 
 var (
@@ -53,7 +72,7 @@ func SetProject(root string, folders Folders) {
 	projectRootMu.Lock()
 	defer projectRootMu.Unlock()
 	projectRoot = root
-	projectFolders = folders
+	projectFolders = folders.named()
 }
 
 // ProjectFolders returns the folders of the active project, as SetProject

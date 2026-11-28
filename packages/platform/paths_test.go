@@ -132,6 +132,20 @@ func TestWithProject_RestoresTheProjectItFound(t *testing.T) {
 	}
 }
 
+func TestTheZeroFoldersAreTheDefaultNamesNeverTheRoot(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "site")
+	got, _ := WithProject(root, Folders{Skills: "lib/skills"}, func() ([2]string, error) {
+		return [2]string{AgentsDir(), SkillsDir()}, nil
+	})
+	if want := [2]string{filepath.Join(root, "agents"), filepath.Join(root, "lib", "skills")}; got != want {
+		t.Errorf("folders = %q, want %q", got, want)
+	}
+	folders, _ := WithProject(root, Folders{}, func() (Folders, error) { return ProjectFolders(), nil })
+	if want := (Folders{"agents", "skills", "tools", "hooks", "commands", "profiles"}); folders != want {
+		t.Errorf("ProjectFolders() = %+v, want %+v", folders, want)
+	}
+}
+
 func TestWithProject_ReturnsTheActsError(t *testing.T) {
 	want := errors.New("boom")
 	_, err := WithProject("/p", Folders{}, func() (int, error) { return 0, want })
