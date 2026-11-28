@@ -282,6 +282,60 @@ func TestAValueMachinesWroteFollowsTheFragmentAndOneOfTheOwnersStays(t *testing.
 	}
 }
 
+func TestAFragmentThatChangesAKeysShapeReplacesWhatWasMachinesAloneInOnePass(t *testing.T) {
+	for name, c := range map[string]struct{ v1, v2, want string }{
+		"an object becomes a scalar":  {`{"a": {"b": 1}}`, `{"a": 7}`, "{\n  \"keep\": 1,\n  \"a\": 7\n}\n"},
+		"an array becomes a scalar":   {`{"a": ["x", "y"]}`, `{"a": "x"}`, "{\n  \"keep\": 1,\n  \"a\": \"x\"\n}\n"},
+		"a scalar becomes an object":  {`{"a": 7}`, `{"a": {"b": 1}}`, "{\n  \"keep\": 1,\n  \"a\": {\n    \"b\": 1\n  }\n}\n"},
+		"an object becomes an array":  {`{"a": {"b": {}}}`, `{"a": [1]}`, "{\n  \"keep\": 1,\n  \"a\": [\n    1\n  ]\n}\n"},
+		"an array becomes an object":  {`{"a": [[1]]}`, `{"a": {"b": 1}}`, "{\n  \"keep\": 1,\n  \"a\": {\n    \"b\": 1\n  }\n}\n"},
+		"a scalar becomes another":    {`{"a": 7}`, `{"a": false}`, "{\n  \"keep\": 1,\n  \"a\": false\n}\n"},
+		"a nested object goes scalar": {`{"a": {"b": {"c": 1}}}`, `{"a": {"b": 2}}`, "{\n  \"keep\": 1,\n  \"a\": {\n    \"b\": 2\n  }\n}\n"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			b := newBench(t, catalog.WriteMerge, c.v1, ".x.json")
+			b.write("{\n  \"keep\": 1\n}\n", 0o600)
+			b.apply()
+			b.ours["pkg/fragment.json"].Data = []byte(c.v2)
+			if said := b.apply(); !reflect.DeepEqual(said, []string{"~/.x.json: merged"}) {
+				t.Errorf("the new version's apply said %q", said)
+			}
+			if got := b.read(); got != c.want {
+				t.Errorf("the new version wrote %q, want %q", got, c.want)
+			}
+			record, _ := os.ReadFile(b.record)
+			if said := b.apply(); !reflect.DeepEqual(said, []string{"~/.x.json: as Machines wrote it: nothing written"}) {
+				t.Errorf("the new version applied again said %q", said)
+			}
+			if again, _ := os.ReadFile(b.record); b.read() != c.want || !bytes.Equal(again, record) {
+				t.Errorf("the new version applied again moved the file %q or the record", b.read())
+			}
+			b.off()
+			if got := b.read(); got != "{\n  \"keep\": 1\n}\n" {
+				t.Errorf("off left %q", got)
+			}
+		})
+	}
+}
+
+func TestAFragmentThatChangesAKeysShapeLeavesWhatTheOwnerPutInIt(t *testing.T) {
+	b := newBench(t, catalog.WriteMerge, `{"a": {"b": 1}}`, ".x.json")
+	b.write("{\n  \"keep\": 1\n}\n", 0o600)
+	b.apply()
+	b.write("{\n  \"keep\": 1,\n  \"a\": {\n    \"b\": 1,\n    \"c\": 2\n  }\n}\n", 0o600)
+	b.ours["pkg/fragment.json"].Data = []byte(`{"a": 7}`)
+	want := "{\n  \"keep\": 1,\n  \"a\": {\n    \"c\": 2\n  }\n}\n"
+	if said := b.apply(); !reflect.DeepEqual(said, []string{"~/.x.json: merged", "~/.x.json /a: yours, kept"}) {
+		t.Errorf("the new version's apply said %q", said)
+	}
+	if got := b.read(); got != want {
+		t.Errorf("the new version wrote %q, want %q", got, want)
+	}
+	if said := b.apply(); !reflect.DeepEqual(said, []string{"~/.x.json: as Machines wrote it: nothing written", "~/.x.json /a: yours, kept"}) || b.read() != want {
+		t.Errorf("the new version applied again said %q and left %q", said, b.read())
+	}
+}
+
 func TestAFileThatIsNotStrictJSONIsRefusedAndLeftAsItIs(t *testing.T) {
 	for name, text := range map[string]string{
 		"a comment":        "{\n  // mine\n  \"a\": 1\n}\n",

@@ -10,7 +10,8 @@ import (
 // does not have is added, an object or an array he has is merged into,
 // an element goes into an array only when no deep-equal one is there, and
 // a value of his is never replaced; a value Machines wrote and he left as
-// it is is Machines' own, written anew when the fragment moved.
+// it is is Machines' own, written anew when the fragment moved, whatever
+// shape it moved to.
 
 type merging struct {
 	old  []entry
@@ -69,13 +70,59 @@ func (w *merging) object(have, frag *node, at string) {
 			w.array(mine, m.val, p)
 		case mine.equal(m.val):
 			w.carry(entry{Pointer: p, Kind: kindValue, Digest: mine.digest()})
-		case w.take(entry{Pointer: p, Kind: kindValue, Digest: mine.digest()}):
-			have.keys[i].val = m.val.clone()
-			w.now = append(w.now, entry{Pointer: p, Kind: kindValue, Digest: m.val.digest()})
 		default:
-			w.kept = append(w.kept, p)
+			taken, ours := w.owned(mine, p, nil)
+			if !ours {
+				w.kept = append(w.kept, p)
+				continue
+			}
+			for _, o := range taken {
+				w.used[o] = true
+			}
+			have.keys[i].val = w.made(m.val, p)
 		}
 	}
+}
+
+// invariant: what sits at a key is Machines' alone when every part of it
+// is an entry of the record not used yet: a value by its digest, an object
+// or an array it made, each member and element of it so: only then does a
+// fragment of another value or shape replace it, in the same pass; one
+// part of the owner's leaves the whole his.
+func (w *merging) owned(n *node, at string, taken []int) ([]int, bool) {
+	switch n.shape {
+	case scalar:
+		return w.claim(entry{Pointer: at, Kind: kindValue, Digest: n.digest()}, taken)
+	case object:
+		var ok bool
+		taken, ok = w.claim(entry{Pointer: at, Kind: kindObject}, taken)
+		for _, m := range n.keys {
+			if !ok {
+				break
+			}
+			taken, ok = w.owned(m.val, child(at, m.name), taken)
+		}
+		return taken, ok
+	case array:
+	}
+	var ok bool
+	taken, ok = w.claim(entry{Pointer: at, Kind: kindArray}, taken)
+	for _, it := range n.items {
+		if !ok {
+			break
+		}
+		taken, ok = w.claim(entry{Pointer: at, Kind: kindElement, Digest: it.digest()}, taken)
+	}
+	return taken, ok
+}
+
+func (w *merging) claim(e entry, taken []int) ([]int, bool) {
+	for i, o := range w.old {
+		if !w.used[i] && o == e && !slices.Contains(taken, i) {
+			return append(taken, i), true
+		}
+	}
+	return taken, false
 }
 
 func (w *merging) array(have, frag *node, at string) {
