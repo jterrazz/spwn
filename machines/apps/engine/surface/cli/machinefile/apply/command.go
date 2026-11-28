@@ -68,7 +68,7 @@ func Run(ctx context.Context, d Deps, env kit.Env, in Input, io kit.IO) error {
 		return err
 	})
 	steps.Stop()
-	if len(out.Done) == 0 && len(out.Removed) == 0 && out.Ran == nil {
+	if len(out.Done) == 0 && len(out.Removed) == 0 && out.Ran == nil && out.SkillFailed == "" {
 		return err
 	}
 	done, removed := worded(out.Done), worded(out.Removed)

@@ -1,0 +1,16 @@
+description: 'an apply with no package to carry out still says the spwn skill it could not write'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+      exit: 0
+    - command: 'world fault Skill.Write'
+      exit: 0
+    - command: 'machinefile apply'
+      exit: 0
+      stdout: |
+          ✗	spwn		skill	not written: open ~/.agents/skills/spwn/SKILL.md: permission denied
