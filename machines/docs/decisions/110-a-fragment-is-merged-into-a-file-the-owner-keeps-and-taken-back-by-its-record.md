@@ -11,7 +11,7 @@ ADR-052's failure was a hook written into an agent's settings whose command was 
 
 ## Decision
 
-Two modes beside `file`: `block`, the package block's marker scheme in any text file, and `merge`, a JSON fragment merged into a `.json` file.
+Two modes beside `file`: `block`, the package block's marker scheme in a text file whose format reads a `#` line as a comment (an allow-list, below), and `merge`, a JSON fragment merged into a `.json` file.
 
 ### How a merge merges
 
@@ -35,3 +35,4 @@ No new key: the package's existing `requires` is the guard. A setting in either 
 - An element of an array the owner edited cannot be told from one he deleted, so off leaves it without a word.
 - A block goes only into a file known to read a `#` line as a comment, by an allow-list of extensions and names held in the catalog's code; a format outside it (Vim's, Lua's) takes no block until the list names it.
 - The guard checks the app is installed, not that the hook's command is on the PATH of the app that runs it.
+- The next lot, which reads a source's own `files/`, must guarantee: `from` confined inside the source root with no link out (`os.Root`), bounds on mode `file`, the real-path and `othersOwn` checks extended to mode `file`, and consent or a deny-list for code-execution targets.
