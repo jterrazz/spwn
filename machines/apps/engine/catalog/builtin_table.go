@@ -4079,6 +4079,31 @@ func builtinCatalog() (Catalog, error) {
 							Repo:  "jakubkrehel/skills",
 							Skill: "better-writing"}}}},
 			{
+				Name:        "caveman",
+				Kind:        "app",
+				AppKind:     "skill",
+				Description: "Terse answers that keep every technical fact, for fewer tokens",
+				Category:    "Agent skills",
+				Installs: []LivesOn{
+					{
+						Kinds: []MachineKind{
+							"mac"},
+						Install: SkillInstall{
+							Repo:  "JuliusBrussee/caveman",
+							Skill: "caveman"}},
+					{
+						Kinds: []MachineKind{
+							"linux"},
+						Install: SkillInstall{
+							Repo:  "JuliusBrussee/caveman",
+							Skill: "caveman"}},
+					{
+						Kinds: []MachineKind{
+							"macos"},
+						Install: SkillInstall{
+							Repo:  "JuliusBrussee/caveman",
+							Skill: "caveman"}}}},
+			{
 				Name:        "chrome-extensions",
 				Kind:        "app",
 				AppKind:     "skill",
@@ -8872,6 +8897,22 @@ func builtinCatalog() (Catalog, error) {
 								Name: "better-writing"}}}},
 				Folder: "agent-skills",
 				File:   "packages/agent-skills/better-writing.yaml",
+				Origin: "built-in"},
+			{
+				Package: Package{
+					Package:     "station.package/v1",
+					Kind:        "app",
+					Name:        "caveman",
+					Description: "Terse answers that keep every technical fact, for fewer tokens",
+					Methods: []MethodSpec{
+						{
+							Selector: Selector{
+								OS: "any"},
+							Skill: &SkillMethod{
+								Repo: "JuliusBrussee/caveman",
+								Name: "caveman"}}}},
+				Folder: "agent-skills",
+				File:   "packages/agent-skills/caveman.yaml",
 				Origin: "built-in"},
 			{
 				Package: Package{

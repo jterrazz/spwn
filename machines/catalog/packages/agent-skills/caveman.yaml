@@ -1,0 +1,9 @@
+package: station.package/v1
+kind: app
+name: caveman
+description: Terse answers that keep every technical fact, for fewer tokens
+methods:
+    - os: any
+      skill:
+          repo: JuliusBrussee/caveman
+          name: caveman

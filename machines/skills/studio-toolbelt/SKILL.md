@@ -213,6 +213,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 - **better-typography**: Typography craft
 - **better-ui**: UI review across the better-* skills
 - **better-writing**: Interface copy
+- **caveman**: Terse answers that keep every technical fact, for fewer tokens
 - **chrome-extensions**: Chrome extension authoring
 - **frontend-design**: Distinctive, polished frontend interfaces
 - **last30days**: Research what happened in the last 30 days

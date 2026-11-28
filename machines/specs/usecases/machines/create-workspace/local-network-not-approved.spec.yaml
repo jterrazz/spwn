@@ -26,7 +26,7 @@ runs:
       stdout: |
           	On linux-2:
           	Activity	? not measured
-          	Apps	● 1 ok · ○ 78 not installed
+          	Apps	● 1 ok · ○ 79 not installed
           	Settings	set by Machines · ○ 0 of 7
           	Disk	● 0 B free · 0 B can rebuild
           	Ports	Public 0 · Private 0
