@@ -49,6 +49,9 @@ type Options struct {
 	Ours fs.FS
 	// value: the record of what each fragment wrote, beside the ledger.
 	Record string
+	// value: station's own folders on this run, absolute, where its XDG
+	// variables put them; no setting writes in one.
+	Own []string
 }
 
 type Applier struct {
@@ -63,20 +66,32 @@ func New(files Files, run Runner, o Options) *Applier { return &Applier{files: f
 
 func (*Applier) Kind() catalog.EffectKind { return catalog.EffectDotfile }
 
-func of(it catalog.Setting) (catalog.Dotfiles, error) {
+func (a *Applier) of(it catalog.Setting) (catalog.Dotfiles, error) {
 	d, ok := it.Effect.(catalog.Dotfiles)
 	if !ok || len(d.Files) == 0 {
 		return catalog.Dotfiles{}, errors.New(it.Name + " is not files Machines writes")
 	}
 	// invariant: decode confines every file, and so does each call here
 	// again, so a setting built past decode still writes nothing out of
-	// the home or into station's own.
+	// the home or into station's own, where this run's XDG variables put
+	// it too.
 	for _, c := range d.Files {
 		if problem := catalog.Confined(c.To, d.Mode); problem != "" {
 			return catalog.Dotfiles{}, errors.New(it.Name + ": " + problem)
 		}
+		for _, own := range a.o.Own {
+			if within(expand(a.o.Home, c.To), own) {
+				return catalog.Dotfiles{}, fmt.Errorf("%s: file %s is in %s, station's own: no setting writes there", it.Name, c.To, own)
+			}
+		}
 	}
 	return d, nil
+}
+
+// value: whether p is root or in it, without case, as a macOS volume
+// opens names.
+func within(p, root string) bool {
+	return root != "" && (strings.EqualFold(p, root) || len(p) > len(root) && strings.EqualFold(p[:len(root)+1], root+"/"))
 }
 
 // value: what one file of a setting holds of it now: there at all, exactly
@@ -96,7 +111,7 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 	// setting otherwise as station last wrote it reads as station's to write.
 	// A fragment's covers only what it writes there: the owner's other keys
 	// and lines never move it.
-	d, err := of(it)
+	d, err := a.of(it)
 	if err != nil {
 		return settings.Observation{}, err
 	}
@@ -164,7 +179,7 @@ func (a *Applier) see(setting string, mode catalog.WriteMode, c catalog.Copy, r 
 }
 
 func (a *Applier) Apply(ctx context.Context, it catalog.Setting, _ map[string]string) (settings.Change, error) {
-	d, err := of(it)
+	d, err := a.of(it)
 	if err != nil {
 		return settings.Change{}, err
 	}
@@ -228,7 +243,7 @@ func (a *Applier) Undo(ctx context.Context, it catalog.Setting) (settings.Change
 	// invariant: Undo removes a file only while it is still exactly station's,
 	// and from a file of the owner's only the fragment station wrote and he
 	// left as it is: off never destroys a change of the owner's.
-	d, err := of(it)
+	d, err := a.of(it)
 	if err != nil {
 		return settings.Change{}, err
 	}
@@ -353,8 +368,11 @@ func (a *Applier) real(p string) (string, error) {
 // when it is not there yet.
 func (a *Applier) target(to string, mode catalog.WriteMode) (at string, data []byte, there bool, err error) {
 	// invariant: a fragment lands in the file its links really name, and
-	// only inside the real home and out of what Confined keeps it from:
-	// a link out of either is refused, never followed.
+	// only inside the real home and out of what Confined keeps it from and
+	// station's own folders of this run, each compared by its own real
+	// path: a link out of the home, or to a kept file or folder, or a kept
+	// folder that is itself a link to the one named, is refused, never
+	// followed.
 	home, err := a.real(a.o.Home)
 	if err != nil {
 		return "", nil, false, err
@@ -368,6 +386,16 @@ func (a *Applier) target(to string, mode catalog.WriteMode) (at string, data []b
 		return "", nil, false, fmt.Errorf("%s leads through its links to %s, outside your home: Machines writes nothing there", to, at)
 	case catalog.Confined("~/"+rest, mode) != "":
 		return "", nil, false, fmt.Errorf("%s leads through its links to ~/%s: %s", to, rest, catalog.Confined("~/"+rest, mode))
+	}
+	for _, k := range append(catalog.Kept(mode), a.o.Own...) {
+		// invariant: a kept path whose links name nothing keeps its name.
+		really, unreal := a.real(expand(a.o.Home, k))
+		if unreal != nil {
+			really = expand(a.o.Home, k)
+		}
+		if within(at, really) {
+			return "", nil, false, fmt.Errorf("%s is really %s, in %s: Machines writes no fragment there", to, at, k)
+		}
 	}
 	info, err := a.files.Stat(at)
 	switch {

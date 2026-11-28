@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"path"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/authorizedkeys"
@@ -26,6 +27,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/settings/adapter/touch"
 	settingscalls "github.com/jterrazz/studio-station/apps/engine/settings/calls"
 	settingscontract "github.com/jterrazz/studio-station/apps/engine/settings/contract"
+	"github.com/jterrazz/studio-station/apps/engine/setup"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 	settingscmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/settings"
 	settingsapply "github.com/jterrazz/studio-station/apps/engine/surface/cli/settings/apply"
@@ -72,6 +74,12 @@ func settingsOf(m machine) *settingscalls.Catalogue {
 	})
 }
 
+// value: station's own folders on this run, where its XDG variables put
+// them.
+func stationsOwn(p setup.Paths) []string {
+	return slices.DeleteFunc([]string{p.Prefs, p.Data, p.State, p.Cache}, func(dir string) bool { return dir == "" })
+}
+
 // value: the Applier of every effect of the catalogue on this machine; in
 // a world, every procedure is a fake over the Mac's slice: no world runs a
 // procedure of the real machine.
@@ -82,7 +90,7 @@ func settingAppliers(m machine) []settingscontract.Applier {
 		touch.New(m.sys.FS, m.sys.Env.Home()),
 		gitaliases.New(m.sys.FS, m.sys.Env.Home()),
 		zshblock.New(m.zshrc(), zshblock.Options{Home: m.sys.Env.Home(), OS: machineOf(m.profile).System.OS, Arch: machineOf(m.profile).System.Arch}),
-		dotfile.New(lockable{m.sys.FS}, m.sys.Run, dotfile.Options{Home: m.sys.Env.Home(), Ours: files, Record: filepath.Join(m.paths.State, "merged.json")}),
+		dotfile.New(lockable{m.sys.FS}, m.sys.Run, dotfile.Options{Home: m.sys.Env.Home(), Ours: files, Record: filepath.Join(m.paths.State, "merged.json"), Own: stationsOwn(m.paths)}),
 		neversleeps.New(m.stores.neverSleeps()),
 	}
 	// invariant: a world's files are the run's own: none is given away.

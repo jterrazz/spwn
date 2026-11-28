@@ -342,7 +342,7 @@ func TestAFileOutsideTheHomeOrStationsOwnIsRefusedAtApplyToo(t *testing.T) {
 	for mode, tos := range map[catalog.WriteMode][]string{
 		catalog.WriteMerge: {"../escape.json", ".config/station/x.json", ".ssh/x.json"},
 		catalog.WriteBlock: {"../escape.conf", ".zshrc", ".local/state/station/x.conf"},
-		catalog.WriteFile:  {"../escape.json", ".config/station/x.json"},
+		catalog.WriteFile:  {"../escape.json", ".config/station/x.json", "Library/LaunchAgents/com.jterrazz.station.engine.plist"},
 	} {
 		for _, to := range tos {
 			b := newBench(t, mode, `{"a": 1}`, to)
@@ -508,6 +508,28 @@ func TestALinkOutOfTheHomeIsRefused(t *testing.T) {
 			}
 			if data, _ := os.ReadFile(filepath.Join(outside, "x.json")); string(data) != "{}\n" {
 				t.Errorf("the file out of the home holds %q", data)
+			}
+		})
+	}
+}
+
+func TestAFileInAKeptFolderThatIsALinkIsRefusedByItsRealName(t *testing.T) {
+	for name, c := range map[string]struct {
+		mode     catalog.WriteMode
+		kept, to string
+	}{
+		"the authorized keys' folder": {catalog.WriteBlock, ".ssh", "foo/config"},
+		"station's own folder":        {catalog.WriteMerge, ".config/station", "cfg/x.json"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			b := newBench(t, c.mode, `{"a": 1}`, c.to)
+			theirs := b.put(c.to, "{}\n")
+			b.link(filepath.Dir(theirs), c.kept)
+			if _, err := b.applier.Apply(t.Context(), b.setting, nil); err == nil || !strings.Contains(err.Error(), "~/"+c.kept) {
+				t.Errorf("Apply: %v; want the file refused as one in ~/%s, which links to its folder", err, c.kept)
+			}
+			if data, _ := os.ReadFile(theirs); string(data) != "{}\n" {
+				t.Errorf("the file in the kept folder holds %q", data)
 			}
 		})
 	}
