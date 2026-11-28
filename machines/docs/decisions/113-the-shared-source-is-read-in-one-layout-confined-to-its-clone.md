@@ -32,6 +32,12 @@ The refusal of `run.upgrade` takes away one line of the shared source, not every
 - **Shell methods.** A shell line is its install and its update, in `bash -c` (`apps/engine/apps/adapter/shell/shell.go:34-37`, `shell.go:45`, `shell.go:58`).
 - **`then:` hooks.** The settings a package names in `then` are applied after it is installed or updated (`apps/engine/apps/calls/operations.go:92`, `operations.go:468`), and a setting runs its own method.
 
+A push also changes what the owner's next attended `machinefile apply` does on that computer, and apply asks him to confirm only the removals it plans (`apps/engine/machinefile/calls/apply.go:130-132`):
+
+- **Setting values.** A setting the shared files set is applied at the value the push wrote, the sensitive adapters' among them: the authorized keys, remote login and automatic login.
+- **The app list.** An app a push adds to a kit or a machine file is installed by that apply without a question.
+- **The boot and image phases.** `apply --phase boot` and `apply --phase image` run the shared files' `run.boot` and `run.image` lines.
+
 What stands against such a push today:
 
 - **The forward-only clone.** A pull takes only a commit that descends from the clone's own (`apps/engine/machinefile/contract/source.go:19-27`), so a rewritten history or a force-push is refused and the clone stays where it stood; a push on top of the history is taken.
@@ -47,5 +53,4 @@ So the push rights to the shared repository are still the trust boundary of ever
 ## Consequences
 
 - An owner's shared source in the old layout reads empty until it is moved into the tree; no machine of the owner's reads one today (ADR-109 §1).
-- The bare name of a VM two computers hold (ADR-109 §2) and a VM bearing its own file's name (ADR-109 §3) are not decided here: they are the router's and the create's.
 - A repository may carry the tree under any folder, so the Agents' and the OS's folders can sit beside it.
