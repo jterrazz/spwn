@@ -691,8 +691,7 @@
         "Interrupted",
         "Plan",
         "Ran",
-        "Removed",
-        "SkillFailed"
+        "Removed"
       ],
       "type": "object"
     },

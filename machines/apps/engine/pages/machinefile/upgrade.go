@@ -175,6 +175,9 @@ type UpgradedJSON struct {
 	Interrupted bool          `json:"interrupted"`
 	// value: why the shared source was not pulled, when it was not.
 	Unpulled string `json:"unpulled,omitempty"`
+	// value: why the machine's `spwn` skill was not written at the run's
+	// end; absent when it was.
+	SkillFailed string `json:"skill_failed,omitempty"`
 }
 
 type WaitingJSON struct {
@@ -187,8 +190,9 @@ type WaitingJSON struct {
 
 func UpgradedContract(schema string, u machinefile.Upgraded, done []Worded) UpgradedJSON {
 	// value: station.machinefile.upgrade/v2: each app as the upgrade left
-	// it, and what moved in the lock.
-	out := UpgradedJSON{Schema: schema, Machinefile: u.Plan.Name, Lines: []LineJSON{}, Lock: []LockChangeJSON{}, Waiting: []WaitingJSON{}, Run: ranJSON(u.Ran), Interrupted: u.Interrupted, Unpulled: u.Unpulled}
+	// it, what moved in the lock, and why the `spwn` skill was not written
+	// when it was not.
+	out := UpgradedJSON{Schema: schema, Machinefile: u.Plan.Name, Lines: []LineJSON{}, Lock: []LockChangeJSON{}, Waiting: []WaitingJSON{}, Run: ranJSON(u.Ran), Interrupted: u.Interrupted, Unpulled: u.Unpulled, SkillFailed: u.SkillFailed}
 	for _, w := range u.Waiting {
 		out.Waiting = append(out.Waiting, WaitingJSON(w))
 	}

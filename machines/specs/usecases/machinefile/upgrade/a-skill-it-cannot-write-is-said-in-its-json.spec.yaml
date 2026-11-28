@@ -1,0 +1,23 @@
+description: 'update --json says why the spwn skill was not written, in skill_failed'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'machinefile apply >/dev/null'
+      exit: 0
+    - command: 'world fault Skill.Write 1 times'
+      exit: 0
+    - command: 'machinefile update --json | /usr/bin/jq -r ''[.schema, .skill_failed] | @tsv'''
+      exit: 0
+      stdout: |
+          station.machinefile.upgrade/v2	open ~/.agents/skills/spwn/SKILL.md: permission denied
+    - command: 'machinefile update --json | /usr/bin/jq -c ''has("skill_failed")'''
+      exit: 0
+      stdout: |
+          false

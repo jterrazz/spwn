@@ -85,6 +85,9 @@ type PlanJSON struct {
 	AfterApply  []string    `json:"after_apply"`
 	Run         *RunJSON    `json:"run,omitempty"`
 	Bound       string      `json:"bound,omitempty"`
+	// value: a run's own: why the machine's `spwn` skill was not written
+	// at its end; absent when it was, and on a plan.
+	SkillFailed string `json:"skill_failed,omitempty"`
 }
 
 func lineJSON(l machinefile.Line, result, detail string) LineJSON {
@@ -126,9 +129,10 @@ func PlanContract(schema string, p machinefile.Plan) PlanJSON {
 func AppliedContract(schema string, a machinefile.Applied, done, removed []Worded) PlanJSON {
 	// value: station.machinefile.apply/v2: the plan's shape, each line with
 	// what the run did with it, then each extra removed, and each block the
-	// run judged with what it did.
+	// run judged with what it did, and why the `spwn` skill was not
+	// written when it was not.
 	out := PlanContract(schema, a.Plan)
-	out.Lines, out.Bound, out.Run = []LineJSON{}, a.Bound, ranJSON(a.Ran)
+	out.Lines, out.Bound, out.Run, out.SkillFailed = []LineJSON{}, a.Bound, ranJSON(a.Ran), a.SkillFailed
 	blocks := out.Blocks
 	out.Blocks = nil
 	for _, j := range blocks {

@@ -1826,7 +1826,7 @@ export type MachinefileApplied = {
     Plan: MachinefilePlan;
     Ran: MachinefileRan | null;
     Removed: MachinefileDone[] | null;
-    SkillFailed: string;
+    SkillFailed?: string;
 };
 
 export type MachinefileApplying = {
@@ -2190,7 +2190,7 @@ export type MachinefileUpgraded = {
     Lock: MachinefileLockDiff;
     Plan: MachinefilePlan;
     Ran: MachinefileRan | null;
-    SkillFailed: string;
+    SkillFailed?: string;
     Unbound: boolean;
     Unpulled: string;
     Waiting: MachinefileWaiting[] | null;
