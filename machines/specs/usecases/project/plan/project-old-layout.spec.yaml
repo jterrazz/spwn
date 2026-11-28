@@ -1,4 +1,4 @@
-description: 'station project plan refuses a project of the old spwn/ layout with the sentence that moves it, and reads nothing'
+description: 'station project plan refuses the old spwn/ layout with the sentence that moves it'
 env:
     - two-macs
     - engine

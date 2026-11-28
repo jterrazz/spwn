@@ -1,4 +1,4 @@
-description: 'station project plan walks spwn.yaml, spwn.lock and the folders it lays out alone: a link anywhere else at the root is not read, a link at a renamed folder is refused'
+description: 'station project plan walks spwn.yaml, spwn.lock and the declared folders, nothing else at the root'
 env:
     - two-macs
     - engine

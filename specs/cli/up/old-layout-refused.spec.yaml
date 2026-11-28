@@ -1,4 +1,4 @@
-description: up in a project of the old spwn/ layout is refused with the sentence that moves it, before Docker is reached, and so is every other command
+description: up and every other command refuse the old spwn/ layout before Docker is reached
 fixture: ./__fixtures__/old-layout/
 runs:
     - command: up

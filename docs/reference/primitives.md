@@ -10,12 +10,7 @@ A Spwn project is per-repo: everything an agent is made of is committed beside t
 my-project/
 ├── spwn.yaml       # manifest: version, name, inline worlds map, project-wide deps
 ├── spwn.lock       # lockfile: pinned catalog deps
-├── agents/neo/
-│   ├── agent.yaml     # composition: dependencies + runtime.backend
-│   ├── AGENTS.md      # provider-neutral entry point (compiled per runtime)
-│   ├── SOUL.md        # who the agent is (purpose, voice, values)
-│   ├── playbooks/     # promoted patterns (auto-indexed from name:/description: headers)
-│   └── journal/       # per-run history
+├── agents/         # one folder per agent, below
 ├── skills/         # project-scoped skills   (skill/<name> → skills/<name>.md)
 ├── tools/          # project-scoped tools    (tool/<name>  → tools/<name>/)
 ├── hooks/          # project-scoped hooks    (hook/<name>  → hooks/<name>.yaml)
@@ -27,6 +22,17 @@ my-project/
     ├── runs.jsonl               # automation receipts (one line per fire)
     ├── automations/state.json   # last-fired cursor per automation (catch-up math)
     └── cache/
+```
+
+One agent's folder:
+
+```text
+agents/neo/
+├── agent.yaml     # composition: dependencies + runtime.backend
+├── AGENTS.md      # provider-neutral entry point (compiled per runtime)
+├── SOUL.md        # who the agent is (purpose, voice, values)
+├── playbooks/     # promoted patterns (auto-indexed from name:/description: headers)
+└── journal/       # per-run history
 ```
 
 ### The folders sit at the root

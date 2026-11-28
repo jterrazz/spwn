@@ -1,4 +1,4 @@
-description: 'station project apply refuses a project of the old spwn/ layout, naming the folders already at the root, and writes nothing'
+description: 'station project apply refuses the old spwn/ layout, naming the folders already at the root'
 env:
     - two-macs
     - engine

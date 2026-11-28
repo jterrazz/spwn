@@ -1,4 +1,4 @@
-description: 'station project plan refuses every folders: entry that names no folder of the project, naming its key, and reads nothing'
+description: 'station project plan refuses each folders: entry that names no folder of the project'
 env:
     - two-macs
     - engine
