@@ -12,7 +12,8 @@ import (
 )
 
 // value: the links a source's folders may hold: none, in the built-in
-// tree (a shared source is a fleet, which follows none either: Fleet);
+// tree (a shared source is a repository, which follows none either:
+// Repository);
 // a link to a regular file, in the owner's own folders, which owners
 // keep in a dotfiles repository.
 

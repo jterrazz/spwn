@@ -10,8 +10,8 @@ type Source interface {
 	// invariant: the source's catalog packages and Machinefiles, each by its
 	// slash path under the source (`catalog/<category>/<name>.yaml`,
 	// `machinefiles/<name>.machine.yaml`), in path order, in the source's
-	// origin; a fleet's names them so too, each with its path in the
-	// repository (Fleet). A source that holds none of its folders answers
+	// origin; a shared source's repository names them so too, each with its
+	// path in the repository (Repository). A source that holds none of its folders answers
 	// no file.
 	Read(ctx context.Context) (machinefile.Tree, error)
 }
