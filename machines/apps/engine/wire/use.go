@@ -11,6 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
@@ -116,15 +117,29 @@ func (u *terminalUses) Gone(machine string, at time.Time) {
 // value: whether a machine of that name is known: this Mac's records, else
 // the other Macs' lists; a Mac that does not answer leaves it untold.
 func (m machine) known(ctx context.Context, name string) (bool, error) {
-	if _, known := m.locate(name); known {
-		return true, nil
+	ref, err := coremachine.ParseAddress(name)
+	if err != nil {
+		return false, err
 	}
-	_, err := m.holder(ctx, name)
+	if ref.On == m.profile.Ref.Name {
+		found, known := m.locate(ref.Name)
+		return known && found.On != "", nil
+	}
+	var held bool
+	if ref.On != "" {
+		held, err = m.holds(ctx, ref.On, ref.Name)
+	} else {
+		if _, known := m.locate(name); known {
+			return true, nil
+		}
+		_, err = m.holder(ctx, name)
+		held = err == nil
+	}
 	var unknown *model.UnknownMachineError
 	if errors.As(err, &unknown) {
 		return false, nil
 	}
-	return err == nil, err
+	return held, err
 }
 
 func useCommand(env kit.Env, m machine) *cobra.Command {

@@ -606,14 +606,21 @@ func TestAPurposeIsOneLineOfAtMostItsLimit(t *testing.T) {
 	}
 }
 
-func TestAVMASilentMacHoldsWithNoKindKeepsItsName(t *testing.T) {
+func TestAVMOfAnotherMacLeavesItsNameFreeHereAndOutOfAnUnaskedCreate(t *testing.T) {
 	b := creating(t, true)
-	if err := b.prefs.Macs.Set(map[string]model.MacRecord{"studio": {VMs: []model.SeenVM{{Name: "old", Lifetime: model.Persistent, CPUs: 2, MemoryBytes: 4 << 30}}}}); err != nil {
+	if err := b.prefs.Macs.Set(map[string]model.MacRecord{"studio": {VMs: []model.SeenVM{{Name: "old", Lifetime: model.Persistent, CPUs: 2, MemoryBytes: 4 << 30}, {Name: "linux-1"}}}}); err != nil {
 		t.Fatal(err)
 	}
 	_, err := b.m.CheckCreate(context.Background(), model.CreateRequest{Image: "base-ubuntu", Name: "old"})
-	if taken := new(model.NameTakenError); !errors.As(err, &taken) || !taken.VM || taken.On != "studio" {
-		t.Errorf("a create named after the VM silent studio holds with no kind: %v; want the name taken, on studio", err)
+	if taken := new(model.NameTakenError); errors.As(err, &taken) {
+		t.Errorf("a create named after the VM silent studio holds: %v; want the name free on This Mac", err)
+	}
+	if _, macErr := b.m.CheckCreate(context.Background(), model.CreateRequest{Image: "base-ubuntu", Name: "studio"}); !errors.As(macErr, new(*model.NameTakenError)) {
+		t.Errorf("a create named after the Mac studio: %v; want the name taken", macErr)
+	}
+	got, err := b.m.CheckCreate(context.Background(), model.CreateRequest{Image: "base-ubuntu"})
+	if err != nil || got.Name == "linux-1" {
+		t.Errorf("an unasked create took %q, %v; want a name no VM of another Mac bears", got.Name, err)
 	}
 }
 

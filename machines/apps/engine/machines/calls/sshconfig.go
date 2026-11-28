@@ -35,7 +35,14 @@ func (s *Machinist) SSHBlocks(ctx context.Context, f model.AllMachines) error {
 			if bad != nil {
 				return bad
 			}
-			blocks = append(blocks, contract.MachineBlock{Name: vm.Name, User: user, Key: key, Behind: mac.Name, ThisMac: mac.ThisMac})
+			// invariant: every VM has the block of its full address; the bare
+			// name's block is This Mac's own VM of that name, else the one VM
+			// of All machines that bears it, and none when two other Macs do.
+			address := vm.Name + "." + mac.Name
+			blocks = append(blocks, contract.MachineBlock{Name: address, User: user, Key: key, Behind: mac.Name, ThisMac: mac.ThisMac, VM: vm.Name})
+			if mac.ThisMac || model.Address(f, mac.Name, vm.Name) == vm.Name {
+				blocks = append(blocks, contract.MachineBlock{Name: vm.Name, User: user, Key: key, Behind: mac.Name, ThisMac: mac.ThisMac})
+			}
 		}
 	}
 	write := s.o.SSHConfig.Put

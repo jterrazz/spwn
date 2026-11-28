@@ -1,0 +1,35 @@
+description: 'stop, start and delete take a full address; an --on naming another computer is refused'
+env: two-computers-one-name
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs.macbook.vms["development-linux"].pid, .macs.mini.vms["development-linux"].pid]'' world.json'
+      exit: 0
+      stdout: |
+          [1001,2001]
+    - command: 'machines stop development-linux.mini --on macbook'
+      exit: 2
+      stderr: |
+          Error: --on macbook disagrees with development-linux.mini, a VM of mini
+          Hint: station machines development-linux.mini
+    - command: 'machines stop development-linux.mini'
+      exit: 0
+      stdout: |
+          	On mini:
+          ●	development-linux	stopped, kept
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs.macbook.vms["development-linux"].pid, .macs.mini.vms["development-linux"].pid]'' world.json'
+      exit: 0
+      stdout: |
+          [1001,null]
+    - command: 'machines start development-linux.mini'
+      exit: 0
+      stdout: |
+          	On mini:
+          ●	development-linux	started
+    - command: 'machines delete development-linux.macbook --confirm=development-linux'
+      exit: 0
+      stdout: |
+          	On macbook:
+          ●	development-linux	deleted
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[(.macs.macbook.vms // {} | keys), (.macs.mini.vms // {} | keys), .macs.mini.vms["development-linux"].pid]'' world.json'
+      exit: 0
+      stdout: |
+          [[],["development-linux"],1002]

@@ -14,6 +14,9 @@ type MachineBlock struct {
 	// value: the Mac a VM runs on, empty for a Mac; ThisMac when that Mac is this one.
 	Behind  string
 	ThisMac bool
+	// value: the VM its Mac's pipe is asked for, when the block's name is
+	// that VM's full address, `<vm>.<computer>`; empty when the name is it.
+	VM string
 }
 
 const sshWord = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._-"

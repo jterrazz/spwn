@@ -37,8 +37,9 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			f.StringVar(&in.Confirm, "confirm", "", "the workspace's name, typed, to delete it without the question")
 		},
 		Bind: func(in *Input, args []string) error {
-			in.Name = args[0]
-			return nil
+			name, err := env.VM(args[0])
+			in.Name = name
+			return err
 		},
 		Complete: func([]string, string) []string { return d.Names() },
 		Run: func(ctx context.Context, in *Input, io kit.IO) error {

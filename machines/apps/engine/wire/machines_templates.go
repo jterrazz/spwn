@@ -48,7 +48,7 @@ func (t machineTemplates) Template(ctx context.Context, name string) (model.Temp
 	for _, mt := range got.Mounts {
 		out.Mounts = append(out.Mounts, model.Mount{Computer: t.onMac(mt.Computer), Guest: mt.Guest, ReadOnly: mt.ReadOnly})
 	}
-	out.SignIns, out.Grants, out.Chain = got.SignIns, got.Grants, got.Chain
+	out.SignIns, out.Grants, out.Chain, out.OneVM = got.SignIns, got.Grants, got.Chain, got.OneVM
 	for _, f := range got.Files {
 		out.Files = append(out.Files, model.TemplateFile{Path: f.Path, Body: f.Body})
 	}

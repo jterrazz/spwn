@@ -1,4 +1,4 @@
-description: 'a VM is made from its file of the shared source, with the kits it extends'
+description: 'a VM is made from its file of the shared source, bearing its name, with the kits it extends'
 fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
@@ -11,11 +11,11 @@ runs:
           [["accounts.grants.npm","shared","ai-kit","studio@1a2b3c4/kits/ai-kit.kit.yaml"]]
     - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq ''.macs["web"] = .macs["linux-1"]'' world.json > w.json && /bin/mv w.json world.json'
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["studio-linux"] = .macs["linux-1"]'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
-    - command: 'machines create --memory 4G web --from studio-linux | /usr/bin/grep -E "Boot|npm|Created"'
+    - command: 'machines create --memory 4G --from studio-linux | /usr/bin/grep -E "Boot|npm|Created"'
       exit: 0
       stdout: |
           ●	Boot phase	studio-linux	7 apps installed · 2 settings set
           ●	npm	granted
-          ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB
+          ●	studio-linux	Created	Ephemeral · 4 CPU · 4 GB · 20 GB

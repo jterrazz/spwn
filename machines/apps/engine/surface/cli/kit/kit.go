@@ -259,7 +259,7 @@ func Command[I any](l Leaf[I], env Env) *cobra.Command {
 			envelope:      func() *output.Envelope { return env.envelope(c.Context()) },
 		}
 		if env.Far() {
-			o.on = page.MacName(env.Target().Name, env.Self.Name)
+			o.on = page.MacName(env.Target().Address(), env.Self.Name)
 		}
 		if l.Plumbing {
 			o.in, o.raw = env.Stdin, env.Stdout
@@ -307,7 +307,11 @@ func run[I any](ctx context.Context, c *cobra.Command, l Leaf[I], in *I, args []
 
 func proceed[I any](ctx context.Context, c *cobra.Command, l Leaf[I], in *I, args []string, env Env, o IO) error {
 	// value: a leaf's run past its binding, which says what it says once:
-	// what a terminal runs again once a missing need is installed.
+	// what a terminal runs again once a missing need is installed. Its
+	// banner is the target's once bound: a full address names it.
+	if env.Far() {
+		o.on = page.MacName(env.Target().Address(), env.Self.Name)
+	}
 	if l.Validate != nil && !env.Far() {
 		// invariant: Validate checks against this machine; a call sent
 		// elsewhere is checked by its own use case, there.

@@ -6,7 +6,7 @@ runs:
     - command: '--version >/dev/null; "$STATION" machines >/dev/null && /usr/bin/jq -c ''.macs[.this_mac].ssh.blocks | map_values(.user)'' world.json'
       exit: 0
       stdout: |
-          {"api":"you","infra":"jterrazz.agent","linux-1":"you","mac-mini":"jterrazz.agent"}
+          {"api":"you","api.macbook-pro":"you","infra":"jterrazz.agent","infra.mac-mini":"jterrazz.agent","linux-1":"you","linux-1.macbook-pro":"you","mac-mini":"jterrazz.agent"}
     - command: '--version >/dev/null; /usr/bin/jq ''.macs[.this_mac].preferences.vm_user = "you\n  ProxyCommand /usr/bin/touch pwned"'' world.json > w.json && /bin/mv w.json world.json'
       exit: 0
     - command: '--version >/dev/null; "$STATION" machines | /usr/bin/grep "not refreshed"'
@@ -16,4 +16,4 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs[.this_mac].ssh.blocks | map_values(.user)'' world.json'
       exit: 0
       stdout: |
-          {"api":"you","infra":"jterrazz.agent","linux-1":"you","mac-mini":"jterrazz.agent"}
+          {"api":"you","api.macbook-pro":"you","infra":"jterrazz.agent","infra.mac-mini":"jterrazz.agent","linux-1":"you","linux-1.macbook-pro":"you","mac-mini":"jterrazz.agent"}

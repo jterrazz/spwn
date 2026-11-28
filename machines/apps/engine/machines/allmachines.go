@@ -373,7 +373,8 @@ type RefusedMac struct{ Name, Why string }
 
 type Unasked struct {
 	// value: a create asked for its machine file alone: that file, its
-	// image, size and lifetime, no name; the kind its name is given by;
+	// image, size and lifetime, no name but a shared machine file's own;
+	// the kind its name is given by;
 	// the built-in Linux image whose own file it is, empty for any other
 	// file.
 	Request CreateRequest

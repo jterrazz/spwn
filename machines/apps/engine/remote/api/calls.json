@@ -1009,6 +1009,7 @@
         "machines.name-taken",
         "machines.no-image",
         "machines.not-enough-memory",
+        "machines.one-vm-name",
         "machines.server-template",
         "machines.template-name",
         "machines.too-little-memory",

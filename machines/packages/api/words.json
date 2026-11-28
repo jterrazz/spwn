@@ -1066,6 +1066,11 @@
       "Detail": "machines",
       "Tone": "plain"
     },
+    "machines.one-vm-name": {
+      "Word": "one VM name",
+      "Detail": "machines",
+      "Tone": "plain"
+    },
     "machines.server-bridged": {
       "Word": "server bridged",
       "Detail": "machines",
@@ -1217,6 +1222,11 @@
     },
     "range_full": {
       "Word": "No free port",
+      "Tone": "plain"
+    },
+    "remote.ambiguous-name": {
+      "Word": "ambiguous name",
+      "Detail": "remote",
       "Tone": "plain"
     },
     "remote.bad-mac-name": {

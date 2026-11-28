@@ -22,6 +22,18 @@ func MaySleep(f AllMachines, h MacView) string {
 	return Label(f, h) + " may sleep: a server pauses with it."
 }
 
+func Address(f AllMachines, mac, vm string) string {
+	// value: how a list names a VM of that Mac: its bare name while it is
+	// the one VM of All machines that bears it, else its full address,
+	// `<vm>.<computer>`, the bare name naming no one machine there.
+	for _, h := range f.Macs {
+		if h.Name != mac && slices.ContainsFunc(h.VMs, func(v VM) bool { return v.Name == vm }) {
+			return vm + "." + mac
+		}
+	}
+	return vm
+}
+
 func Label(f AllMachines, h MacView) string {
 	if h.ThisMac {
 		return "This Mac"

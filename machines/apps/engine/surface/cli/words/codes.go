@@ -163,6 +163,17 @@ func Codes() map[fail.Code]Wording {
 			mac := cmp.Or(e.Detail["label"], e.Subject)
 			return mac + " does not answer", strings.TrimSpace("station machines " + mac)
 		},
+		call.AmbiguousName: func(e *fail.Error) (string, string) {
+			macs := strings.Fields(e.Detail["on"])
+			if len(macs) < 2 {
+				return e.Subject + " names VMs of more than one Mac", "station machines"
+			}
+			on := strings.Join(macs[:len(macs)-1], ", ") + " and " + macs[len(macs)-1]
+			if silent := strings.Fields(e.Detail["silent"]); len(silent) > 0 {
+				on += " (" + strings.Join(silent, ", ") + ": no answer, held it at the last)"
+			}
+			return e.Subject + " is on " + on + ": name one, " + e.Subject + "." + macs[0], "station machines"
+		},
 		call.VMMacUnreachable: func(e *fail.Error) (string, string) {
 			mac := cmp.Or(e.Detail["label"], e.Detail["mac"])
 			return e.Subject + " is on " + mac + ", which does not answer", "station machines " + mac
@@ -515,6 +526,9 @@ func Codes() map[fail.Code]Wording {
 		},
 		machinescalls.UnknownImage: func(e *fail.Error) (string, string) {
 			return (&machines.UnknownImageError{Image: e.Subject}).Error(), "station images for the images"
+		},
+		machinescalls.OneVMName: func(e *fail.Error) (string, string) {
+			return (&machines.OneVMNameError{Name: e.Subject, Template: e.Detail["template"]}).Error(), "station machines create " + e.Detail["template"] + " --from " + e.Detail["template"]
 		},
 		machinescalls.TemplateName: func(e *fail.Error) (string, string) {
 			return (&machines.TemplateNameError{Name: e.Subject, Template: e.Detail["template"]}).Error(), "name it apart: station machines create <name> --from " + e.Detail["template"]

@@ -41,8 +41,9 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 			f.StringVar(&in.Confirm, "confirm", "", "the VM's name, typed, to stop a server without the question")
 		},
 		Bind: func(in *Input, args []string) error {
-			in.Name = args[0]
-			return nil
+			name, err := env.VM(args[0])
+			in.Name = name
+			return err
 		},
 		Asks:     true,
 		Confirm:  func(in *Input) string { return "Stop " + in.Name + "? What it serves stops until you start it again." },

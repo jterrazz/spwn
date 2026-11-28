@@ -30,6 +30,7 @@ const (
 	BadPurpose      fail.Code = "machines.bad-purpose"
 	TooLittle       fail.Code = "machines.too-little-memory"
 	TemplateName    fail.Code = "machines.template-name"
+	OneVMName       fail.Code = "machines.one-vm-name"
 )
 
 // value: the refusals both creates declare, each coded by Worded; each
@@ -40,7 +41,7 @@ func createRefusals() []fail.Code {
 }
 
 func workspaceRefusals() []fail.Code {
-	return append(createRefusals(), BadLifetime, CheckForServers, ServerTemplate, TemplateName)
+	return append(createRefusals(), BadLifetime, CheckForServers, ServerTemplate, TemplateName, OneVMName)
 }
 
 func serverRefusals() []fail.Code {
@@ -69,6 +70,7 @@ func Worded(err error) error {
 		image  *machines.UnknownImageError
 		tmpl   *machines.ServerTemplateError
 		named  *machines.TemplateNameError
+		one    *machines.OneVMNameError
 		net    *machines.BadNetworkError
 		hyper  *machines.NoEngineError
 		bad    *machines.BadNameError
@@ -102,6 +104,8 @@ func Worded(err error) error {
 		return refused(fail.Refused, ServerTemplate, tmpl.Name, nil)
 	case errors.As(err, &named):
 		return refused(fail.Refused, TemplateName, named.Name, map[string]string{"template": named.Template})
+	case errors.As(err, &one):
+		return refused(fail.Refused, OneVMName, one.Name, map[string]string{"template": one.Template})
 	case errors.As(err, &net):
 		return refused(fail.Refused, BadNetwork, net.Value, map[string]string{"bridge": yes(net.Bridge)})
 	case errors.As(err, &hyper):

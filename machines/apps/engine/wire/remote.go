@@ -141,33 +141,28 @@ func (m machine) locate(name string) (coremachine.Ref, bool) {
 }
 
 // invariant: a VM of another Mac is found in that Mac's own list, asked of
-// every other Mac at once; a name none of them holds is unknown, and while a
-// Mac is silent the VM may be its own, so that silence is the answer: the
-// silent Mac that held it at its last answer first.
+// every other Mac at once; the one Mac that holds it, answering or silent
+// and holding it at its last answer, is its holder, and a name more than one
+// holds is refused naming each, never guessed. A name none of them holds is
+// unknown, and while a Mac is silent the VM may be its own, so that silence
+// is the answer.
 func (m machine) holder(ctx context.Context, vm string) (string, error) {
-	r := m.far.router
 	others := m.machines(false).OtherMacs()
-	got := each.All(ctx, others, func(ctx context.Context, mac string) (bool, error) {
-		out, err := call.Read(ctx, r, coremachine.Ref{Name: mac}, machinescalls.List, machinescalls.ListIn{ThisMac: true}, nil)
-		if err != nil {
-			return false, err
-		}
-		for _, mac := range out.All.Macs {
-			if slices.ContainsFunc(mac.VMs, func(v model.VM) bool { return v.Name == vm }) {
-				return true, nil
-			}
-		}
-		return false, nil
-	})
+	got := each.All(ctx, others, func(ctx context.Context, mac string) (bool, error) { return m.holds(ctx, mac, vm) })
+	var holders, silent []string
 	for _, mac := range others {
-		if got[mac].Err == nil && got[mac].Value {
-			return mac, nil
+		switch {
+		case got[mac].Err == nil && got[mac].Value:
+			holders = append(holders, mac)
+		case got[mac].Err != nil && m.machines(false).Remembers(mac, vm):
+			holders, silent = append(holders, mac), append(silent, mac)
 		}
 	}
-	for _, mac := range others {
-		if got[mac].Err != nil && m.machines(false).Remembers(mac, vm) {
-			return mac, nil
-		}
+	switch {
+	case len(holders) == 1:
+		return holders[0], nil
+	case len(holders) > 1:
+		return "", call.Ambiguous(vm, holders, silent)
 	}
 	for _, mac := range others {
 		if err := got[mac].Err; err != nil {
@@ -175,6 +170,20 @@ func (m machine) holder(ctx context.Context, vm string) (string, error) {
 		}
 	}
 	return "", &model.UnknownMachineError{Name: vm}
+}
+
+// value: whether that other Mac's own list holds a VM of that name.
+func (m machine) holds(ctx context.Context, mac, vm string) (bool, error) {
+	out, err := call.Read(ctx, m.far.router, coremachine.Ref{Name: mac}, machinescalls.List, machinescalls.ListIn{ThisMac: true}, nil)
+	if err != nil {
+		return false, err
+	}
+	for _, h := range out.All.Macs {
+		if slices.ContainsFunc(h.VMs, func(v model.VM) bool { return v.Name == vm }) {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 // value: the Mac that runs a VM: this Mac for one it holds the record of,
@@ -414,6 +423,9 @@ func (m machine) socketDoor() door {
 	return door{far: func(t coremachine.Ref) bool {
 		if t.Name == "" || t.Name == m.profile.Ref.Name {
 			return false
+		}
+		if t.On != "" {
+			return t.On != m.profile.Ref.Name
 		}
 		ref, _ := m.locate(t.Name)
 		return ref.On != m.profile.Ref.Name

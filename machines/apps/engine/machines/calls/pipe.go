@@ -3,8 +3,12 @@ package calls
 import (
 	"context"
 	"errors"
+	"slices"
 	"strconv"
 	"time"
+
+	"github.com/jterrazz/studio-station/apps/engine/core/call"
+	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
@@ -16,10 +20,18 @@ func (s *Machinist) CheckPipe(ctx context.Context, name string) (model.VMRecord,
 	if err := s.CheckMac(); err != nil {
 		return model.VMRecord{}, err
 	}
+	address := name
+	if ref, bad := machine.ParseAddress(name); bad == nil && ref.On == s.ThisMacName() {
+		name = ref.Name
+	}
 	m, err := s.lookup(name)
 	var unknown *model.UnknownMachineError
 	if errors.As(err, &unknown) {
-		if mac, ok := s.macOf(ctx, name); ok {
+		mac, held := s.macOf(ctx, address)
+		if held != nil {
+			return model.VMRecord{}, held
+		}
+		if mac != "" {
 			return model.VMRecord{}, &model.NotThisMacError{Name: name, Mac: mac}
 		}
 	}
@@ -29,19 +41,38 @@ func (s *Machinist) CheckPipe(ctx context.Context, name string) (model.VMRecord,
 	return s.VM(m.Name, "pipe")
 }
 
-func (s *Machinist) macOf(ctx context.Context, name string) (string, bool) {
-	allMachines, err := s.AllMachines(ctx, false)
+// value: the other Mac that holds a VM by its address: the Mac a full
+// address names, when it lists that VM; else the one other Mac whose VM
+// bears the bare name, two or more refused naming each; none, an empty
+// name, when All machines cannot be read.
+func (s *Machinist) macOf(ctx context.Context, name string) (string, error) {
+	ref, err := machine.ParseAddress(name)
 	if err != nil {
-		return "", false
+		return "", err
 	}
-	for _, h := range allMachines.Macs {
-		for _, vm := range h.VMs {
-			if vm.Name == name {
-				return h.Name, true
+	var macs []model.MacView
+	if allMachines, listed := s.AllMachines(ctx, false); listed == nil {
+		macs = allMachines.Macs
+	}
+	var holders, silent []string
+	for _, h := range macs {
+		if h.ThisMac || ref.On != "" && h.Name != ref.On {
+			continue
+		}
+		if slices.ContainsFunc(h.VMs, func(vm model.VM) bool { return vm.Name == ref.Name }) {
+			holders = append(holders, h.Name)
+			if !h.Reachable {
+				silent = append(silent, h.Name)
 			}
 		}
 	}
-	return "", false
+	switch len(holders) {
+	case 0:
+		return "", nil
+	case 1:
+		return holders[0], nil
+	}
+	return "", call.Ambiguous(ref.Name, holders, silent)
 }
 
 func (s *Machinist) Pipe(ctx context.Context, name string, pipe func(ctx context.Context, ip string, port int) error) error {

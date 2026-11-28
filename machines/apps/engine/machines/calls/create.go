@@ -86,6 +86,9 @@ func (s *Machinist) fromTemplate(ctx context.Context, r model.CreateRequest) (mo
 		return r, nil, &model.ServerTemplateError{Name: t.Name}
 	}
 	r.Image = t.Name
+	if t.OneVM {
+		r.Name = cmp.Or(r.Name, t.Name)
+	}
 	r.Lifetime = cmp.Or(r.Lifetime, t.Lifetime)
 	r.Network = cmp.Or(r.Network, t.Network)
 	r.Size.CPUs = cmp.Or(r.Size.CPUs, t.Size.CPUs)
@@ -97,9 +100,18 @@ func (s *Machinist) fromTemplate(ctx context.Context, r model.CreateRequest) (mo
 // invariant: a workspace is named apart from every Machinefile its
 // template's chain reads, so its own changes are its alone: the name asked
 // is judged before anything else of the create, the one chosen once
-// chosen.
+// chosen. A fleet's machine file is one machine (ADR-109 §3): the VM made
+// from it bears its name, its own changes and the file's overlay one file,
+// and no other name is made from it.
 func apart(name string, t *model.Template) error {
-	if t != nil && slices.Contains(t.Chain, name) {
+	switch {
+	case t == nil:
+		return nil
+	case t.OneVM && name != "" && name != t.Name:
+		return &model.OneVMNameError{Name: name, Template: t.Name}
+	case t.OneVM && name == t.Name:
+		return nil
+	case slices.Contains(t.Chain, name):
 		return &model.TemplateNameError{Name: name, Template: t.Name}
 	}
 	return nil
@@ -300,9 +312,9 @@ func (s *Machinist) engineUp(ctx context.Context, start bool) error {
 	return nil
 }
 
-// value: every name All machines holds, for a VM's name the Mac it is on,
-// by the Name machines.list gives it, This Mac's included, and every VM's
-// another Mac was last seen holding.
+// value: every Mac's name All machines and the preferences hold, This
+// Mac's VMs with the Mac they are on, by the Name machines.list gives it,
+// and apart, every VM's name another Mac holds or was last seen holding.
 func (s *Machinist) claims(ctx context.Context) (claims, error) {
 	allMachines, err := s.AllMachines(ctx, false)
 	if err != nil {
@@ -312,10 +324,14 @@ func (s *Machinist) claims(ctx context.Context) (claims, error) {
 }
 
 func (s *Machinist) claimsOf(allMachines model.AllMachines) (claims, error) {
-	c := claims{held: map[string]claim{}, on: map[string]string{}}
+	c := claims{held: map[string]claim{}, on: map[string]string{}, elsewhere: map[string]bool{}}
 	for _, h := range allMachines.Macs {
 		c.held[h.Name] = claimMac
 		for _, vm := range h.VMs {
+			if !h.ThisMac {
+				c.elsewhere[vm.Name] = true
+				continue
+			}
 			c.held[vm.Name], c.on[vm.Name] = claimVM, h.Name
 		}
 	}
@@ -326,12 +342,10 @@ func (s *Machinist) claimsOf(allMachines model.AllMachines) (claims, error) {
 	for name, h := range cfg.Macs {
 		c.held[name] = claimMac
 		// invariant: a VM a silent Mac was last seen holding keeps its name
-		// held, its kind told or not: the list leaves out one with no kind,
-		// a create never takes its name.
+		// from an unasked create, its kind told or not: the list leaves out
+		// one with no kind.
 		for _, vm := range h.VMs {
-			if c.held[vm.Name] == unclaimed {
-				c.held[vm.Name], c.on[vm.Name] = claimVM, name
-			}
+			c.elsewhere[vm.Name] = true
 		}
 	}
 	return c, nil

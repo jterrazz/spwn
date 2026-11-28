@@ -27,7 +27,7 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].ssh.blocks | keys'' world.json'
       exit: 0
       stdout: |
-          ["api","linux-1"]
+          ["api","api.macbook-pro","linux-1","linux-1.macbook-pro"]
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["mac-mini"] | del(.engine.memory, .engine.activity)'' world.json | /usr/bin/cmp - mini-before.json && echo unchanged'
       exit: 0
       stdout: |

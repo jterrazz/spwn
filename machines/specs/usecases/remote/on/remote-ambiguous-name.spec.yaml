@@ -1,0 +1,54 @@
+description: 'a bare name two other computers hold is refused naming each address; each address reaches its own'
+env: two-computers-one-name
+runs:
+    - command: 'apps --on development-linux'
+      exit: 2
+      stderr: |
+          Error: development-linux is on macbook and mini: name one, development-linux.macbook
+          Hint: station machines
+    - command: 'machines ssh development-linux'
+      exit: 2
+      stderr: |
+          Error: development-linux is on macbook and mini: name one, development-linux.macbook
+          Hint: station machines
+    - command: 'machines ssh development-linux.mini'
+      exit: 0
+      stdout: |
+          ssh you@development-linux.mini
+    - command: 'machines stop development-linux --on mini'
+      exit: 0
+      stdout: |
+          	On mini:
+          ●	development-linux	stopped, kept
+    - command: 'overview --on development-linux.mini'
+      exit: 0
+      stdout: |
+          	On development-linux.mini:
+          # Health
+          ●	Running
+          ●	Has an address	192.168.64.5
+          ●	SSH answers
+          ●	Size	4 CPU · 8 GB · 50 GB
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	air	Mac	air	Engine running
+          ●	macbook	Mac	macbook	Engine running
+          ●	development-linux.macbook	Workspace	macbook	Running · persistent	4 CPU	8 GB
+          ●	mini	Mac	mini	Engine running
+          ○	development-linux.mini	Workspace	mini	Stopped · persistent	8 CPU	16 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs.macbook.vms["development-linux"].pid, .macs.mini.vms["development-linux"].pid]'' world.json'
+      exit: 0
+      stdout: |
+          [1001,null]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs[.this_mac].ssh.blocks | keys[]]'' world.json'
+      exit: 0
+      stdout: |
+          ["development-linux.macbook","development-linux.mini","macbook","mini"]
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs.mini.offline = true | .macs.air.preferences.macs.mini.answered = "2026-11-04T03:12:00Z" | .macs.air.preferences.macs.mini.vms = [{name: "development-linux", kind: "linux", lifetime: "persistent", cpus: 2, memory_bytes: 4294967296}]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines ssh development-linux'
+      exit: 2
+      stderr: |
+          Error: development-linux is on macbook and mini (mini: no answer, held it at the last): name one, development-linux.macbook
+          Hint: station machines

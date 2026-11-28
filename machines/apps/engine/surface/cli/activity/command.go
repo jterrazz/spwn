@@ -84,7 +84,7 @@ func one(ctx context.Context, d Deps, env kit.Env, target machine.Ref, how read)
 	if target == env.Self {
 		return mac(ctx, env, env.Self, env.Self.Name, how)
 	}
-	held, ok := kit.Holder(ctx, env, target.Name)
+	held, ok := kit.Holder(ctx, env, target)
 	if !ok {
 		return mac(ctx, env, target, target.Name, how)
 	}

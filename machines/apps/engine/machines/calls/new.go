@@ -91,7 +91,10 @@ var NewSheet = call.Watch[Deps, NewIn, NewMachine]{
 			}
 		}
 		sheet := func(f machines.AllMachines) call.Update[NewMachine] {
-			name, err := d.Machines.NameFor(unasked.Kind, f)
+			name, err := unasked.Request.Name, error(nil)
+			if name == "" {
+				name, err = d.Machines.NameFor(unasked.Kind, f)
+			}
 			if err != nil {
 				return call.Update[NewMachine]{Err: err}
 			}

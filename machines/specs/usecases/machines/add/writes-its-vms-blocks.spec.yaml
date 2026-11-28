@@ -16,4 +16,4 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].ssh.blocks | keys'' world.json'
       exit: 0
       stdout: |
-          ["agent-7f","api","infra","linux-1","linux-2","linux-3","mac-mini","macbook-air","review-bot"]
+          ["agent-7f","agent-7f.macbook-pro","api","api.macbook-pro","infra","infra.mac-mini","linux-1","linux-1.macbook-pro","linux-2","linux-2.macbook-pro","linux-3","linux-3.mac-mini","mac-mini","macbook-air","review-bot","review-bot.mac-mini"]

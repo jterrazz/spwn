@@ -27,6 +27,9 @@ type Template struct {
 	// value: the names of the Machinefiles its chain reads, itself among
 	// them: a VM named like one would read that file's overlay as its own.
 	Chain []string
+	// value: a fleet's machine file, one machine: the VM made from it bears
+	// its name, and no other VM is made from it (ADR-109 §3).
+	OneVM bool
 }
 
 type TemplateFile struct {
@@ -105,6 +108,15 @@ type TemplateNameError struct{ Name, Template string }
 
 func (e *TemplateNameError) Error() string {
 	return e.Name + " names a Machinefile of " + e.Template + "'s chain: a workspace's own changes, " + e.Name + ".local.yaml, would be those of every machine that follows " + e.Template
+}
+
+// value: a VM asked of a fleet's machine file under another name: that
+// file is one machine, made into the one VM that bears its name.
+
+type OneVMNameError struct{ Name, Template string }
+
+func (e *OneVMNameError) Error() string {
+	return e.Template + " is one machine's file: the VM it makes is " + e.Template + ", never " + e.Name
 }
 
 type ServerTemplateError struct{ Name string }

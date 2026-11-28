@@ -53,14 +53,39 @@ func (o *On) Target() (string, bool) {
 
 func (e Env) Target() machine.Ref {
 	// invariant: --on is a target of the Router: the leaf runs here, its call
-	// runs on that machine and its answer is rendered by this binary.
+	// runs on that machine and its answer is rendered by this binary; a full
+	// address, `<vm>.<computer>`, is that VM of that computer.
 	if name, ok := e.On.Target(); ok && name != e.Self.Name {
+		if ref, err := machine.ParseAddress(name); err == nil {
+			return ref
+		}
 		return machine.Ref{Name: name}
 	}
 	return e.Self
 }
 
 func (e Env) Far() bool { return e.Target() != e.Self }
+
+func (e Env) VM(address string) (string, error) {
+	// invariant: the VM a positional address names, its computer becoming
+	// the target as `--on` would; an `--on` naming another computer is
+	// refused.
+	ref, err := machine.ParseAddress(address)
+	if err != nil {
+		return "", usage(err.Error(), "station machines")
+	}
+	if ref.On == "" {
+		return ref.Name, nil
+	}
+	if e.On == nil {
+		return "", usage("\""+address+"\" names a computer this command cannot reach", "station machines")
+	}
+	if e.On.Machine != "" && e.On.Machine != ref.On {
+		return "", usage("--on "+e.On.Machine+" disagrees with "+address+", a VM of "+ref.On, "station machines "+address)
+	}
+	e.On.Machine = ref.On
+	return ref.Name, nil
+}
 
 func refusesOn(path string) bool {
 	fields := strings.Fields(path)
@@ -94,6 +119,9 @@ func RefuseOn(env Env) func(*cobra.Command, []string) error {
 		}
 		if env.On.Machine == "" {
 			return nil
+		}
+		if _, err := machine.ParseAddress(env.On.Machine); err != nil {
+			return usage(err.Error(), "station machines")
 		}
 		p := path(c)
 		if refusesOn(p) {

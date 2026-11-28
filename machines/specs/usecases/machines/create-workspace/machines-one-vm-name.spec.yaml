@@ -1,0 +1,19 @@
+description: 'a shared source''s machine file makes one VM, named after it: another name or a kit''s is refused'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}} | .sources = {"https://example.com/studio.git": {head: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"machines/macbook-pro/development-linux.machine.yaml": "machinefile: station.machinefile/v1\nname: development-linux\nmachine: { kind: workspace, system: { os: ubuntu, version: \"24.04\" } }\nextends: [base-ubuntu, ai-kit]\n", "kits/ai-kit.kit.yaml": "machinefile: station.machinefile/v1\nname: ai-kit\n"}}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines create web --from development-linux'
+      exit: 2
+      stderr: |
+          Error: development-linux is one machine's file: the VM it makes is development-linux, never web
+          Hint: station machines create development-linux --from development-linux
+    - command: 'machines create ai-kit --from development-linux'
+      exit: 2
+      stderr: |
+          Error: development-linux is one machine's file: the VM it makes is development-linux, never ai-kit
+          Hint: station machines create development-linux --from development-linux
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].vms // {} | keys'' world.json'
+      exit: 0
+      stdout: |
+          ["api","linux-1","station-image-base-ubuntu-2026.10.20","station-image-base-ubuntu-2026.11.01"]

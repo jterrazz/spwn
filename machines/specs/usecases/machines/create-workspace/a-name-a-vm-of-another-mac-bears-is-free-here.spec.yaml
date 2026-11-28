@@ -1,0 +1,13 @@
+description: 'a name a VM of another Mac bears is free here: the create goes past it to its next refusal'
+env: two-macs
+runs:
+    - command: 'machines create infra --memory 64G'
+      exit: 2
+      stderr: |
+          Error: not enough memory on macbook-pro: 64 GB asked, 4 GB left for VMs
+          Hint: ask for less: --memory 4G
+    - command: 'machines create linux-1 --on mac-mini --memory 64G'
+      exit: 2
+      stderr: |
+          Error: not enough memory on mac-mini: 64 GB asked, 36 GB left for VMs
+          Hint: ask for less: --memory 36G

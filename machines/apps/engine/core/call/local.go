@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"reflect"
+	"slices"
+	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	"github.com/jterrazz/studio-station/apps/engine/core/machine"
@@ -27,7 +29,21 @@ const (
 	// value: a Mac name that is no ssh word, or that ssh reads as an option,
 	// refused before any ssh runs.
 	BadMacName fail.Code = "remote.bad-mac-name"
+	// value: a bare name that VMs of more than one other Mac bear, refused
+	// before anything is dialed, never guessed.
+	AmbiguousName fail.Code = "remote.ambiguous-name"
 )
+
+func Ambiguous(vm string, macs, silent []string) *fail.Error {
+	// value: the refusal of a bare name, each Mac that holds it in name
+	// order, so its words name every full address, and apart the ones that
+	// did not answer and held it at their last answer.
+	detail := map[string]string{"on": strings.Join(slices.Sorted(slices.Values(macs)), " ")}
+	if len(silent) > 0 {
+		detail["silent"] = strings.Join(slices.Sorted(slices.Values(silent)), " ")
+	}
+	return fail.New(fail.Refused, AmbiguousName, vm, detail)
+}
 
 type local interface {
 	run(ctx context.Context, target machine.Profile, in any, p Progress) (any, error)

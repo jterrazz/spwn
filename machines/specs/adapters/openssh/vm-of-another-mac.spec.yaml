@@ -1,4 +1,4 @@
-description: 'bare machines writes a block for a VM of another Mac, with the login of the Mac that hosts it'
+description: 'bare machines writes the address and bare blocks of another Mac''s VM, with its Mac''s login'
 fixture:
     - ../../__fixtures__/hosts-x-y/
     - ../../__fixtures__/machines-stubs/
@@ -23,6 +23,20 @@ runs:
                     UserKnownHostsFile ~/.local/state/station/known_hosts/y
                     StrictHostKeyChecking accept-new
                   # <<< jterrazz machine y <<<
+
+                  # >>> jterrazz machine w.y >>>
+                  Host w.y
+                    HostName w.y
+                    User u
+                    IdentityAgent ~/.local/state/station/agent.sock
+                    IdentityFile "~/.local/state/station/device-key.pub"
+                    IdentitiesOnly yes
+                    ServerAliveInterval 30
+                    ServerAliveCountMax 3
+                    UserKnownHostsFile ~/.local/state/station/known_hosts/w.y
+                    StrictHostKeyChecking accept-new
+                    ProxyCommand ssh y -- "sh -c 'PATH=\"\$HOME/.local/bin:/usr/local/bin:\$PATH\" exec station \"\$@\"' station machines pipe w"
+                  # <<< jterrazz machine w.y <<<
 
                   # >>> jterrazz machine w >>>
                   Host w

@@ -1,0 +1,31 @@
+description: 'on a computer that holds a VM of a name another computer holds too, the bare name is its own'
+env: two-computers-one-name-on-macbook
+runs:
+    - command: 'machines ssh development-linux'
+      exit: 0
+      stdout: |
+          ssh you@development-linux
+    - command: 'machines ssh development-linux.mini'
+      exit: 0
+      stdout: |
+          ssh you@development-linux.mini
+    - command: 'machines stop development-linux'
+      exit: 0
+      stdout: |
+          ●	development-linux	stopped, kept
+    - command: 'machines'
+      exit: 0
+      stdout: |
+          ●	macbook	Mac	macbook	Engine running
+          ○	development-linux.macbook	Workspace	macbook	Stopped · persistent	4 CPU	8 GB
+          ●	air	Mac	air	Engine running
+          ●	mini	Mac	mini	Engine running
+          ●	development-linux.mini	Workspace	mini	Running · persistent	8 CPU	16 GB
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs.macbook.vms["development-linux"].pid, .macs.mini.vms["development-linux"].pid]'' world.json'
+      exit: 0
+      stdout: |
+          [null,2001]
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs[.this_mac].ssh.blocks | keys[]]'' world.json'
+      exit: 0
+      stdout: |
+          ["air","development-linux","development-linux.macbook","development-linux.mini","mini"]

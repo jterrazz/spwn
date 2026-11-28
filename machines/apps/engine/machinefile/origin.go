@@ -98,6 +98,8 @@ type Placed struct {
 	// and its bytes, as its source holds them.
 	Path string
 	Body []byte
+	// value: the slot of a shared source's file, empty for every other.
+	Slot catalog.Slot
 }
 
 // value: every source read: the catalog in its sources, the Machinefiles by
@@ -213,7 +215,7 @@ func Load(trees []Tree) (Library, error) {
 			if err != nil {
 				return Library{}, refusedFile("machinefile", err)
 			}
-			placed := Placed{File: mf, Kind: t.Kind, Path: file, Body: f.Body}
+			placed := Placed{File: mf, Kind: t.Kind, Path: file, Body: f.Body, Slot: f.Slot}
 			switch {
 			case overlay && t.Kind != User:
 				return Library{}, refusedFile("machinefile", &catalog.FileError{File: file, Problem: "an overlay is the owner's alone, in ~/.config/station/machinefiles"})

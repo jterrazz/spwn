@@ -34,6 +34,8 @@ func List(f model.AllMachines, warnings []string, thisMac page.Context) page.Pag
 		g := page.Group{Head: macRow(model.Label(f, h), h, thisVersion, f.Read), Fold: page.Open}
 		for _, vm := range model.Ordered(h.VMs) {
 			row := listVMRow(h.Name, vm)
+			row.ID = model.Address(f, h.Name, vm.Name)
+			row.Label = row.ID
 			g.Items = append(g.Items, page.Item{Row: &row})
 		}
 		if len(h.VMs) == 0 && h.Reachable && !h.OtherRelease {

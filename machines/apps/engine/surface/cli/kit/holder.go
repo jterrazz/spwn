@@ -23,19 +23,35 @@ type Held struct {
 	Kind      machine.Kind
 }
 
-func Holder(ctx context.Context, env Env, vm string) (Held, bool) {
+func Holder(ctx context.Context, env Env, vm machine.Ref) (Held, bool) {
+	// invariant: a VM of All machines by its address: on the computer it
+	// names, else This Mac's of that name, else the one Mac that holds it;
+	// a bare name two other Macs hold is held by none here, so the Router
+	// refuses it naming each.
 	list, err := call.Read(ctx, env.Calls, env.Self, machinescalls.List, machinescalls.ListIn{Unwritten: true}, nil)
 	if err != nil {
 		return Held{}, false
 	}
+	var found []Held
 	for _, h := range list.All.Macs {
+		if vm.On != "" && h.Name != vm.On {
+			continue
+		}
 		for _, v := range h.VMs {
-			if v.Name == vm {
-				return Held{VM: vm, Mac: h.Name, MacIsThisMac: h.ThisMac, Reachable: h.ThisMac || h.Reachable, Running: v.State == machines.Running, Kind: v.Lifetime.Kind()}, true
+			if v.Name != vm.Name {
+				continue
 			}
+			held := Held{VM: vm.Name, Mac: h.Name, MacIsThisMac: h.ThisMac, Reachable: h.ThisMac || h.Reachable, Running: v.State == machines.Running, Kind: v.Lifetime.Kind()}
+			if h.ThisMac {
+				return held, true
+			}
+			found = append(found, held)
 		}
 	}
-	return Held{}, false
+	if len(found) != 1 {
+		return Held{}, false
+	}
+	return found[0], true
 }
 
 // value: SPEC §8.1: when the Mac that does not answer last answered, as All
@@ -66,7 +82,7 @@ func OnItsMac(ctx context.Context, env Env, vm string, err error) error {
 	if err == nil || !errors.As(err, &e) || e.Code != call.Unreachable {
 		return err
 	}
-	h, ok := Holder(ctx, env, vm)
+	h, ok := Holder(ctx, env, machine.Ref{Name: vm, On: e.Subject})
 	if !ok || h.MacIsThisMac || h.Mac != e.Subject {
 		return err
 	}
@@ -94,7 +110,7 @@ func Aim(ctx context.Context, env Env, self string) Aimed {
 	if name == "" {
 		name = self
 	}
-	if h, ok := Holder(ctx, env, name); ok {
+	if h, ok := Holder(ctx, env, machine.Ref{Name: name, On: t.On}); ok {
 		return Aimed{At: machine.Ref{Name: h.Mac}, VM: name, Name: name, Kind: h.Kind}
 	}
 	return Aimed{At: t, Name: name, Kind: machine.Computer}

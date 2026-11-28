@@ -2,6 +2,7 @@ package openssh
 
 import (
 	"bytes"
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
@@ -113,7 +114,7 @@ func (c *sshFile) exists(p string) bool {
 }
 
 func (c *sshFile) proxy(b contract.MachineBlock) string {
-	words := []string{"machines", "pipe", b.Name}
+	words := []string{"machines", "pipe", cmp.Or(b.VM, b.Name)}
 	if b.ThisMac {
 		return shellWord(c.o.Executable) + " " + strings.Join(words, " ")
 	}

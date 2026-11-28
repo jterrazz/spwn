@@ -321,7 +321,7 @@ func (s *Machinist) Remove(ctx context.Context, name string) (model.DeleteReport
 			report.Warnings = append(report.Warnings, err.Error())
 		}
 	}
-	if err := blocksFailure(s.o.SSHConfig.Remove(ctx, name), false); err != nil {
+	if err := blocksFailure(s.o.SSHConfig.Remove(ctx, name, name+"."+s.ThisMacName()), false); err != nil {
 		report.Warnings = append(report.Warnings, err.Error())
 	}
 	return report, nil

@@ -7,6 +7,7 @@ import (
 	"slices"
 
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	"github.com/jterrazz/studio-station/apps/engine/core/machine"
 	model "github.com/jterrazz/studio-station/apps/engine/machines"
 	"github.com/jterrazz/studio-station/apps/engine/machines/contract"
 )
@@ -22,10 +23,18 @@ func (s *Machinist) SSH(ctx context.Context, name string) (model.SSHTarget, erro
 	if err != nil {
 		return model.SSHTarget{}, err
 	}
+	address := name
+	if ref, bad := machine.ParseAddress(name); bad == nil && ref.On == s.ThisMacName() {
+		name = ref.Name
+	}
 	m, err := s.lookup(name)
 	var unknown *model.UnknownMachineError
 	if errors.As(err, &unknown) {
-		if mac, ok := s.macOf(ctx, name); ok {
+		mac, held := s.macOf(ctx, address)
+		if held != nil {
+			return model.SSHTarget{}, held
+		}
+		if mac != "" {
 			user, bad := s.guestUser(cfg, mac)
 			if bad != nil {
 				return model.SSHTarget{}, bad
@@ -45,6 +54,9 @@ func (s *Machinist) SSH(ctx context.Context, name string) (model.SSHTarget, erro
 	user, bad := s.vmUser(cfg)
 	if bad != nil {
 		return model.SSHTarget{}, bad
+	}
+	if address != name {
+		return sshTarget(user, address)
 	}
 	return sshTarget(user, m.Name)
 }

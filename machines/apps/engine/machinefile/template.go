@@ -42,6 +42,9 @@ type Template struct {
 	Files []File
 	// value: the names of the Machinefiles its chain reads, itself last.
 	Chain []string
+	// value: a fleet's machine file, `machines/<computer>/<vm>.machine.yaml`,
+	// one machine and no template others follow (ADR-109 §3).
+	OneVM bool
 	Lock  []byte
 	SHA   string
 }
@@ -73,6 +76,7 @@ func TemplateOf(lib Library, name string, lock []byte) (Template, error) {
 		Name: name, From: from, OS: catalog.OS(m.values["machine.system.os"].Text), Kind: kind, Lock: lock,
 		Lifetime: catalog.Lifetime(m.values["vm.lifetime"].Text), Network: catalog.Network(m.values["vm.network"].Text),
 		Memory: m.values["vm.resources.memory"].Text, Disk: m.values["vm.resources.disk"].Text, Mounts: m.mounts,
+		OneVM: lib.Machinefiles[name].Slot == catalog.SlotVM,
 	}
 	t.CPUs, _ = strconv.Atoi(m.values["vm.resources.cpus"].Text)
 	t.SignIns, t.Grants = m.programs(signInKey), m.programs(grantKey)

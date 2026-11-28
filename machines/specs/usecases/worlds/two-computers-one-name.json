@@ -1,0 +1,125 @@
+{
+    "now": "2026-11-04T10:00:00Z",
+    "this_mac": "air",
+    "user": "you",
+    "macs": {
+        "air": {
+            "engine": {
+                "started_at": "2026-11-01T10:00:00Z"
+            },
+            "power": {
+                "Lid": "open",
+                "Source": "ac",
+                "HasBattery": true,
+                "Percent": 96,
+                "Charging": true
+            },
+            "preferences": {
+                "name": "air",
+                "macs": {
+                    "macbook": {
+                        "user": "you"
+                    },
+                    "mini": {
+                        "user": "you"
+                    }
+                },
+                "vm_user": "you"
+            },
+            "stores": {
+                "release": {
+                    "Read": "2026-11-04T10:00:00Z"
+                }
+            }
+        },
+        "macbook": {
+            "engine": {
+                "started_at": "2026-11-01T10:00:00Z"
+            },
+            "power": {
+                "Source": "ac"
+            },
+            "preferences": {
+                "name": "macbook",
+                "macs": {
+                    "air": {
+                        "user": "you"
+                    },
+                    "mini": {
+                        "user": "you"
+                    }
+                },
+                "vm_user": "you"
+            },
+            "vms": {
+                "development-linux": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "version": "2026.11.01",
+                        "lifetime": "persistent",
+                        "want": "running",
+                        "created_at": "2026-11-02T09:00:00Z"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 4,
+                        "Memory": 8589934592,
+                        "Disk": 50000000000
+                    },
+                    "pid": 1001,
+                    "guest": {}
+                }
+            },
+            "stores": {
+                "release": {
+                    "Read": "2026-11-04T10:00:00Z"
+                }
+            }
+        },
+        "mini": {
+            "engine": {
+                "started_at": "2026-10-23T09:00:00Z"
+            },
+            "power": {
+                "Source": "ac"
+            },
+            "preferences": {
+                "name": "mini",
+                "macs": {
+                    "air": {
+                        "user": "you"
+                    },
+                    "macbook": {
+                        "user": "you"
+                    }
+                },
+                "never_sleeps": true,
+                "vm_user": "you"
+            },
+            "vms": {
+                "development-linux": {
+                    "kept": {
+                        "image": "base-ubuntu",
+                        "version": "2026.11.01",
+                        "lifetime": "persistent",
+                        "want": "running",
+                        "created_at": "2026-11-03T09:00:00Z"
+                    },
+                    "disk": true,
+                    "size": {
+                        "CPUs": 8,
+                        "Memory": 17179869184,
+                        "Disk": 80000000000
+                    },
+                    "pid": 2001,
+                    "guest": {}
+                }
+            },
+            "stores": {
+                "release": {
+                    "Read": "2026-11-04T10:00:00Z"
+                }
+            }
+        }
+    }
+}

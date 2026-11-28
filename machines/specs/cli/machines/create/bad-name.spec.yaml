@@ -1,4 +1,4 @@
-description: 'a malformed name, a Mac''s name and a name a VM record holds are refused before the engine'
+description: 'a malformed name and a Mac''s name are refused before the engine'
 fixture:
     - ../../../__fixtures__/vms/
     - ./__fixtures__/other-host/
@@ -21,14 +21,6 @@ runs:
       stderr: |
           Error: "y" already names a Mac
           Hint: pick another name
-    - command: 'machines create --name linux-1'
-      exit: 2
-      stderr: |
-          Error: "linux-1" is taken (on y)
-          Hint: pick another name
-      files:
-          .calls:
-              contains: 'station engine attach'
     - command: '--version >/dev/null; /usr/bin/grep -c ''tart clone'' .calls'
       exit: 1
       stdout: |

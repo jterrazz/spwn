@@ -8,11 +8,17 @@ runs:
     - command: 'machines > /dev/null; /usr/bin/sed -n ''/^Host /p;/ProxyCommand/p;/IdentityFile/p'' .ssh/config | /usr/bin/sed "s|$PWD|WORKDIR|g"; /usr/bin/grep -c tailscale .ssh/config'
       exit: 1
       stdout: |
+          Host linux-1.x
+            IdentityFile "~/.local/state/station/device-key.pub"
+            ProxyCommand {{path}} machines pipe linux-1
           Host linux-1
             IdentityFile "~/.local/state/station/device-key.pub"
             ProxyCommand {{path}} machines pipe linux-1
           Host y
             IdentityFile "~/.local/state/station/device-key.pub"
+          Host w.y
+            IdentityFile "~/.local/state/station/device-key.pub"
+            ProxyCommand ssh y -- "sh -c 'PATH=\"\$HOME/.local/bin:/usr/local/bin:\$PATH\" exec station \"\$@\"' station machines pipe w"
           Host w
             IdentityFile "~/.local/state/station/device-key.pub"
             ProxyCommand ssh y -- "sh -c 'PATH=\"\$HOME/.local/bin:/usr/local/bin:\$PATH\" exec station \"\$@\"' station machines pipe w"
