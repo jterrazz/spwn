@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: tmux
 description: Terminal multiplexer for persistent sessions
+agent: "Keep a long command alive past your shell: tmux new -d -s <name> '<command>', tmux ls, tmux attach -t <name>"
 provides: [tmux]
 then: [tmux-dotfiles]
 methods:

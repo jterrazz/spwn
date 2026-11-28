@@ -987,6 +987,9 @@
       },
       "type": "array"
     },
+    "agent": {
+      "type": "string"
+    },
     "bundle": {
       "type": "string"
     },

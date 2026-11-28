@@ -174,6 +174,27 @@ func TestAPackageIsJudgedAlone(t *testing.T) {
 	refusedFor(t, defaults+"writes: [{path: ~/x, level: settings, os: macos, family: linux}]\n", "~/x: names an os and a family")
 }
 
+func TestAnAgentLineIsOneShortLine(t *testing.T) {
+	agent := func(line string) string {
+		return strings.Replace(gh, "provides: [gh]", "provides: [gh]\nagent: "+line, 1)
+	}
+	for line, want := range map[string]string{
+		"'" + strings.Repeat("a", 161) + "'": "an agent line is at most 160 bytes, this one 161",
+		`"open a PR\nthen merge"`:            "an agent line is one line, with no control character",
+		`"tab\there"`:                        "an agent line is one line, with no control character",
+		`"ends with a blank "`:               "an agent line opens and ends with a word, not a blank",
+		"|\n    a block scalar\n":            "an agent line is one line, with no control character",
+	} {
+		refusedFor(t, agent(line), want)
+	}
+	it, err := catalog.Decode("packages/git/gh.yaml", []byte(agent("'"+strings.Repeat("a", 160)+"'")))
+	if err != nil || len(it.Agent) != catalog.AgentMax {
+		t.Errorf("a line of exactly 160 bytes decoded to %q, %v", it.Agent, err)
+	}
+	setting := "package: station.package/v1\nkind: setting\nname: gh\ndescription: d\nagent: use it\nmethods:\n    - os: any\n      builtin: dns\n"
+	refusedFor(t, setting, "`agent` is not a key of a setting")
+}
+
 func TestAPathInsideAnotherAppsContainerIsRefused(t *testing.T) {
 	disk := func(rows string) string { return gh + "disk:\n" + rows + "    no-erase: gh's own\n" }
 	for body, want := range map[string]string{
@@ -228,6 +249,7 @@ func TestEveryKeyOfTheFormatDecodes(t *testing.T) {
 kind: app
 name: gh
 description: GitHub CLI
+agent: 'GitHub from the shell: gh pr create, gh issue list'
 provides: [gh]
 requires: [git]
 after: [tmux]

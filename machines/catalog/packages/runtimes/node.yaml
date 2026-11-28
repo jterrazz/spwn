@@ -2,6 +2,7 @@ package: station.package/v1
 kind: manager
 name: node
 description: JavaScript runtime built on Chrome's V8 engine
+agent: 'Node.js with npm and npx: node <file>, npm install, npm run <script>, npx <package>'
 manages: [npm]
 provides: [node, npm, npx]
 ports:

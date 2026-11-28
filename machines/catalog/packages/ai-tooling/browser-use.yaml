@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: browser-use
 description: AI agent library for browser automation
+agent: 'Hand a browser task to an AI agent, in Python or from the shell: browser-use --help'
 provides: [browser-use]
 requires: [uv]
 version-read:

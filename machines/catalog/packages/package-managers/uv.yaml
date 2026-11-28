@@ -2,6 +2,7 @@ package: station.package/v1
 kind: manager
 name: uv
 description: Fast Python package and project manager
+agent: 'Python projects and their commands, no pip: uv run <script>, uv add <package>, uvx <package> runs one once'
 manages: [uv]
 provides: [uv]
 methods:

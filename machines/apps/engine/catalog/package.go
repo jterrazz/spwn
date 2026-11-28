@@ -231,14 +231,18 @@ func (OptionType) Enum() []string {
 }
 
 type Package struct {
-	Package     string   `yaml:"package"`
-	Kind        Kind     `yaml:"kind"`
-	Name        string   `yaml:"name"`
-	Description string   `yaml:"description"`
-	Help        string   `yaml:"help,omitempty"`
-	Replaces    string   `yaml:"replaces,omitempty"`
-	Provides    []string `yaml:"provides,omitempty"`
-	Requires    []string `yaml:"requires,omitempty"`
+	Package     string `yaml:"package"`
+	Kind        Kind   `yaml:"kind"`
+	Name        string `yaml:"name"`
+	Description string `yaml:"description"`
+	// value: what an AI agent reads of the app in the machine's `spwn`
+	// skill: when to use it and the one command shape; without it, the
+	// skill says its description.
+	Agent    string   `yaml:"agent,omitempty"`
+	Help     string   `yaml:"help,omitempty"`
+	Replaces string   `yaml:"replaces,omitempty"`
+	Provides []string `yaml:"provides,omitempty"`
+	Requires []string `yaml:"requires,omitempty"`
 	// value: a setting's apps of which any one serves.
 	RequiresOneOf []string `yaml:"requires-one-of,omitempty"`
 	// value: packages applied before this one when both are, never installed

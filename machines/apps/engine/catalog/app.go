@@ -81,10 +81,12 @@ type App struct {
 	// skill), a manager, else an app.
 	AppKind     AppKind
 	Description string
-	Category    Category
-	Replaces    string
-	Supersedes  string
-	AppStore    bool
+	// value: its package's agent line (`agent:`), empty when it says none.
+	Agent      string `json:",omitempty"`
+	Category   Category
+	Replaces   string
+	Supersedes string
+	AppStore   bool
 	// value: the app updates itself (`updates: self`): station reads it
 	// present, never behind, and never updates it.
 	UpdatesSelf bool

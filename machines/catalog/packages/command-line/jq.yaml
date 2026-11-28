@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: jq
 description: Command-line JSON processor
+agent: "Read or reshape JSON: jq '.key' <file>, or <command> | jq -r '.items[].name'"
 provides: [jq]
 version-read:
     args: [jq, --version]

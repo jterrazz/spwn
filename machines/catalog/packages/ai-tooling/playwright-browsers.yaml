@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: playwright-browsers
 description: Chromium runtime for website specs (@jterrazz/test)
+agent: 'The Chromium that Playwright tests run in is already here: run the specs (npx playwright test), never download a browser'
 requires: [node]
 version-read:
     path: ~/Library/Caches/ms-playwright/chromium*

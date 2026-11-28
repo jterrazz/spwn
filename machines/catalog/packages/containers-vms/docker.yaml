@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: docker
 description: Container engine, inside the Linux VM
+agent: 'Run containers on this VM: docker run --rm <image>, docker ps, docker compose up -d'
 provides: [docker]
 version-read:
     args: [docker, --version]

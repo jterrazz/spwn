@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: playwright-mcp
 description: Browser automation for AI agents via MCP
+agent: 'A browser over MCP: add @playwright/mcp to the MCP servers your agent reads, or call it from the shell through mcp2cli'
 requires: [node]
 methods:
     - os: macos

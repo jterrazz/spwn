@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: fd
 description: Fast find alternative
+agent: 'Find files by name, .gitignore respected: fd <pattern> [path]; fd -e <extension> by extension'
 replaces: find
 provides: [fd]
 methods:

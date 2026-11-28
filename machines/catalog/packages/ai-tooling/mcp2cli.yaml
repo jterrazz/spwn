@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: mcp2cli
 description: Any MCP server exposed as command-line subcommands
+agent: 'Call an MCP server as shell subcommands, with no MCP client: mcp2cli --help says how to name a server and list what it offers'
 provides: [mcp2cli]
 requires: [uv]
 version-read:

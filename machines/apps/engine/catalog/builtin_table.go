@@ -192,6 +192,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "manager",
 				AppKind:     "manager",
 				Description: "Polyglot runtime manager: node, go, python, bun, rust, java",
+				Agent:       "Pin a runtime per project: mise use node@22 writes mise.toml, mise install installs what it pins, mise exec -- <command> runs under it",
 				Category:    "Package Managers",
 				Installs: []LivesOn{
 					{
@@ -286,6 +287,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Fast, disk space efficient Node package manager",
+				Agent:       "Node packages where a project has pnpm-lock.yaml: pnpm install, pnpm run <script>",
 				Category:    "Package Managers",
 				Installs: []LivesOn{
 					{
@@ -402,6 +404,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "manager",
 				AppKind:     "manager",
 				Description: "Fast Python package and project manager",
+				Agent:       "Python projects and their commands, no pip: uv run <script>, uv add <package>, uvx <package> runs one once",
 				Category:    "Package Managers",
 				Installs: []LivesOn{
 					{
@@ -446,6 +449,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "manager",
 				AppKind:     "manager",
 				Description: "Fast JavaScript runtime and package manager",
+				Agent:       "Run TypeScript or JavaScript and install packages where a project has bun.lock: bun run <script>, bun install, bunx <package>",
 				Category:    "Runtimes",
 				Installs: []LivesOn{
 					{
@@ -545,6 +549,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Compiled systems programming language by Google",
+				Agent:       "Build and test Go: go build ./..., go test ./..., go run .",
 				Category:    "Runtimes",
 				Installs: []LivesOn{
 					{
@@ -753,6 +758,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "manager",
 				AppKind:     "manager",
 				Description: "JavaScript runtime built on Chrome's V8 engine",
+				Agent:       "Node.js with npm and npx: node <file>, npm install, npm run <script>, npx <package>",
 				Category:    "Runtimes",
 				Installs: []LivesOn{
 					{
@@ -866,6 +872,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Python programming language runtime",
+				Agent:       "Python 3 is python3, not python: python3 <script>, python3 -m venv .venv; a project with uv runs uv run",
 				Category:    "Runtimes",
 				Installs: []LivesOn{
 					{
@@ -919,6 +926,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Systems programming language for safety and speed",
+				Agent:       "Build and test Rust with cargo: cargo build, cargo test, cargo run",
 				Category:    "Runtimes",
 				Installs: []LivesOn{
 					{
@@ -1131,6 +1139,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Terminal multiplexer for persistent sessions",
+				Agent:       "Keep a long command alive past your shell: tmux new -d -s <name> '<command>', tmux ls, tmux attach -t <name>",
 				Category:    "Shell & Terminal",
 				Installs: []LivesOn{
 					{
@@ -1208,6 +1217,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Cat clone with syntax highlighting",
+				Agent:       "Show a file to a human, highlighted and numbered: bat <file>; to read one yourself, plain cat is enough",
 				Category:    "Command line",
 				Replaces:    "cat (for humans)",
 				Installs: []LivesOn{
@@ -1371,6 +1381,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Fast find alternative",
+				Agent:       "Find files by name, .gitignore respected: fd <pattern> [path]; fd -e <extension> by extension",
 				Category:    "Command line",
 				Replaces:    "find",
 				Installs: []LivesOn{
@@ -1397,6 +1408,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Command-line JSON processor",
+				Agent:       "Read or reshape JSON: jq '.key' <file>, or <command> | jq -r '.items[].name'",
 				Category:    "Command line",
 				Installs: []LivesOn{
 					{
@@ -1427,6 +1439,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Fast grep, the rg agents and editors shell out to",
+				Agent:       "Search file contents, .gitignore respected: rg <pattern> [path]; rg -l <pattern> lists only the files",
 				Category:    "Command line",
 				Replaces:    "grep (what agents and editors call)",
 				Installs: []LivesOn{
@@ -1565,6 +1578,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "GitHub CLI for repository management",
+				Agent:       "Anything on GitHub from the shell, signed in: gh pr create, gh pr view, gh issue list, gh run view, gh api <path>",
 				Category:    "Git",
 				Replaces:    "raw GitHub API / web UI",
 				Installs: []LivesOn{
@@ -1616,6 +1630,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Distributed version control system",
+				Agent:       "Version control: git status, git diff, git log --oneline, git commit -m <message>",
 				Category:    "Git",
 				Installs: []LivesOn{
 					{
@@ -1972,6 +1987,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Container engine, inside the Linux VM",
+				Agent:       "Run containers on this VM: docker run --rm <image>, docker ps, docker compose up -d",
 				Category:    "Containers & VMs",
 				Installs: []LivesOn{
 					{
@@ -2837,6 +2853,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Browser automation CLI for AI agents",
+				Agent:       "Drive a real browser from the shell: agent-browser open <url>, then agent-browser snapshot; agent-browser --help lists the rest",
 				Category:    "AI Tooling",
 				Installs: []LivesOn{
 					{
@@ -2862,6 +2879,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "AI agent library for browser automation",
+				Agent:       "Hand a browser task to an AI agent, in Python or from the shell: browser-use --help",
 				Category:    "AI Tooling",
 				Installs: []LivesOn{
 					{
@@ -2908,6 +2926,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Convert files to Markdown for LLMs",
+				Agent:       "Read a PDF, Word, Excel, PowerPoint or HTML file as Markdown: markitdown <file> > <file>.md",
 				Category:    "AI Tooling",
 				Installs: []LivesOn{
 					{
@@ -2933,6 +2952,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Any MCP server exposed as command-line subcommands",
+				Agent:       "Call an MCP server as shell subcommands, with no MCP client: mcp2cli --help says how to name a server and list what it offers",
 				Category:    "AI Tooling",
 				Installs: []LivesOn{
 					{
@@ -3078,6 +3098,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Chromium runtime for website specs (@jterrazz/test)",
+				Agent:       "The Chromium that Playwright tests run in is already here: run the specs (npx playwright test), never download a browser",
 				Category:    "AI Tooling",
 				Installs: []LivesOn{
 					{
@@ -3149,6 +3170,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Browser automation for AI agents via MCP",
+				Agent:       "A browser over MCP: add @playwright/mcp to the MCP servers your agent reads, or call it from the shell through mcp2cli",
 				Category:    "AI Tooling",
 				Installs: []LivesOn{
 					{
@@ -3168,6 +3190,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Local semantic search over markdown",
+				Agent:       "Search Markdown notes and docs by meaning, not by string: qmd search <words>; qmd --help for collections",
 				Category:    "AI Tooling",
 				Replaces:    "grep over markdown notes",
 				Installs: []LivesOn{
@@ -3209,6 +3232,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Token-optimized CLI proxy for agents",
+				Agent:       "Prefix a noisy dev command to get its output compacted, fewer tokens: rtk <command>, as in rtk git status",
 				Category:    "AI Tooling",
 				Replaces:    "raw dev commands (token-heavy output)",
 				Installs: []LivesOn{
@@ -4930,6 +4954,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "manager",
 					Name:        "mise",
 					Description: "Polyglot runtime manager: node, go, python, bun, rust, java",
+					Agent:       "Pin a runtime per project: mise use node@22 writes mise.toml, mise install installs what it pins, mise exec -- <command> runs under it",
 					Provides: []string{
 						"mise"},
 					Manages: []ManagerKey{
@@ -5020,6 +5045,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "pnpm",
 					Description: "Fast, disk space efficient Node package manager",
+					Agent:       "Node packages where a project has pnpm-lock.yaml: pnpm install, pnpm run <script>",
 					Provides: []string{
 						"pnpm"},
 					Methods: []MethodSpec{
@@ -5129,6 +5155,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "manager",
 					Name:        "uv",
 					Description: "Fast Python package and project manager",
+					Agent:       "Python projects and their commands, no pip: uv run <script>, uv add <package>, uvx <package> runs one once",
 					Provides: []string{
 						"uv"},
 					Manages: []ManagerKey{
@@ -5178,6 +5205,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "manager",
 					Name:        "bun",
 					Description: "Fast JavaScript runtime and package manager",
+					Agent:       "Run TypeScript or JavaScript and install packages where a project has bun.lock: bun run <script>, bun install, bunx <package>",
 					Provides: []string{
 						"bun"},
 					Manages: []ManagerKey{
@@ -5268,6 +5296,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "go",
 					Description: "Compiled systems programming language by Google",
+					Agent:       "Build and test Go: go build ./..., go test ./..., go run .",
 					Provides: []string{
 						"go"},
 					Methods: []MethodSpec{
@@ -5452,6 +5481,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "manager",
 					Name:        "node",
 					Description: "JavaScript runtime built on Chrome's V8 engine",
+					Agent:       "Node.js with npm and npx: node <file>, npm install, npm run <script>, npx <package>",
 					Provides: []string{
 						"node",
 						"npm",
@@ -5571,6 +5601,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "python",
 					Description: "Python programming language runtime",
+					Agent:       "Python 3 is python3, not python: python3 <script>, python3 -m venv .venv; a project with uv runs uv run",
 					Provides: []string{
 						"python3"},
 					Version: &VersionRead{
@@ -5614,6 +5645,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "rust",
 					Description: "Systems programming language for safety and speed",
+					Agent:       "Build and test Rust with cargo: cargo build, cargo test, cargo run",
 					Provides: []string{
 						"rustc",
 						"cargo"},
@@ -5798,6 +5830,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "tmux",
 					Description: "Terminal multiplexer for persistent sessions",
+					Agent:       "Keep a long command alive past your shell: tmux new -d -s <name> '<command>', tmux ls, tmux attach -t <name>",
 					Provides: []string{
 						"tmux"},
 					Then: []string{
@@ -5872,6 +5905,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "bat",
 					Description: "Cat clone with syntax highlighting",
+					Agent:       "Show a file to a human, highlighted and numbered: bat <file>; to read one yourself, plain cat is enough",
 					Replaces:    "cat (for humans)",
 					Provides: []string{
 						"bat"},
@@ -6045,6 +6079,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "fd",
 					Description: "Fast find alternative",
+					Agent:       "Find files by name, .gitignore respected: fd <pattern> [path]; fd -e <extension> by extension",
 					Replaces:    "find",
 					Provides: []string{
 						"fd"},
@@ -6072,6 +6107,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "jq",
 					Description: "Command-line JSON processor",
+					Agent:       "Read or reshape JSON: jq '.key' <file>, or <command> | jq -r '.items[].name'",
 					Provides: []string{
 						"jq"},
 					Version: &VersionRead{
@@ -6101,6 +6137,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "ripgrep",
 					Description: "Fast grep, the rg agents and editors shell out to",
+					Agent:       "Search file contents, .gitignore respected: rg <pattern> [path]; rg -l <pattern> lists only the files",
 					Replaces:    "grep (what agents and editors call)",
 					Provides: []string{
 						"rg"},
@@ -6236,6 +6273,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "gh",
 					Description: "GitHub CLI for repository management",
+					Agent:       "Anything on GitHub from the shell, signed in: gh pr create, gh pr view, gh issue list, gh run view, gh api <path>",
 					Replaces:    "raw GitHub API / web UI",
 					Provides: []string{
 						"gh"},
@@ -6286,6 +6324,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "git",
 					Description: "Distributed version control system",
+					Agent:       "Version control: git status, git diff, git log --oneline, git commit -m <message>",
 					Provides: []string{
 						"git"},
 					Version: &VersionRead{
@@ -6626,6 +6665,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "docker",
 					Description: "Container engine, inside the Linux VM",
+					Agent:       "Run containers on this VM: docker run --rm <image>, docker ps, docker compose up -d",
 					Provides: []string{
 						"docker"},
 					Version: &VersionRead{
@@ -7473,6 +7513,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "agent-browser",
 					Description: "Browser automation CLI for AI agents",
+					Agent:       "Drive a real browser from the shell: agent-browser open <url>, then agent-browser snapshot; agent-browser --help lists the rest",
 					Provides: []string{
 						"agent-browser"},
 					Requires: []string{
@@ -7502,6 +7543,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "browser-use",
 					Description: "AI agent library for browser automation",
+					Agent:       "Hand a browser task to an AI agent, in Python or from the shell: browser-use --help",
 					Provides: []string{
 						"browser-use"},
 					Requires: []string{
@@ -7549,6 +7591,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "markitdown",
 					Description: "Convert files to Markdown for LLMs",
+					Agent:       "Read a PDF, Word, Excel, PowerPoint or HTML file as Markdown: markitdown <file> > <file>.md",
 					Provides: []string{
 						"markitdown"},
 					Requires: []string{
@@ -7579,6 +7622,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "mcp2cli",
 					Description: "Any MCP server exposed as command-line subcommands",
+					Agent:       "Call an MCP server as shell subcommands, with no MCP client: mcp2cli --help says how to name a server and list what it offers",
 					Provides: []string{
 						"mcp2cli"},
 					Requires: []string{
@@ -7733,6 +7777,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "playwright-browsers",
 					Description: "Chromium runtime for website specs (@jterrazz/test)",
+					Agent:       "The Chromium that Playwright tests run in is already here: run the specs (npx playwright test), never download a browser",
 					Requires: []string{
 						"node"},
 					Version: &VersionRead{
@@ -7816,6 +7861,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "playwright-mcp",
 					Description: "Browser automation for AI agents via MCP",
+					Agent:       "A browser over MCP: add @playwright/mcp to the MCP servers your agent reads, or call it from the shell through mcp2cli",
 					Requires: []string{
 						"node"},
 					Methods: []MethodSpec{
@@ -7839,6 +7885,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "qmd",
 					Description: "Local semantic search over markdown",
+					Agent:       "Search Markdown notes and docs by meaning, not by string: qmd search <words>; qmd --help for collections",
 					Replaces:    "grep over markdown notes",
 					Provides: []string{
 						"qmd"},
@@ -7870,6 +7917,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "rtk",
 					Description: "Token-optimized CLI proxy for agents",
+					Agent:       "Prefix a noisy dev command to get its output compacted, fewer tokens: rtk <command>, as in rtk git status",
 					Replaces:    "raw dev commands (token-heavy output)",
 					Provides: []string{
 						"rtk"},

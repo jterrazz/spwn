@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: rust
 description: Systems programming language for safety and speed
+agent: 'Build and test Rust with cargo: cargo build, cargo test, cargo run'
 provides: [rustc, cargo]
 methods:
     - os: any

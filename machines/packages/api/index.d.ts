@@ -765,6 +765,7 @@ export type CatalogAction = {
 };
 
 export type CatalogApp = {
+    Agent?: string;
     AppKind: 'app' | 'manager' | 'skill';
     AppStore: boolean;
     Bundle: string;

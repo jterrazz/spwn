@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: qmd
 description: Local semantic search over markdown
+agent: 'Search Markdown notes and docs by meaning, not by string: qmd search <words>; qmd --help for collections'
 replaces: grep over markdown notes
 provides: [qmd]
 requires: [bun]

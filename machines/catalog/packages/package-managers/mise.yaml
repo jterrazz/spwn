@@ -2,6 +2,7 @@ package: station.package/v1
 kind: manager
 name: mise
 description: 'Polyglot runtime manager: node, go, python, bun, rust, java'
+agent: 'Pin a runtime per project: mise use node@22 writes mise.toml, mise install installs what it pins, mise exec -- <command> runs under it'
 manages: [mise]
 provides: [mise]
 methods:

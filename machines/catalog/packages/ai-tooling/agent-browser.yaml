@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: agent-browser
 description: Browser automation CLI for AI agents
+agent: 'Drive a real browser from the shell: agent-browser open <url>, then agent-browser snapshot; agent-browser --help lists the rest'
 provides: [agent-browser]
 requires: [bun]
 methods:

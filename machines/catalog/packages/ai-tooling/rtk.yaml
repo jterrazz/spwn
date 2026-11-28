@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: rtk
 description: Token-optimized CLI proxy for agents
+agent: 'Prefix a noisy dev command to get its output compacted, fewer tokens: rtk <command>, as in rtk git status'
 replaces: raw dev commands (token-heavy output)
 provides: [rtk]
 methods:

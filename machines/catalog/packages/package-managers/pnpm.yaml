@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: pnpm
 description: Fast, disk space efficient Node package manager
+agent: 'Node packages where a project has pnpm-lock.yaml: pnpm install, pnpm run <script>'
 provides: [pnpm]
 methods:
     - os: macos

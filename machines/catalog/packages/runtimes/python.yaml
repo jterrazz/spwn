@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: python
 description: Python programming language runtime
+agent: 'Python 3 is python3, not python: python3 <script>, python3 -m venv .venv; a project with uv runs uv run'
 provides: [python3]
 version-read:
     args: [python3, --version]

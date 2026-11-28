@@ -196,6 +196,9 @@
     "catalog.App": {
       "additionalProperties": false,
       "properties": {
+        "Agent": {
+          "type": "string"
+        },
         "AppKind": {
           "enum": [
             "app",

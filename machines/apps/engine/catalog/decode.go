@@ -12,6 +12,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"unicode"
 
 	"go.yaml.in/yaml/v3"
 )
@@ -200,6 +201,9 @@ func checkPackage(file string, doc *yaml.Node, it Package) error {
 	if it.Description == "" {
 		return refused(file, doc, "description", "has no description")
 	}
+	if problem := checkAgent(it.Agent); problem != "" {
+		return refused(file, doc, "agent", problem)
+	}
 	if key := foreignKey(it); key != "" {
 		return refused(file, doc, key, "`"+key+"` is not a key of a "+string(it.Kind))
 	}
@@ -276,6 +280,28 @@ func checkPackage(file string, doc *yaml.Node, it Package) error {
 	return nil
 }
 
+// value: the most bytes an agent line holds, so a machine's `spwn` skill
+// lists every app within its own bound.
+
+const AgentMax = 160
+
+// invariant: an agent line is one line of at most AgentMax bytes, with no
+// control character and no blank at either end; absent, the skill says the
+// description.
+func checkAgent(line string) string {
+	switch {
+	case line == "":
+		return ""
+	case len(line) > AgentMax:
+		return fmt.Sprintf("an agent line is at most %d bytes, this one %d", AgentMax, len(line))
+	case strings.ContainsFunc(line, unicode.IsControl):
+		return "an agent line is one line, with no control character"
+	case strings.TrimSpace(line) != line:
+		return "an agent line opens and ends with a word, not a blank"
+	}
+	return ""
+}
+
 func refused(file string, doc *yaml.Node, key, problem string) error {
 	line := doc.Line
 	if k, _ := entry(doc, key); k != nil {
@@ -295,7 +321,7 @@ func foreignKey(it Package) string {
 		{"replaces", it.Replaces != ""}, {"provides", len(it.Provides) > 0}, {"then", len(it.Then) > 0},
 		{"bundle", it.Bundle != ""}, {"version-read", it.Version != nil}, {"supersedes", it.Supersedes != ""},
 		{"accepts", len(it.Accepts) > 0}, {"updates", it.Updates != ""}, {"live", it.Live != nil}, {"disk", it.Disk != nil},
-		{"ports", len(it.Ports) > 0},
+		{"ports", len(it.Ports) > 0}, {"agent", it.Agent != ""},
 	}
 	setting := []key{
 		{"help", it.Help != ""}, {"requires-one-of", len(it.RequiresOneOf) > 0},

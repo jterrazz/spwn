@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: git
 description: Distributed version control system
+agent: 'Version control: git status, git diff, git log --oneline, git commit -m <message>'
 provides: [git]
 version-read:
     args: [git, --version]

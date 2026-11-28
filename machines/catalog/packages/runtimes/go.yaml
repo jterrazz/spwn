@@ -2,6 +2,7 @@ package: station.package/v1
 kind: app
 name: go
 description: Compiled systems programming language by Google
+agent: 'Build and test Go: go build ./..., go test ./..., go run .'
 provides: [go]
 methods:
     - os: any

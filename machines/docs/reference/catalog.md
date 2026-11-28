@@ -59,6 +59,7 @@ The lists stand by category, in the categories' order (`Package Managers`, `Runt
 | `live`            | manager, app | how it is read running: a `process` name, or a `command`                                                                                                                                                                            |
 | `ports`           | manager, app | the ports it serves on, each a `port` and its `label`, a hint a listening port is shown with ("probably Vite"), and what a shared port sets: `http`, `env`                                                                          |
 | `disk`            | manager, app | its Disk row ([Disk](disk.md)): `paths`, `installed`, `removal`, `size`, `free`, `erase`, `no-erase`, `quit`, `relocate`, `misplaced`                                                                                               |
+| `agent`           | manager, app | its usage line for an AI agent: when to use it and the one command shape; absent, the agent reads its `description`                                                                                                                 |
 | `help`            | setting      | the hint a form shows                                                                                                                                                                                                               |
 | `requires-one-of` | setting      | apps of which any one serves, never beside `requires`                                                                                                                                                                               |
 | `guided`          | setting      | it opens System Settings for the owner to finish                                                                                                                                                                                    |
@@ -67,6 +68,8 @@ The lists stand by category, in the categories' order (`Package Managers`, `Runt
 | `declares`        | setting      | the port it opens to the machine's network: `port`, `via`, `label`                                                                                                                                                                  |
 | `sets`            | setting      | the values it sets, as its check reads them back: `key`, `value`                                                                                                                                                                    |
 | `writes`          | setting      | the files it writes, each a `path`, its `level`, a `note`, and a selector                                                                                                                                                           |
+
+An `agent` line is one line of at most 160 bytes, with no control character and no blank at either end; any other is refused at decode, as is the key on a setting.
 
 A disk action (`free`, `erase`, a misplaced row's `free`) runs a command, deletes or prunes paths: `run`, `env`, `delete`, `prune`, `uses` (the command it runs with, which must be on the search path), `exists`, and a selector.
 

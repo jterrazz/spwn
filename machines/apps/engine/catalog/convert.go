@@ -137,7 +137,7 @@ func (m MethodSpec) effect() Effect {
 
 func (it Package) app(category Category) App {
 	t := App{
-		Name: it.Name, Kind: it.Kind, Description: it.Description, Category: category, Replaces: it.Replaces,
+		Name: it.Name, Kind: it.Kind, Description: it.Description, Agent: it.Agent, Category: category, Replaces: it.Replaces,
 		Supersedes: it.Supersedes, AppStore: slices.Contains(it.Accepts, SourceAppStore), UpdatesSelf: it.Updates == UpdatesSelf, Provides: it.Provides, Bundle: it.Bundle,
 		Requires: it.Requires, Then: it.Then, Needs: it.Needs,
 	}
