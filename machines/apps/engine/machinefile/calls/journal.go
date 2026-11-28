@@ -11,7 +11,7 @@ import (
 )
 
 // invariant: an apply keeps one line, the file it applied and what it
-// installed and removed, counted.
+// installed and removed, counted, then skillLines.
 func keptApply(in ApplyIn, out machinefile.Applied, _ error) []journal.Line {
 	file := out.Plan.Name
 	if file == "" {
@@ -30,13 +30,23 @@ func keptApply(in ApplyIn, out machinefile.Applied, _ error) []journal.Line {
 	if n := len(out.Removed); n > 0 {
 		said = append(said, strconv.Itoa(n)+" removed")
 	}
-	return []journal.Line{{Text: file + " applied", Detail: strings.Join(said, ", ")}}
+	return append([]journal.Line{{Text: file + " applied", Detail: strings.Join(said, ", ")}}, skillLines(out.SkillFailed)...)
+}
+
+// invariant: a run that could not write the machine's `spwn` skill keeps
+// one more line, failed, with why, so the journal of a run no one watched,
+// the night's, says it; a run that wrote it keeps none.
+func skillLines(failed string) []journal.Line {
+	if failed == "" {
+		return nil
+	}
+	return []journal.Line{{Text: "spwn skill", Detail: "not written: " + failed, Outcome: journal.Failed}}
 }
 
 // invariant: an upgrade keeps one line per app it moved, held or failed
 // to move, a failed one with the words its update failed with and the
 // update that tries it again; one that
-// moved nothing keeps one line that says so.
+// moved nothing keeps one line that says so; then skillLines.
 func keptUpgrade(in UpgradeIn, out machinefile.Upgraded, err error) []journal.Line {
 	n := machinefile.NightOf(out, err, in.Machinefile, time.Time{})
 	app := func(name string) *journal.Subject { return &journal.Subject{Kind: journal.App, Name: name} }
@@ -57,5 +67,5 @@ func keptUpgrade(in UpgradeIn, out machinefile.Upgraded, err error) []journal.Li
 	if len(lines) == 0 {
 		lines = append(lines, journal.Line{Text: n.Machinefile + " upgraded", Detail: "nothing moved"})
 	}
-	return lines
+	return append(lines, skillLines(out.SkillFailed)...)
 }

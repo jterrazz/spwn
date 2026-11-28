@@ -1,0 +1,25 @@
+description: 'a night that cannot write the spwn skill keeps a failed journal line saying why'
+fixture: ../../__fixtures__/homebrew/
+env: versions
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh]
+      exit: 0
+    - command: 'machinefile apply --machinefile macbook-pro >/dev/null'
+      exit: 0
+    - command: 'world fault Skill.Write'
+      exit: 0
+    - command: 'world advance 18h'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.journal[] | select(.Text == "spwn skill") | {Text, By, Outcome, Detail}'' world.json'
+      exit: 0
+      stdout: |
+          {"Text":"spwn skill","By":"the night","Outcome":"failed","Detail":"not written: open ~/.agents/skills/spwn/SKILL.md: permission denied"}
+    - command: 'overview | /usr/bin/grep -c "failed its update"'
+      exit: 1
+      stdout: |
+          0

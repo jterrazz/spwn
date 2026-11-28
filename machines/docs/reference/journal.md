@@ -63,15 +63,15 @@ What the engine tells of a server is kept too, by `station`, with no `Call`: a r
 
 The gestures that keep lines today:
 
-| Call                                                                     | Line                                                                                                         |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `machines.create-workspace`, `machines.create-server`                    | `<vm> created`, with its purpose and its creator                                                             |
-| `machines.delete`, `machines.restart`, `machines.start`, `machines.stop` | `<machine> deleted` (`restarted`, `started`, `stopped`), `<machine> not deleted` when it failed              |
-| `disk.free`, `disk.free-unused`                                          | `<row> freed` per row it freed, with its sentence; `<row> not freed` and its reason for a row that broke     |
-| `apps.update`                                                            | one per app it updated or failed to, a failed one with `apps.update` as its `Retry`                          |
-| `machinefile.apply`                                                      | `<file> applied`, what it installed and removed counted                                                      |
-| `images.build`                                                           | `<image> built`, `<image> not built` when it failed                                                          |
-| `machinefile.upgrade`                                                    | one per app it moved (`Upgrade`), left waiting (`held`) or failed to move; `<file> upgraded` when none moved |
+| Call                                                                     | Line                                                                                                                                                                  |
+| ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `machines.create-workspace`, `machines.create-server`                    | `<vm> created`, with its purpose and its creator                                                                                                                      |
+| `machines.delete`, `machines.restart`, `machines.start`, `machines.stop` | `<machine> deleted` (`restarted`, `started`, `stopped`), `<machine> not deleted` when it failed                                                                       |
+| `disk.free`, `disk.free-unused`                                          | `<row> freed` per row it freed, with its sentence; `<row> not freed` and its reason for a row that broke                                                              |
+| `apps.update`                                                            | one per app it updated or failed to, a failed one with `apps.update` as its `Retry`                                                                                   |
+| `machinefile.apply`                                                      | `<file> applied`, what it installed and removed counted; `spwn skill` failed, with why, when it could not write the [`spwn` skill](apps-and-skills.md#the-spwn-skill) |
+| `images.build`                                                           | `<image> built`, `<image> not built` when it failed                                                                                                                   |
+| `machinefile.upgrade`                                                    | one per app it moved (`Upgrade`), left waiting (`held`) or failed to move; `<file> upgraded` when none moved; `spwn skill` as apply's, the night's included           |
 
 ### The steps a line carries
 
