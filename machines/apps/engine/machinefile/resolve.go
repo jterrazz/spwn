@@ -603,9 +603,11 @@ func mergeSettings(m *merged, s catalog.SettingList, o Origin, unit string) {
 // invariant: a computer takes the shared source's newest commit every
 // night, unattended, so no file of that source its chain reads carries
 // run.upgrade (ADR-109): whoever pushes to the source would run lines on
-// it with nobody there. A VM's chain may: a VM never upgrades by itself.
-func upgradesShared(name string, files []Placed, kind catalog.MachineRole) error {
-	if kind != catalog.RoleComputer {
+// it with nobody there. The computer is this machine as its profile says
+// it, whatever kind the files say, as much as a chain that says one. A
+// VM's chain may: a VM never upgrades by itself.
+func upgradesShared(name string, files []Placed, kind, this catalog.MachineRole) error {
+	if kind != catalog.RoleComputer && this != catalog.RoleComputer {
 		return nil
 	}
 	for _, f := range files {
@@ -619,7 +621,9 @@ func upgradesShared(name string, files []Placed, kind catalog.MachineRole) error
 func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error) {
 	// invariant: a Machinefile resolves against the catalog and the system it
 	// says (this machine's where it says none): a mixin is never applied, a
-	// computer has no vm, each package's method is the first of its matching
+	// computer has no vm, a machine whose profile is a computer resolves a
+	// computer's Machinefile alone (explain reads another as its own kind
+	// does), each package's method is the first of its matching
 	// methods in prefer's order, then the system's priority, then the file's
 	// order; the steps run requires first, managers before what they install,
 	// `after` between two the plan holds; a cycle is refused. An app the
@@ -638,7 +642,11 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 	if m.refused != nil {
 		return Resolved{}, m.refused
 	}
-	if refused := upgradesShared(name, files, catalog.MachineRole(m.values["machine.kind"].Text)); refused != nil {
+	kind := catalog.MachineRole(m.values["machine.kind"].Text)
+	if this.Kind == catalog.RoleComputer && kind != catalog.RoleComputer {
+		return Resolved{}, &OtherKindError{Name: name, This: this.Name, Kind: string(kind)}
+	}
+	if refused := upgradesShared(name, files, kind, this.Kind); refused != nil {
 		return Resolved{}, refused
 	}
 	if said := m.values["machine.system.os"].Text; said == "" || said == string(this.System.OS) {

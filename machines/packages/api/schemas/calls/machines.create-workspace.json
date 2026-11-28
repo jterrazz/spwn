@@ -432,6 +432,7 @@
             "login.other-mac",
             "login.site-refused",
             "login.unknown-program",
+            "machinefile.another-kind",
             "machinefile.bad-phase",
             "machinefile.bad-value",
             "machinefile.busy",

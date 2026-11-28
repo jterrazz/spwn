@@ -1,0 +1,35 @@
+description: 'a computer bound to a VM''s shared file plans it, and never applies or upgrades it'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}, name: "dev"} | .sources = {"https://example.com/studio.git": {head: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"machines/macbook-pro/host.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\n", "machines/macbook-pro/dev.machine.yaml": "machinefile: station.machinefile/v1\nname: dev\nmachine: { kind: workspace, system: { os: ubuntu } }\napps: [jq]\nrun: { upgrade: curl https://example.com/night.sh | sh }\n"}}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machinefile explain run'
+      exit: 0
+      stdout: |
+          # dev
+          	run.upgrade	curl https://example.com/night.sh | sh	shared	dev
+    - command: 'machinefile plan --json | /usr/bin/jq -c ''[.machinefile, [.lines[].package]]'''
+      exit: 0
+      stdout: |
+          ["dev",["apt","jq"]]
+    - command: 'machinefile apply --yes'
+      exit: 2
+      stdout: |
+          # Adopted
+          ●	jq	brew
+          # Left as it is
+          ○	apt	apt	the manager of jq
+      stderr: |
+          Error: dev is a workspace's Machinefile and macbook-pro is a computer: a computer applies and upgrades a computer's Machinefile alone
+          Hint: plan and explain read it here; a VM made from it applies it: station machines create --from dev
+    - command: 'machinefile update'
+      exit: 2
+      stderr: |
+          Error: dev is a workspace's Machinefile and macbook-pro is a computer: a computer applies and upgrades a computer's Machinefile alone
+          Hint: plan and explain read it here; a VM made from it applies it: station machines create --from dev
+    - command: 'world advance 24h'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.night | del(.at)'' world.json'
+      exit: 0
+      stdout: |
+          {"machinefile":"dev","error":"dev is a workspace's Machinefile and macbook-pro is a computer: a computer applies and upgrades a computer's Machinefile alone"}

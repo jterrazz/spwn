@@ -878,6 +878,7 @@
       "errors": [
         "catalog.invalid",
         "catalog.newer-schema",
+        "machinefile.another-kind",
         "machinefile.bad-value",
         "machinefile.chain-too-long",
         "machinefile.cycle",

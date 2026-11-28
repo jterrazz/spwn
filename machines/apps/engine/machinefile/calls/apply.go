@@ -109,7 +109,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			return machinefile.Applied{}, err
 		}
 		defer release()
-		plan, err := judged(ctx, d, in.Machinefile, in.Phase)
+		plan, err := judged(ctx, d, d.Machine, in.Machinefile, in.Phase)
 		if err != nil {
 			return machinefile.Applied{}, err
 		}

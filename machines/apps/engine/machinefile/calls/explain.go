@@ -88,14 +88,17 @@ const (
 	OutsideTheSource fail.Code = "machinefile.outside-the-source"
 	// value: a computer's chain reading run.upgrade from the shared source.
 	UpgradeOnComputer fail.Code = "machinefile.upgrade-on-a-computer"
-	Busy              fail.Code = "machinefile.busy"
-	CatalogInvalid    fail.Code = "catalog.invalid"
-	CatalogNewer      fail.Code = "catalog.newer-schema"
+	// value: a computer planning, applying or upgrading a Machinefile of
+	// another kind.
+	AnotherKind    fail.Code = "machinefile.another-kind"
+	Busy           fail.Code = "machinefile.busy"
+	CatalogInvalid fail.Code = "catalog.invalid"
+	CatalogNewer   fail.Code = "catalog.newer-schema"
 )
 
 func resolution() []fail.Code {
 	// value: every code reading the Machinefile may end in.
-	return []fail.Code{NotFound, Invalid, NewerSchema, Mixin, VMOnComputer, Cycle, SiblingsDiffer, ChainTooLong, NoMethod, Unpinnable, UnknownPackage, BadValue, Unavailable, OutsideTheSource, UpgradeOnComputer, CatalogInvalid, CatalogNewer}
+	return []fail.Code{NotFound, Invalid, NewerSchema, Mixin, VMOnComputer, Cycle, SiblingsDiffer, ChainTooLong, NoMethod, Unpinnable, UnknownPackage, BadValue, Unavailable, OutsideTheSource, UpgradeOnComputer, AnotherKind, CatalogInvalid, CatalogNewer}
 }
 
 type ExplainIn struct {
@@ -166,14 +169,24 @@ func named(ctx context.Context, d Deps, asked string) (name string, path *machin
 
 // value: the Machinefile resolved, with the catalog it was resolved
 // against, which judges what the ledger holds that it lists no longer.
-func resolveIn(ctx context.Context, d Deps, asked string) (machinefile.Resolved, catalog.Catalog, error) {
+func resolveIn(ctx context.Context, d Deps, this machinefile.Machine, asked string) (machinefile.Resolved, catalog.Catalog, error) {
 	name, lib, source, lock, err := load(ctx, d, asked)
 	if err != nil {
 		return machinefile.Resolved{}, catalog.Catalog{}, err
 	}
-	r, err := machinefile.Resolve(lib, name, d.Machine, lock)
+	r, err := machinefile.Resolve(lib, name, this, lock)
 	r.Source = source
 	return r, lib.Catalog, Worded(err)
+}
+
+// invariant: this machine as a read of a Machinefile sees it (explain,
+// plan, drift): with no kind, so a computer reads a Machinefile of
+// another kind as that kind does. What carries a plan out (apply,
+// upgrade and the night that runs it) resolves against Deps.Machine,
+// the kind its profile says, and a computer refuses there a Machinefile
+// that is not a computer's (machinefile.OtherKindError).
+func (d Deps) reading() machinefile.Machine {
+	return machinefile.Machine{Name: d.Machine.Name, System: d.Machine.System}
 }
 
 // value: what explain reads: the Machinefile resolved, or, for a mixin,
@@ -183,7 +196,7 @@ func resolveValues(ctx context.Context, d Deps, asked string) (machinefile.Resol
 	if err != nil {
 		return machinefile.Resolved{}, err
 	}
-	r, err := machinefile.Resolve(lib, name, d.Machine, lock)
+	r, err := machinefile.Resolve(lib, name, d.reading(), lock)
 	var mixin *machinefile.MixinError
 	if errors.As(err, &mixin) {
 		r, err = machinefile.Own(lib, name)
@@ -253,6 +266,7 @@ func Worded(err error) error {
 		gone      *contract.UnavailableError
 		outside   *contract.OutsideError
 		upgrade   *machinefile.UpgradeOnComputerError
+		other     *machinefile.OtherKindError
 		newer     *catalog.NewerSchemaError
 		fileError *catalog.FileError
 	)
@@ -306,6 +320,8 @@ func Worded(err error) error {
 		return refused(fail.Refused, OutsideTheSource, outside.Source, map[string]string{"at": outside.At, "problem": outside.Problem})
 	case errors.As(err, &upgrade):
 		return refused(fail.Refused, UpgradeOnComputer, upgrade.Name, map[string]string{"says": upgrade.Says, "file": upgrade.File})
+	case errors.As(err, &other):
+		return refused(fail.Refused, AnotherKind, other.Name, map[string]string{"kind": other.Kind, "this": other.This})
 	}
 	return err
 }

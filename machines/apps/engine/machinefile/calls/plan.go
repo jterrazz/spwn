@@ -42,7 +42,7 @@ var Plan = call.Call[Deps, PlanIn, machinefile.Plan]{
 		if bad := badPhase(in.Phase, false); bad != nil {
 			return machinefile.Plan{}, bad
 		}
-		p, err := judged(ctx, d, in.Machinefile, in.Phase)
+		p, err := judged(ctx, d, d.reading(), in.Machinefile, in.Phase)
 		return p.Answered(), err
 	},
 }
@@ -126,7 +126,7 @@ func nights(ctx context.Context, d Deps, name, file string) (machinefile.Upgrade
 
 func plannedOn(ctx context.Context, d Deps, name, file string) (machinefile.Plan, error) {
 	if name == d.Name {
-		return judged(ctx, d, file, "")
+		return judged(ctx, d, d.reading(), file, "")
 	}
 	return call.Invoke(ctx, d.Far, machine.Ref{Name: name}, Plan, PlanIn{Machinefile: file}, nil)
 }
@@ -225,10 +225,11 @@ func accessOf(ctx context.Context, d Deps, vm, mac, file string) (*machinefile.A
 	return access, nil
 }
 
-// value: the plan of a Machinefile against this machine, with when the
-// machine last applied it.
-func judged(ctx context.Context, d Deps, asked string, phase catalog.Phase) (machinefile.Plan, error) {
-	p, err := judgedOnce(ctx, d, asked, phase)
+// value: the plan of a Machinefile against this machine, as `this` says
+// it (Deps.reading for a plan read, Deps.Machine for one carried out),
+// with when the machine last applied it.
+func judged(ctx context.Context, d Deps, this machinefile.Machine, asked string, phase catalog.Phase) (machinefile.Plan, error) {
+	p, err := judgedOnce(ctx, d, this, asked, phase)
 	if err != nil {
 		return machinefile.Plan{}, err
 	}
@@ -245,8 +246,8 @@ func judged(ctx context.Context, d Deps, asked string, phase catalog.Phase) (mac
 // invariant: whether a line run as root asks a password is the machine's
 // answer, read once and only for a plan a sudo need is in; a read that
 // cannot tell asks it, so a run off a terminal is refused as before.
-func judgedOnce(ctx context.Context, d Deps, asked string, phase catalog.Phase) (machinefile.Plan, error) {
-	r, cat, err := resolveIn(ctx, d, asked)
+func judgedOnce(ctx context.Context, d Deps, this machinefile.Machine, asked string, phase catalog.Phase) (machinefile.Plan, error) {
+	r, cat, err := resolveIn(ctx, d, this, asked)
 	if err != nil {
 		return machinefile.Plan{}, err
 	}

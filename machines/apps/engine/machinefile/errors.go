@@ -94,6 +94,18 @@ func (e *UpgradeOnComputerError) Error() string {
 	return e.Says + " (" + e.File + ") says run.upgrade, which " + e.Name + "'s chain reads: a computer runs no line of the shared source at night"
 }
 
+// value: a Machinefile of another kind than this computer, resolved on
+// it to be applied or upgraded: Name the Machinefile, Kind what its chain says, This the
+// computer.
+
+type OtherKindError struct {
+	Name, This, Kind string
+}
+
+func (e *OtherKindError) Error() string {
+	return e.Name + " is a " + e.Kind + "'s Machinefile and " + e.This + " is a computer: a computer applies and upgrades a computer's Machinefile alone"
+}
+
 type VMOnComputerError struct {
 	Name string
 	// value: the file that says vm.

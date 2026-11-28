@@ -886,6 +886,11 @@
       "Detail": "login",
       "Tone": "plain"
     },
+    "machinefile.another-kind": {
+      "Word": "another kind",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
     "machinefile.bad-phase": {
       "Word": "bad phase",
       "Detail": "machinefile",

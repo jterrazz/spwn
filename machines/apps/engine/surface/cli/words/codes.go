@@ -329,6 +329,9 @@ func Codes() map[fail.Code]Wording {
 		machinefilecalls.UpgradeOnComputer: func(e *fail.Error) (string, string) {
 			return e.Detail["says"] + " (" + e.Detail["file"] + ") says run.upgrade, which " + e.Subject + "'s chain reads: a computer runs no line of the shared source at night", "remove run.upgrade from " + e.Detail["says"] + ": a computer's nights run what its packages say"
 		},
+		machinefilecalls.AnotherKind: func(e *fail.Error) (string, string) {
+			return e.Subject + " is a " + e.Detail["kind"] + "'s Machinefile and " + e.Detail["this"] + " is a computer: a computer applies and upgrades a computer's Machinefile alone", "plan and explain read it here; a VM made from it applies it: station machines create --from " + e.Subject
+		},
 		imagescalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no image \"" + e.Subject + "\"", "station images"
 		},
