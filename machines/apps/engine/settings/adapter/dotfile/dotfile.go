@@ -452,6 +452,12 @@ func (a *Applier) land(w *written, at string, data []byte, seen local.Seen) erro
 		return err
 	}
 	if err := a.files.Swap(at, seen, data, 0o600); err != nil {
+		// invariant: a try that does not land takes back the folders it
+		// made, deepest first, while they are empty, so the next try makes
+		// and records them again.
+		for _, dir := range made {
+			_ = a.files.Remove(dir)
+		}
 		return err
 	}
 	w.Made = w.Made || !seen.There

@@ -2,8 +2,10 @@ package dotfile_test
 
 import (
 	"context"
+	"errors"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -131,6 +133,35 @@ func TestOffNeverRemovesAFileItMadeThatAnotherWriterChangedAfterItsRead(t *testi
 				t.Errorf("off left %q; want the other writer's key, with nothing of Machines' left in it, %q", got, want)
 			}
 		})
+	}
+}
+
+// value: the bench's disk where the first swap finds the file changed,
+// and writes nothing.
+type changedOnce struct {
+	disk
+	tried *bool
+}
+
+func (c changedOnce) Swap(p string, seen local.Seen, data []byte, perm fs.FileMode) error {
+	if !*c.tried {
+		*c.tried = true
+		return local.ErrChanged
+	}
+	return c.disk.Swap(p, seen, data, perm)
+}
+
+func TestTheFoldersATryThatDidNotLandMadeAreTakenBackByOff(t *testing.T) {
+	b := newBench(t, catalog.WriteMerge, `{"a": 1}`, ".config/new/deep/x.json")
+	if err := os.MkdirAll(filepath.Join(b.home, ".config"), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	tried := false
+	b.over(changedOnce{disk: b.files, tried: &tried}, b.ours)
+	b.apply()
+	b.off()
+	if _, err := b.files.Stat(filepath.Join(b.home, ".config", "new")); !tried || !errors.Is(err, fs.ErrNotExist) {
+		t.Errorf("a folder Machines made on a try that did not land stayed after off: %v", err)
 	}
 }
 
