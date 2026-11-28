@@ -3,6 +3,7 @@ package fake
 import (
 	"context"
 	"errors"
+	"io"
 	"io/fs"
 	"path"
 	"slices"
@@ -70,21 +71,16 @@ func (s Shared) Read(context.Context) (machinefile.Tree, error) {
 
 type held map[string]string
 
-func (h held) ReadFile(name string) ([]byte, error) {
-	body, ok := h[name]
-	if !ok {
-		return nil, fs.ErrNotExist
+func (h held) OpenUnfollowed(name string) (fs.File, error) {
+	if body, ok := h[name]; ok {
+		return &opened{entry: entry{name: path.Base(name), size: int64(len(body))}, body: strings.NewReader(body)}, nil
 	}
-	return []byte(body), nil
-}
-
-func (h held) ReadDir(name string) ([]fs.DirEntry, error) {
 	prefix := name + "/"
 	if name == "." {
 		prefix = ""
 	}
 	seen := map[string]bool{}
-	var out []fs.DirEntry
+	var children []fs.DirEntry
 	for p, body := range h {
 		rest, ok := strings.CutPrefix(p, prefix)
 		if !ok {
@@ -93,24 +89,42 @@ func (h held) ReadDir(name string) ([]fs.DirEntry, error) {
 		child, _, deeper := strings.Cut(rest, "/")
 		if !seen[child] {
 			seen[child] = true
-			out = append(out, entry{name: child, dir: deeper, size: int64(len(body))})
+			children = append(children, entry{name: child, dir: deeper, size: int64(len(body))})
 		}
 	}
-	if len(out) == 0 {
-		return nil, fs.ErrNotExist
+	if len(children) == 0 {
+		return nil, &fs.PathError{Op: "open", Path: name, Err: fs.ErrNotExist}
 	}
-	slices.SortFunc(out, func(a, b fs.DirEntry) int { return strings.Compare(a.Name(), b.Name()) })
-	return out, nil
+	slices.SortFunc(children, func(a, b fs.DirEntry) int { return strings.Compare(a.Name(), b.Name()) })
+	return &opened{entry: entry{name: path.Base(name), dir: true}, children: children}, nil
 }
 
-func (h held) Stat(name string) (fs.FileInfo, error) {
-	if body, ok := h[name]; ok {
-		return entry{name: path.Base(name), size: int64(len(body))}, nil
+type opened struct {
+	entry
+	body     *strings.Reader
+	children []fs.DirEntry
+}
+
+func (o *opened) Stat() (fs.FileInfo, error) { return o.entry, nil }
+func (o *opened) Close() error               { return nil }
+
+func (o *opened) Read(b []byte) (int, error) {
+	if o.body == nil {
+		return 0, &fs.PathError{Op: "read", Path: o.name, Err: fs.ErrInvalid}
 	}
-	if _, err := h.ReadDir(name); err != nil {
-		return nil, err
+	return o.body.Read(b)
+}
+
+func (o *opened) ReadDir(n int) ([]fs.DirEntry, error) {
+	if n > 0 && len(o.children) == 0 {
+		return nil, io.EOF
 	}
-	return entry{name: path.Base(name), dir: true}, nil
+	if n <= 0 || n > len(o.children) {
+		n = len(o.children)
+	}
+	out := o.children[:n]
+	o.children = o.children[n:]
+	return out, nil
 }
 
 type entry struct {

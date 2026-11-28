@@ -3,6 +3,7 @@ package git
 import (
 	"context"
 	"errors"
+	"io/fs"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -55,11 +56,23 @@ func (s Source) Read(ctx context.Context) (machinefile.Tree, error) {
 		return machinefile.Tree{}, &contract.UnavailableError{Source: s.src.Name, Cause: err}
 	}
 	root := s.src.Name + "@" + head[:7]
-	files, err := contract.Repository{Dir: s.fs, At: s.dir, Sub: s.src.Path, Computer: s.computer, Source: s.src.Name, Root: root}.Read()
+	files, err := contract.Repository{Dir: clone{s.fs}, At: s.dir, Sub: s.src.Path, Computer: s.computer, Source: s.src.Name, Root: root}.Read()
 	return machinefile.Tree{
 		Kind: machinefile.Shared, Root: root, Files: files,
 		Source: &catalog.LockSource{Name: s.src.Name, Commit: head},
 	}, err
+}
+
+// value: the clone's entries opened on the disk, a link said in the
+// contract's word for it.
+type clone struct{ fs local.FS }
+
+func (c clone) OpenUnfollowed(name string) (fs.File, error) {
+	f, err := c.fs.OpenUnfollowed(name)
+	if local.Linked(err) {
+		return nil, &fs.PathError{Op: "open", Path: name, Err: contract.ErrLink}
+	}
+	return f, err
 }
 
 func (s Source) Pull(ctx context.Context) (contract.Pulled, error) {

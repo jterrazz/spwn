@@ -13,9 +13,22 @@ import (
 
 type disk struct{ owner *invoker }
 
-func (disk) Open(name string) (fs.File, error)          { return os.Open(name) }
-func (disk) ReadFile(path string) ([]byte, error)       { return os.ReadFile(path) }
-func (disk) Readlink(path string) (string, error)       { return os.Readlink(path) }
+func (disk) Open(name string) (fs.File, error)    { return os.Open(name) }
+func (disk) ReadFile(path string) ([]byte, error) { return os.ReadFile(path) }
+func (disk) Readlink(path string) (string, error) { return os.Readlink(path) }
+
+// invariant: the entry at path opened as it stands, never through a link
+// (O_NOFOLLOW: a link answers syscall.ELOOP) and never waiting on a pipe
+// or a device (O_NONBLOCK), so its own Stat says what it is.
+func (disk) OpenUnfollowed(path string) (fs.File, error) {
+	return os.OpenFile(path, os.O_RDONLY|syscall.O_NOFOLLOW|syscall.O_NONBLOCK, 0)
+}
+
+func Linked(err error) bool {
+	// value: whether an OpenUnfollowed refused the entry for being a link.
+	return errors.Is(err, syscall.ELOOP)
+}
+
 func (disk) Symlink(target, path string) error          { return os.Symlink(target, path) }
 func (disk) Stat(path string) (fs.FileInfo, error)      { return os.Stat(path) }
 func (disk) ReadDir(path string) ([]fs.DirEntry, error) { return os.ReadDir(path) }

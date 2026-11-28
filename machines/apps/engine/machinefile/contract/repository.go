@@ -2,6 +2,7 @@ package contract
 
 import (
 	"errors"
+	"io"
 	"io/fs"
 	"path"
 	"slices"
@@ -24,13 +25,24 @@ const (
 	KitSuffix          = ".kit.yaml"
 )
 
-// value: how much of a repository is read at most: the files read, and
-// the bytes of one, each judged before it is read.
+// value: how much of a repository is read at most: the entries listed,
+// files and folders alike, every folder of the walk counted, and the
+// bytes of one file.
 
 const (
-	RepositoryFiles    = 1024
+	RepositoryEntries  = 1024
 	RepositoryFileSize = 256 << 10
 )
+
+// value: a clone's entries, each opened where it stands: a link is never
+// followed, and opening one answers an error that is ErrLink. A
+// folder opened lists its entries (fs.ReadDirFile), a file reads its
+// bytes, and each says what it is by its own Stat, never by its path's.
+type clone interface {
+	OpenUnfollowed(name string) (fs.File, error)
+}
+
+var ErrLink = errors.New("a link, never followed")
 
 // value: a shared source's repository read from a folder: the clone it
 // stands in, the folder of the repository its machines are declared in
@@ -39,7 +51,7 @@ const (
 // (`studio@1a2b3c4`).
 
 type Repository struct {
-	Dir      folders
+	Dir      clone
 	At       string
 	Sub      string
 	Computer string
@@ -65,32 +77,40 @@ func (e *OutsideError) Error() string {
 
 func (r Repository) Read() ([]machinefile.File, error) {
 	// invariant: every file read is a folder entry of the clone listed from
-	// its top, never a name joined from the repository's words: no link is
-	// followed, a `source.path` is relative and never climbs, and nothing is
-	// read past RepositoryFiles files or a file past RepositoryFileSize
-	// bytes. A computer reads its own folder of machines/ alone, the one
-	// its own name says. The files come in path order, named as every
-	// source names them, `catalog/<category>/<name>.yaml` and
-	// `machinefiles/<name>.machine.yaml`, each with its repository path.
-	w := &walk{r: r}
+	// its top, never a name joined from the repository's words, and it is
+	// judged on the handle it is read from: opened with no link followed,
+	// read only when that handle is a regular file of RepositoryFileSize
+	// bytes at most, and never past them. Each folder is listed once, from
+	// its own handle, and every entry listed counts against one budget,
+	// RepositoryEntries, refused past it before the rest is listed. A
+	// `source.path` is relative and never climbs. A computer reads its own
+	// folder of machines/ alone, the one its own name says. The files come
+	// in path order, named as every source names them,
+	// `catalog/<category>/<name>.yaml` and `machinefiles/<name>.machine.yaml`,
+	// each with its repository path.
+	w := &walk{r: r, left: RepositoryEntries}
 	at, repo := r.At, ""
+	if r.Sub != "" && (!fs.ValidPath(r.Sub) || r.Sub == ".") {
+		return nil, &OutsideError{Source: r.Source, At: r.Sub, Problem: "a source's `path` is a folder of it, relative and with no `..`"}
+	}
+	top, _, err := w.list(at, repo)
+	if err != nil {
+		return nil, err
+	}
 	if r.Sub != "" {
-		if !fs.ValidPath(r.Sub) || r.Sub == "." {
-			return nil, &OutsideError{Source: r.Source, At: r.Sub, Problem: "a source's `path` is a folder of it, relative and with no `..`"}
-		}
 		for part := range strings.SplitSeq(r.Sub, "/") {
-			next, ok, err := w.folder(at, repo, part)
+			next, ok, err := w.folder(top, at, repo, part)
 			if err != nil {
 				return nil, err
 			}
 			if !ok {
 				return nil, &UnavailableError{Source: r.Source, Cause: errors.New("its `path` " + strconv.Quote(r.Sub) + " names no folder of it")}
 			}
-			at, repo = next, path.Join(repo, part)
+			at, repo, top = next.at, next.repo, next.entries
 		}
 	}
-	for _, read := range []func(at, repo string) error{w.machines, w.kits, w.packages} {
-		if err := read(at, repo); err != nil {
+	for _, read := range []func(top []fs.DirEntry, at, repo string) error{w.machines, w.kits, w.packages} {
+		if err := read(top, at, repo); err != nil {
 			return nil, err
 		}
 	}
@@ -105,8 +125,17 @@ func (r Repository) Read() ([]machinefile.File, error) {
 }
 
 type walk struct {
-	r   Repository
-	out []machinefile.File
+	r Repository
+	// value: how many more entries the walk may list.
+	left int
+	out  []machinefile.File
+}
+
+// value: a folder of the walk: where it is in the clone, its path in the
+// repository, and its entries, listed once.
+type listed struct {
+	at, repo string
+	entries  []fs.DirEntry
 }
 
 func (w *walk) refused(format, repo, problem string) error {
@@ -121,80 +150,132 @@ func (w *walk) link(repo string) error {
 	return &OutsideError{Source: w.r.Source, At: repo, Problem: "it is a link: Machines reads a shared source inside its clone, never through a link"}
 }
 
-// value: the folder of `at` named `name`, and whether it is there; a link
-// of that name is refused, and an entry that is no folder is none.
-func (w *walk) folder(at, repo, name string) (dir string, ok bool, err error) {
-	entries, err := list(w.r.Dir, at)
-	if err != nil {
-		return "", false, err
+// value: the entry at `at` opened where it stands; a link there is
+// refused, and one not there is none.
+func (w *walk) open(at, repo string) (fs.File, error) {
+	f, err := w.r.Dir.OpenUnfollowed(at)
+	if errors.Is(err, ErrLink) {
+		return nil, w.link(repo)
 	}
-	for _, e := range entries {
-		if e.Name() != name {
-			continue
-		}
-		if e.Type()&fs.ModeSymlink != 0 {
-			return "", false, w.link(path.Join(repo, name))
-		}
-		return path.Join(at, name), e.IsDir(), nil
-	}
-	return "", false, nil
+	return f, err
 }
 
-// value: the entries of a folder that are meant to be read, each judged
-// (no link, a regular file, under the bounds) before it is.
-func (w *walk) files(at, repo string) ([]fs.DirEntry, error) {
-	entries, err := list(w.r.Dir, at)
-	if err != nil {
-		return nil, err
+// value: the entries of the folder at `at`, listed from its own handle,
+// in name order, each counted against the walk's budget; ok is false
+// when no folder stands there.
+func (w *walk) list(at, repo string) (entries []fs.DirEntry, ok bool, err error) {
+	f, err := w.open(at, repo)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, false, nil
 	}
+	if err != nil {
+		return nil, false, err
+	}
+	defer func() { _ = f.Close() }()
+	info, err := f.Stat()
+	if err != nil {
+		return nil, false, err
+	}
+	dir, isDir := f.(fs.ReadDirFile)
+	if !info.IsDir() || !isDir {
+		return nil, false, nil
+	}
+	entries, err = dir.ReadDir(w.left + 1)
+	if err != nil && !errors.Is(err, io.EOF) {
+		return nil, false, err
+	}
+	if len(entries) > w.left {
+		return nil, false, w.refused("machinefile", w.r.Sub, "holds more than "+strconv.Itoa(RepositoryEntries)+" entries to read")
+	}
+	w.left -= len(entries)
+	slices.SortFunc(entries, func(a, b fs.DirEntry) int { return strings.Compare(a.Name(), b.Name()) })
+	return entries, true, nil
+}
+
+// value: the folder named `name` among the entries of `at`, listed, and
+// whether it is there; a link of that name is refused, and an entry that
+// is no folder is none.
+func (w *walk) folder(entries []fs.DirEntry, at, repo, name string) (listed, bool, error) {
+	i := slices.IndexFunc(entries, func(e fs.DirEntry) bool { return e.Name() == name })
+	if i < 0 {
+		return listed{}, false, nil
+	}
+	return w.enter(entries[i], at, repo)
+}
+
+// value: the entry e of `at` listed as a folder; a link is refused, and
+// an entry that is no folder is none.
+func (w *walk) enter(e fs.DirEntry, at, repo string) (listed, bool, error) {
+	sub, subRepo := path.Join(at, e.Name()), path.Join(repo, e.Name())
+	if e.Type()&fs.ModeSymlink != 0 {
+		return listed{}, false, w.link(subRepo)
+	}
+	if !e.IsDir() {
+		return listed{}, false, nil
+	}
+	held, ok, err := w.list(sub, subRepo)
+	return listed{at: sub, repo: subRepo, entries: held}, ok, err
+}
+
+// value: the entries of a folder meant to be read, each judged by its
+// listing (no link, a regular file) before it is opened, and again on
+// its handle when it is (read).
+func (w *walk) files(in listed) ([]fs.DirEntry, error) {
 	var out []fs.DirEntry
-	for _, e := range entries {
+	for _, e := range in.entries {
 		if e.IsDir() || !meant(e.Name()) {
 			continue
 		}
-		p := path.Join(repo, e.Name())
+		p := path.Join(in.repo, e.Name())
 		switch t := e.Type(); {
 		case t&fs.ModeSymlink != 0:
 			return nil, w.link(p)
 		case !t.IsRegular():
 			return nil, w.refused("machinefile", p, "is no regular file: a source holds files and folders alone")
 		}
-		info, err := e.Info()
-		if err != nil {
-			return nil, err
-		}
-		if info.Size() > RepositoryFileSize {
-			return nil, w.refused("machinefile", p, "is "+strconv.FormatInt(info.Size(), 10)+" bytes: a source's file is "+strconv.Itoa(RepositoryFileSize)+" at most")
-		}
-		if len(w.out)+len(out) == RepositoryFiles {
-			return nil, w.refused("machinefile", w.r.Sub, "holds more than "+strconv.Itoa(RepositoryFiles)+" files to read")
-		}
 		out = append(out, e)
 	}
 	return out, nil
 }
 
-func (w *walk) read(at, repo string, e fs.DirEntry, logical string, slot catalog.Slot) error {
-	body, err := w.r.Dir.ReadFile(path.Join(at, e.Name()))
+func (w *walk) read(in listed, e fs.DirEntry, logical string, slot catalog.Slot) error {
+	p := path.Join(in.repo, e.Name())
+	f, err := w.open(path.Join(in.at, e.Name()), p)
 	if err != nil {
 		return err
 	}
-	w.out = append(w.out, machinefile.File{Path: logical, Body: body, Repo: path.Join(repo, e.Name()), Slot: slot})
+	defer func() { _ = f.Close() }()
+	info, err := f.Stat()
+	if err != nil {
+		return err
+	}
+	if !info.Mode().IsRegular() {
+		return w.refused("machinefile", p, "is no regular file: a source holds files and folders alone")
+	}
+	if info.Size() > RepositoryFileSize {
+		return w.refused("machinefile", p, "is "+strconv.FormatInt(info.Size(), 10)+" bytes: a source's file is "+strconv.Itoa(RepositoryFileSize)+" at most")
+	}
+	body, err := io.ReadAll(io.LimitReader(f, RepositoryFileSize+1))
+	if err != nil {
+		return err
+	}
+	if len(body) > RepositoryFileSize {
+		return w.refused("machinefile", p, "is past "+strconv.Itoa(RepositoryFileSize)+" bytes: a source's file is "+strconv.Itoa(RepositoryFileSize)+" at most")
+	}
+	w.out = append(w.out, machinefile.File{Path: logical, Body: body, Repo: p, Slot: slot})
 	return nil
 }
 
-func (w *walk) machines(at, repo string) error {
-	machines, ok, err := w.folder(at, repo, RepositoryMachines)
+func (w *walk) machines(top []fs.DirEntry, at, repo string) error {
+	machines, ok, err := w.folder(top, at, repo, RepositoryMachines)
 	if err != nil || !ok || !catalog.IsMachinefileName(w.r.Computer) {
 		return err
 	}
-	repo = path.Join(repo, RepositoryMachines)
-	mine, ok, err := w.folder(machines, repo, w.r.Computer)
+	mine, ok, err := w.folder(machines.entries, machines.at, machines.repo, w.r.Computer)
 	if err != nil || !ok {
 		return err
 	}
-	repo = path.Join(repo, w.r.Computer)
-	entries, err := w.files(mine, repo)
+	entries, err := w.files(mine)
 	if err != nil {
 		return err
 	}
@@ -203,67 +284,60 @@ func (w *walk) machines(at, repo string) error {
 		name, slot := vm, catalog.SlotVM
 		switch {
 		case !named:
-			return w.refused("machinefile", path.Join(repo, e.Name()), "is no machine file: a computer's folder holds `"+ComputerFile+"` and <vm>"+catalog.MachinefileSuffix)
+			return w.refused("machinefile", path.Join(mine.repo, e.Name()), "is no machine file: a computer's folder holds `"+ComputerFile+"` and <vm>"+catalog.MachinefileSuffix)
 		case e.Name() == ComputerFile:
 			name, slot = w.r.Computer, catalog.SlotComputer
 		}
-		if err := w.read(mine, repo, e, "machinefiles/"+name+catalog.MachinefileSuffix, slot); err != nil {
+		if err := w.read(mine, e, "machinefiles/"+name+catalog.MachinefileSuffix, slot); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (w *walk) kits(at, repo string) error {
-	kits, ok, err := w.folder(at, repo, RepositoryKits)
+func (w *walk) kits(top []fs.DirEntry, at, repo string) error {
+	kits, ok, err := w.folder(top, at, repo, RepositoryKits)
 	if err != nil || !ok {
 		return err
 	}
-	repo = path.Join(repo, RepositoryKits)
-	entries, err := w.files(kits, repo)
+	entries, err := w.files(kits)
 	if err != nil {
 		return err
 	}
 	for _, e := range entries {
 		name, named := strings.CutSuffix(e.Name(), KitSuffix)
 		if !named {
-			return w.refused("machinefile", path.Join(repo, e.Name()), "is no kit: a kit is kits/<name>"+KitSuffix)
+			return w.refused("machinefile", path.Join(kits.repo, e.Name()), "is no kit: a kit is kits/<name>"+KitSuffix)
 		}
-		if err := w.read(kits, repo, e, "machinefiles/"+name+catalog.MachinefileSuffix, catalog.SlotKit); err != nil {
+		if err := w.read(kits, e, "machinefiles/"+name+catalog.MachinefileSuffix, catalog.SlotKit); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (w *walk) packages(at, repo string) error {
-	packages, ok, err := w.folder(at, repo, RepositoryPackages)
+func (w *walk) packages(top []fs.DirEntry, at, repo string) error {
+	packages, ok, err := w.folder(top, at, repo, RepositoryPackages)
 	if err != nil || !ok {
 		return err
 	}
-	repo = path.Join(repo, RepositoryPackages)
-	entries, err := list(w.r.Dir, packages)
-	if err != nil {
-		return err
-	}
-	for _, c := range entries {
-		category, ok, err := w.folder(packages, repo, c.Name())
+	for _, c := range packages.entries {
+		category, ok, err := w.enter(c, packages.at, packages.repo)
 		if err != nil {
 			return err
 		}
 		if !ok {
 			if meant(c.Name()) {
-				return w.refused("catalog", path.Join(repo, c.Name()), "is no package file: a package is packages/<category>/<name>.yaml")
+				return w.refused("catalog", path.Join(packages.repo, c.Name()), "is no package file: a package is packages/<category>/<name>.yaml")
 			}
 			continue
 		}
-		in := path.Join(repo, c.Name())
-		files, err := w.files(category, in)
+		files, err := w.files(category)
 		if err != nil {
 			return err
 		}
 		for _, e := range files {
-			if err := w.read(category, in, e, "catalog/"+c.Name()+"/"+e.Name(), ""); err != nil {
+			if err := w.read(category, e, "catalog/"+c.Name()+"/"+e.Name(), ""); err != nil {
 				return err
 			}
 		}

@@ -30,6 +30,11 @@ func (f *FS) ReadFile(p string) ([]byte, error) { return f.Files.ReadFile(key(p)
 
 func (f *FS) Readlink(string) (string, error) { return "", fs.ErrNotExist }
 
+func (f *FS) OpenUnfollowed(name string) (fs.File, error) {
+	// value: Open, since this tree holds no link to follow.
+	return f.Open(name)
+}
+
 func (f *FS) Symlink(string, string) error { return fs.ErrInvalid }
 
 func (f *FS) WriteFile(p string, data []byte, perm fs.FileMode) error {

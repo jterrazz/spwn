@@ -2,7 +2,9 @@ package contract_test
 
 import (
 	"errors"
+	"io/fs"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -26,7 +28,7 @@ func library(t *testing.T, user, repo map[string]string) (machinefile.Library, e
 	for p, body := range repo {
 		held[p] = &fstest.MapFile{Data: []byte(body)}
 	}
-	files, err := contract.Repository{Dir: held, At: ".", Computer: "mini", Source: "studio", Root: "studio@1a2b3c4"}.Read()
+	files, err := contract.Repository{Dir: counted{MapFS: held, opens: new(int)}, At: ".", Computer: "mini", Source: "studio", Root: "studio@1a2b3c4"}.Read()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -42,6 +44,73 @@ func library(t *testing.T, user, repo map[string]string) (machinefile.Library, e
 		{Kind: machinefile.Shared, Root: "studio@1a2b3c4", Files: files},
 		tree(machinefile.Builtin, "built-in", map[string]string{"catalog/command-line/fd.yaml": pkg("fd", "the built-in fd"), "catalog/command-line/jq.yaml": pkg("jq", "json")}),
 	})
+}
+
+// value: a repository held in memory, which counts every entry opened.
+type counted struct {
+	fstest.MapFS
+	opens *int
+}
+
+func (c counted) OpenUnfollowed(name string) (fs.File, error) {
+	*c.opens++
+	return c.Open(name)
+}
+
+func TestEachFolderIsListedOnceAndEveryEntryCounted(t *testing.T) {
+	held := fstest.MapFS{}
+	for i := range 100 {
+		held["packages/c"+strconv.Itoa(i)+"/p.yaml"] = &fstest.MapFile{Data: []byte(pkg("p"+strconv.Itoa(i), "one"))}
+	}
+	opens := 0
+	files, err := contract.Repository{Dir: counted{MapFS: held, opens: &opens}, At: ".", Computer: "mini", Source: "studio", Root: "studio@1a2b3c4"}.Read()
+	if err != nil || len(files) != 100 {
+		t.Fatalf("read %d files with %v", len(files), err)
+	}
+	if want := 2 + 2*100; opens != want {
+		t.Errorf("opened %d entries; want %d, the top, packages/, each category and each file once", opens, want)
+	}
+}
+
+func TestAWalkPastItsBudgetIsRefusedBeforeItListsTheRest(t *testing.T) {
+	held := fstest.MapFS{}
+	for i := range 5000 {
+		held["packages/c"+strconv.Itoa(i)] = &fstest.MapFile{Mode: fs.ModeDir | 0o755}
+	}
+	opens := 0
+	_, err := contract.Repository{Dir: counted{MapFS: held, opens: &opens}, At: ".", Computer: "mini", Source: "studio", Root: "studio@1a2b3c4"}.Read()
+	var file *catalog.FileError
+	if !errors.As(err, &file) || !strings.Contains(file.Problem, "more than "+strconv.Itoa(contract.RepositoryEntries)+" entries") {
+		t.Errorf("read 5000 empty categories with %v; want them refused past the budget", err)
+	}
+	if opens != 2 {
+		t.Errorf("opened %d entries; want 2, the top and packages/, refused as it is listed", opens)
+	}
+}
+
+// value: a repository held in memory where the entry at `at` becomes
+// `to` the first time it is opened, after the listing that judged it.
+type turned struct {
+	fstest.MapFS
+	at string
+	to *fstest.MapFile
+}
+
+func (s *turned) OpenUnfollowed(name string) (fs.File, error) {
+	if name == s.at && s.to != nil {
+		s.MapFS[name], s.to = s.to, nil
+	}
+	return s.Open(name)
+}
+
+func TestAFileTurnedIntoAPipeAfterItsListingIsRefusedByItsHandle(t *testing.T) {
+	held := fstest.MapFS{"kits/essentials.kit.yaml": &fstest.MapFile{Data: []byte(header + "name: essentials\n")}}
+	pipe := &fstest.MapFile{Mode: fs.ModeNamedPipe | 0o600}
+	_, err := contract.Repository{Dir: &turned{MapFS: held, at: "kits/essentials.kit.yaml", to: pipe}, At: ".", Computer: "mini", Source: "studio", Root: "studio@1a2b3c4"}.Read()
+	var file *catalog.FileError
+	if !errors.As(err, &file) || file.File != "studio@1a2b3c4/kits/essentials.kit.yaml" || !strings.Contains(file.Problem, "no regular file") {
+		t.Errorf("read a kit turned into a pipe with %v; want it refused as no regular file", err)
+	}
 }
 
 func computer(body string) string {

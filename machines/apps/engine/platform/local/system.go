@@ -103,6 +103,10 @@ type FS interface {
 	Chown(path string, uid, gid int) error
 	Readlink(path string) (string, error)
 	Symlink(target, path string) error
+	// value: the entry at path opened where it stands: a link is never
+	// followed (its open answers syscall.ELOOP), and a folder opened lists
+	// its entries from that handle.
+	OpenUnfollowed(path string) (fs.File, error)
 }
 
 type Env interface {

@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"testing"
 	"time"
 )
@@ -165,5 +166,39 @@ func TestAReleasedTransientLockReleasedAgainLeavesTheNextHoldersFile(t *testing.
 	first()
 	if _, err := os.Stat(at); err != nil {
 		t.Errorf("a second release removed the lock file another holder owns: %v", err)
+	}
+}
+
+func TestAnUnfollowedOpenRefusesALinkAndTellsAPipeByItsHandle(t *testing.T) {
+	dir := t.TempDir()
+	file, folder, pipe := filepath.Join(dir, "file"), filepath.Join(dir, "folder"), filepath.Join(dir, "pipe")
+	if err := os.WriteFile(file, []byte("x"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Mkdir(folder, 0o700); err != nil {
+		t.Fatal(err)
+	}
+	if err := syscall.Mkfifo(pipe, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	for _, to := range []string{file, folder} {
+		at := to + ".link"
+		if err := os.Symlink(to, at); err != nil {
+			t.Fatal(err)
+		}
+		if f, err := (disk{}).OpenUnfollowed(at); !errors.Is(err, syscall.ELOOP) {
+			if f != nil {
+				_ = f.Close()
+			}
+			t.Errorf("opened the link to %s with %v; want ELOOP", to, err)
+		}
+	}
+	f, err := disk{}.OpenUnfollowed(pipe)
+	if err != nil {
+		t.Fatalf("opened the pipe with %v; want it opened without waiting", err)
+	}
+	defer func() { _ = f.Close() }()
+	if info, err := f.Stat(); err != nil || info.Mode().IsRegular() {
+		t.Errorf("the pipe's handle says %v, %v; want no regular file", info, err)
 	}
 }
