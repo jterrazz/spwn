@@ -55,8 +55,9 @@ func readProject(project string) projectReads {
 	defer tree.Close()
 	home := filepath.Join(project, "agents", "neo")
 	body, err := NewCommandFileResolver(project, "commands").Resolve("command/evil")
+	skills, skillsErr := collectRuntimeSkills(tree, "skills", nil)
 	reads := projectReads{
-		skills:    fmt.Sprintf("%q", collectRuntimeSkills(tree, "skills", nil)),
+		skills:    fmt.Sprintf("%q %v", skills, skillsErr),
 		hooks:     fmt.Sprintf("%q", loadRuntimeHooks(tree, "hooks")),
 		commands:  fmt.Sprintf("%q", loadRuntimeCommands(tree, "commands")),
 		soul:      string(readAgentFile(tree, home, "SOUL.md")),
@@ -112,8 +113,8 @@ func TestAProjectFileThatLinksOutIsNeverRead(t *testing.T) {
 	if there.resolveErr == "" {
 		t.Errorf("Resolve(command/evil) = %q; want it refused", there.resolved)
 	}
-	if !strings.Contains(there.skills, "kept") || strings.Contains(there.skills, "half") {
-		t.Errorf("skills = %s; want kept, and half dropped for its link out", there.skills)
+	if want := "[] project.skill-refused: skills/half/refs/secret.md is a link, which a skill never ships"; there.skills != want {
+		t.Errorf("skills = %s; want half refused for its link out, naming it", there.skills)
 	}
 	if err := os.RemoveAll(outside); err != nil {
 		t.Fatal(err)
@@ -188,17 +189,17 @@ func TestAnHonestProjectReadsAsAPlainReadDoes(t *testing.T) {
 		"skills/review/SKILL.md":       "---\nname: review\ndescription: review\n---\nReview.\n",
 		"skills/review/refs/a.md":      "a\n",
 		"skills/review/refs/deep/b.sh": "#!/bin/sh\necho b\n",
-		"skills/quick.md":              "Quick.\n",
+		"skills/quick.md":              "---\nname: quick\n---\nQuick.\n",
 		"hooks/lint.yaml":              "event: PostToolUse\nmatcher: Edit\ncommand: make lint\n",
 		"commands/morning.md":          "Brief: {{ .Now }}.\n",
 		"agents/neo/SOUL.md":           "I am neo.\n",
 	})
-	linkAll(t, project, map[string]string{
-		"skills/review/style.md": filepath.Join("..", "..", "shared", "style.md"),
-	})
 	tree := platform.Within(project)
 	defer tree.Close()
-	skills := loadUserSkills(tree, "skills")
+	skills, err := loadUserSkills(tree, "skills")
+	if err != nil {
+		t.Fatal(err)
+	}
 	byName := map[string]map[string][]byte{}
 	for _, s := range skills {
 		byName[s.Name] = s.Files
@@ -206,7 +207,7 @@ func TestAnHonestProjectReadsAsAPlainReadDoes(t *testing.T) {
 	if want := plainFiles(t, filepath.Join(project, "skills", "review")); !reflect.DeepEqual(byName["review"], want) {
 		t.Errorf("the nested skill = %q; want the plain read %q", byName["review"], want)
 	}
-	if want := ensureSkillFrontmatter([]byte("Quick.\n"), "quick"); !reflect.DeepEqual(byName["quick"], map[string][]byte{"SKILL.md": want}) {
+	if want := map[string][]byte{"SKILL.md": []byte("---\nname: quick\n---\nQuick.\n")}; !reflect.DeepEqual(byName["quick"], want) {
 		t.Errorf("the file skill = %q; want %q", byName["quick"], want)
 	}
 	if len(skills) != 2 {

@@ -500,7 +500,11 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	minds := platform.Within(cmp.Or(platform.ProjectRoot(), platform.UserDir()))
 	defer minds.Close()
 	folders := platform.ProjectFolders()
-	runtimeSkills := collectRuntimeSkills(project, folders.Skills, resolvedTools)
+	runtimeSkills, err := collectRuntimeSkills(project, folders.Skills, resolvedTools)
+	if err != nil {
+		a.rollback(ctx, containerID)
+		return nil, err
+	}
 	warnings = append(warnings, refusedToolSkills(resolvedTools)...)
 	hookPool := loadRuntimeHooks(project, folders.Hooks)
 	commandPool := loadRuntimeCommands(project, folders.Commands)

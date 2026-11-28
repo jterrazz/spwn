@@ -293,7 +293,7 @@ spwn install github:jterrazz/does-not-exist  # → rc ≤ 1 (clean error OR plan
 #### 28. Local refs refused without `--agent`
 
 ```bash
-station project create p && cd p && echo "# test" > skills/myskill.md
+station project create p && cd p && printf -- '---\nname: myskill\n---\n# test\n' > skills/myskill.md
 spwn install skill:myskill                   # → exit != 0 (no --agent)
 ```
 

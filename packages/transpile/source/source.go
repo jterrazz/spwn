@@ -37,10 +37,8 @@ type ProjectSource struct {
 	// is deterministic (sorted by Name).
 	Agents []AgentSource
 
-	// Skills are every bare-markdown skill at the top of
-	// skills/*.md. Nested .md files inside a directory-form
-	// package belong to that dependency's own spwn.yaml and are not
-	// enumerated here.
+	// Skills are every skill of the skills folder, as
+	// project.LoadSkills names them.
 	Skills []SkillSource
 
 	// Hooks is every file directly under hooks/.
@@ -121,18 +119,17 @@ type LayerFiles struct {
 	Journal   map[string][]byte
 }
 
-// SkillSource is one project-authored skill under skills/. The
+// SkillSource is one project-authored skill of the skills folder. The
 // canonical on-disk shape is a directory per skill:
 //
 //	skills/<name>/
-//	  SKILL.md          (required; YAML frontmatter + body)
+//	  SKILL.md          (required; front matter naming it, then the body)
 //	  template.md       (optional sidecar, anything goes)
 //	  scripts/run.sh    (optional sidecar, preserved verbatim)
 //
-// Legacy bare-markdown form (`skills/<name>.md`) is still
-// accepted: the loader synthesises a `<name>/SKILL.md` entry (and
-// injects minimal `name:`/`description:` frontmatter when the file
-// has none) so downstream renderers can treat both forms identically.
+// The bare form, `skills/<name>.md` with the same front matter, is read
+// as its `<name>/SKILL.md`, so renderers treat both forms identically.
+// What is a skill, and what is passed over, is project.LoadSkills's.
 type SkillSource struct {
 	// Name is the skill identifier: either the sub-directory name
 	// under skills/ (dir form) or the bare filename minus .md.
@@ -408,85 +405,15 @@ func readTree(t *platform.Tree, dir string) (map[string][]byte, error) {
 }
 
 func loadSkills(t *platform.Tree, dir string) ([]SkillSource, error) {
-	entries, err := t.ReadDir(dir)
+	skills, err := project.LoadSkills(t, dir)
 	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("read %s: %w", dir, err)
+		return nil, err
 	}
-	var out []SkillSource
-	for _, e := range entries {
-		name := e.Name()
-		if strings.HasPrefix(name, ".") {
-			continue
-		}
-		if e.IsDir() {
-			skill, ok, err := loadSkillDir(t, filepath.Join(dir, name), name)
-			if err != nil {
-				return nil, err
-			}
-			if ok {
-				out = append(out, skill)
-			}
-			continue
-		}
-		if !strings.HasSuffix(name, ".md") {
-			continue
-		}
-		path := filepath.Join(dir, name)
-		body, err := t.ReadFile(path)
-		if err != nil {
-			return nil, fmt.Errorf("read %s: %w", path, err)
-		}
-		id := strings.TrimSuffix(name, ".md")
-		out = append(out, SkillSource{
-			Name:  id,
-			Files: map[string][]byte{"SKILL.md": ensureSkillFrontmatter(body, id)},
-		})
+	out := make([]SkillSource, 0, len(skills))
+	for _, s := range skills {
+		out = append(out, SkillSource(s))
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out, nil
-}
-
-func loadSkillDir(t *platform.Tree, root, name string) (SkillSource, bool, error) {
-	files := map[string][]byte{}
-	err := t.WalkDir(root, func(p string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			return nil
-		}
-		rel, relErr := filepath.Rel(root, p)
-		if relErr != nil {
-			return relErr
-		}
-		rel = filepath.ToSlash(rel)
-		body, readErr := t.ReadFile(p)
-		if readErr != nil {
-			return fmt.Errorf("read %s: %w", p, readErr)
-		}
-		files[rel] = body
-		return nil
-	})
-	if err != nil {
-		return SkillSource{}, false, err
-	}
-	if _, ok := files["SKILL.md"]; !ok {
-		return SkillSource{}, false, nil
-	}
-	files["SKILL.md"] = ensureSkillFrontmatter(files["SKILL.md"], name)
-	return SkillSource{Name: name, Files: files}, true, nil
-}
-
-func ensureSkillFrontmatter(body []byte, name string) []byte {
-	trimmed := strings.TrimLeft(string(body), "\n\t ")
-	if strings.HasPrefix(trimmed, "---") {
-		return body
-	}
-	header := fmt.Sprintf("---\nname: %s\ndescription: %s\n---\n\n", name, name)
-	return append([]byte(header), body...)
 }
 
 func loadHooks(t *platform.Tree, dir string) ([]HookSource, error) {

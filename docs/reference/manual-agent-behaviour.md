@@ -593,11 +593,8 @@ spwn install skill:silent-skill --agent neo
 
 > is "silent-skill" in your discoverable skills list?
 
-**Expect:** not discoverable. Either: it appears with name derived from
-filename but no description (acceptable), OR it's skipped entirely
-(depending on how frontmatter-less SKILL.md is handled).
-
-Document actual behavior here for the record.
+**Expect:** not discoverable: a file whose frontmatter names no skill is
+not a skill, so it never reaches the world.
 
 ---
 

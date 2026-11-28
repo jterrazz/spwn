@@ -168,7 +168,9 @@ The compiler unions all deps across a world's agents, topo-sorts, resolves each 
 
 ## Skills: `skills/<name>/SKILL.md`
 
-Reusable sub-prompts both runtimes auto-discover at startup. Source form is a directory per skill with an entry at `SKILL.md` and any sidecar files alongside; frontmatter needs at least `name:` and `description:`. The legacy bare form `skills/<name>.md` auto-wraps into `<name>/SKILL.md` on load.
+Reusable sub-prompts both runtimes auto-discover at startup. Source form is a directory per skill with an entry at `SKILL.md` and any sidecar files alongside; frontmatter needs at least `name:` and `description:`. The bare form `skills/<name>.md` is read as `<name>/SKILL.md`.
+
+A skill is named, never inferred from where a file sits: a folder is a skill only when its `SKILL.md` opens with frontmatter that parses and carries a `name:`, and a bare file only when its own frontmatter does and it is not a `README.md`. Anything else under `skills/` (a note, a vendored folder, a link) renders nothing and is passed over in silence, so a repository whose root already has a `skills/` folder of its own loses nothing to its agents. A named skill ships every file of its folder, at most 64 entries and 256 KiB a file, and none of them a link; past that it is refused, `project.skill-refused`, naming the entry.
 
 The compiler emits `.claude/skills/<skill>/` (Claude Code) or `.agents/skills/<skill>/` (codex, following the cross-vendor `AGENTS.md` convention, **not** `.codex/skills/`). Tool-shipped skills merge into the same tree.
 

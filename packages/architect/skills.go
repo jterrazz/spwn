@@ -13,6 +13,7 @@ import (
 	"spwn.sh/packages/agent"
 	"spwn.sh/packages/dependency/tool"
 	"spwn.sh/packages/platform"
+	"spwn.sh/packages/project"
 	"spwn.sh/packages/transpile"
 )
 
@@ -164,12 +165,14 @@ func agentCommandSelection(agentName string, pool []transpile.CommandEntry) []tr
 	return out
 }
 
-func collectRuntimeSkills(project *platform.Tree, skillsFolder string, tools []tool.Tool) []transpile.SkillEntry {
-	out := make([]transpile.SkillEntry, 0)
-	out = append(out, loadUserSkills(project, skillsFolder)...)
+func collectRuntimeSkills(project *platform.Tree, skillsFolder string, tools []tool.Tool) ([]transpile.SkillEntry, error) {
+	out, err := loadUserSkills(project, skillsFolder)
+	if err != nil {
+		return nil, err
+	}
 	out = append(out, toolSkillEntries(tools)...)
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
-	return out
+	return out, nil
 }
 
 func facultiesForRuntime(verifiedTools, deps []string) []string {
@@ -203,68 +206,19 @@ func facultiesForRuntime(verifiedTools, deps []string) []string {
 	return out
 }
 
-func loadUserSkills(project *platform.Tree, skillsFolder string) []transpile.SkillEntry {
-	if project == nil {
-		return nil
+func loadUserSkills(t *platform.Tree, skillsFolder string) ([]transpile.SkillEntry, error) {
+	if t == nil {
+		return nil, nil
 	}
-	base := filepath.FromSlash(skillsFolder)
-	entries, err := project.ReadDir(base)
+	skills, err := project.LoadSkills(t, filepath.FromSlash(skillsFolder))
 	if err != nil {
-		return nil
+		return nil, err
 	}
-	var out []transpile.SkillEntry
-	for _, e := range entries {
-		name := e.Name()
-		if strings.HasPrefix(name, ".") {
-			continue
-		}
-		if e.IsDir() {
-			if skill, ok := loadUserSkillDir(project, filepath.Join(base, name), name); ok {
-				out = append(out, skill)
-			}
-			continue
-		}
-		if !strings.HasSuffix(name, ".md") {
-			continue
-		}
-		body, readErr := project.ReadFile(filepath.Join(base, name))
-		if readErr != nil {
-			continue
-		}
-		id := strings.TrimSuffix(name, ".md")
-		out = append(out, transpile.SkillEntry{
-			Name:  id,
-			Files: map[string][]byte{"SKILL.md": ensureSkillFrontmatter(body, id)},
-		})
+	out := make([]transpile.SkillEntry, 0, len(skills))
+	for _, s := range skills {
+		out = append(out, transpile.SkillEntry{Name: s.Name, Files: s.Files})
 	}
-	return out
-}
-
-func loadUserSkillDir(project *platform.Tree, dir, name string) (transpile.SkillEntry, bool) {
-	files := map[string][]byte{}
-	err := project.WalkDir(dir, func(p string, d fs.DirEntry, walkErr error) error {
-		if walkErr != nil || d.IsDir() {
-			return walkErr
-		}
-		rel, relErr := filepath.Rel(dir, p)
-		if relErr != nil {
-			return relErr
-		}
-		body, readErr := project.ReadFile(p)
-		if readErr != nil {
-			return readErr
-		}
-		files[filepath.ToSlash(rel)] = body
-		return nil
-	})
-	if err != nil {
-		return transpile.SkillEntry{}, false
-	}
-	if _, ok := files["SKILL.md"]; !ok {
-		return transpile.SkillEntry{}, false
-	}
-	files["SKILL.md"] = ensureSkillFrontmatter(files["SKILL.md"], name)
-	return transpile.SkillEntry{Name: name, Files: files}, true
+	return out, nil
 }
 
 func toolSkillEntries(tools []tool.Tool) []transpile.SkillEntry {
@@ -353,15 +307,6 @@ func collectSidecar(fsys fs.FS, root string, out map[string][]byte) {
 		out[filepath.ToSlash(rel)] = body
 		return nil
 	})
-}
-
-func ensureSkillFrontmatter(body []byte, name string) []byte {
-	trimmed := strings.TrimLeft(string(body), "\n\t ")
-	if strings.HasPrefix(trimmed, "---") {
-		return body
-	}
-	header := fmt.Sprintf("---\nname: %s\ndescription: %s\n---\n\n", name, name)
-	return append([]byte(header), body...)
 }
 
 func skillDirName(ref string) string {
