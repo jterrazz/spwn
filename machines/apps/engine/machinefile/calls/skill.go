@@ -58,7 +58,16 @@ func spwnSkill(ctx context.Context, d Deps, name string) (failed string) {
 	return ""
 }
 
+// invariant: a skill not written always says why: its error's first line
+// that holds words, or, for an error of no words, unsaidWhy.
 func why(err error) string {
-	line, _, _ := strings.Cut(err.Error(), "\n")
-	return line
+	for line := range strings.Lines(err.Error()) {
+		if line = strings.TrimSpace(line); line != "" {
+			return line
+		}
+	}
+	return unsaidWhy
 }
+
+// value: why a skill was not written when its error said no words.
+const unsaidWhy = "its write failed and said no reason"
