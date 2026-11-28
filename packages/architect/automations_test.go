@@ -26,7 +26,7 @@ func TestCommandFileResolver_ReadsBody(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	r := NewCommandFileResolver(root)
+	r := NewCommandFileResolver(root, "commands")
 	got, err := r.Resolve("command/morning-brief")
 	if err != nil {
 		t.Fatalf("resolve: %v", err)
@@ -37,7 +37,7 @@ func TestCommandFileResolver_ReadsBody(t *testing.T) {
 }
 
 func TestCommandFileResolver_RejectsBadShape(t *testing.T) {
-	r := NewCommandFileResolver(t.TempDir())
+	r := NewCommandFileResolver(t.TempDir(), "commands")
 	cases := []string{"skill/foo", "command/", "morning-brief", "/morning-brief"}
 	for _, ref := range cases {
 		t.Run(ref, func(t *testing.T) {
@@ -49,7 +49,7 @@ func TestCommandFileResolver_RejectsBadShape(t *testing.T) {
 }
 
 func TestCommandFileResolver_MissingFileErrors(t *testing.T) {
-	r := NewCommandFileResolver(t.TempDir())
+	r := NewCommandFileResolver(t.TempDir(), "commands")
 	_, err := r.Resolve("command/absent")
 	if err == nil {
 		t.Fatal("expected error")
@@ -284,4 +284,3 @@ func cmdContains(cmd []string, needle string) bool {
 	}
 	return false
 }
-

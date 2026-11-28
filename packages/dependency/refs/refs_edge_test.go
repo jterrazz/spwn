@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"spwn.sh/packages/dependency/refs"
+	"spwn.sh/packages/platform"
 )
 
 // ---------- Parse edge cases ----------
@@ -104,7 +105,7 @@ func TestSplitVersion_GithubVersioned(t *testing.T) {
 func TestResolveTool_EmptyRoot(t *testing.T) {
 	// Empty root means the path tools/<name>/ is relative to "".
 	// The directory almost certainly does not exist, so expect NotFound.
-	got := refs.ResolveTool("", refs.ParseRef("tool/something"), nil, false)
+	got := refs.ResolveTool("", platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("tool/something"), nil, false)
 	if got != refs.ResolveNotFound {
 		t.Errorf("empty root local: want NotFound, got %v", got)
 	}
@@ -112,7 +113,7 @@ func TestResolveTool_EmptyRoot(t *testing.T) {
 
 func TestResolveTool_LocalNameWithSlash(t *testing.T) {
 	root := t.TempDir()
-	got := refs.ResolveTool(root, refs.Ref{Kind: refs.KindLocalTool, Name: "foo/bar"}, nil, false)
+	got := refs.ResolveTool(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.Ref{Kind: refs.KindLocalTool, Name: "foo/bar"}, nil, false)
 	if got != refs.ResolveNotFound {
 		t.Errorf("name with slash: want NotFound, got %v", got)
 	}
@@ -120,7 +121,7 @@ func TestResolveTool_LocalNameWithSlash(t *testing.T) {
 
 func TestResolveTool_LocalNameWithDotDot(t *testing.T) {
 	root := t.TempDir()
-	got := refs.ResolveTool(root, refs.Ref{Kind: refs.KindLocalTool, Name: "../escape"}, nil, false)
+	got := refs.ResolveTool(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.Ref{Kind: refs.KindLocalTool, Name: "../escape"}, nil, false)
 	if got != refs.ResolveNotFound {
 		t.Errorf("name with ..: want NotFound, got %v", got)
 	}
@@ -128,7 +129,7 @@ func TestResolveTool_LocalNameWithDotDot(t *testing.T) {
 
 func TestResolveTool_BuiltinWithoutCatalog(t *testing.T) {
 	// haveCatalog=false should accept any well-formed builtin.
-	got := refs.ResolveTool("", refs.ParseRef("spwn:anything"), nil, false)
+	got := refs.ResolveTool("", platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("spwn:anything"), nil, false)
 	if got != refs.ResolveOK {
 		t.Errorf("builtin without catalog: want OK, got %v", got)
 	}
@@ -138,7 +139,7 @@ func TestResolveTool_BuiltinWithCatalogMissing(t *testing.T) {
 	catalog := map[string]struct{}{
 		"spwn:unix": {},
 	}
-	got := refs.ResolveTool("", refs.ParseRef("spwn:not-in-catalog"), catalog, true)
+	got := refs.ResolveTool("", platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("spwn:not-in-catalog"), catalog, true)
 	if got != refs.ResolveNotFound {
 		t.Errorf("builtin missing from catalog: want NotFound, got %v", got)
 	}
@@ -151,7 +152,7 @@ func TestResolveSkill_MdPathIsDirectory(t *testing.T) {
 	// Create a directory named "trick.md" instead of a file.
 	mustMkdirEdge(t, filepath.Join(root, "skills", "trick.md"))
 
-	got := refs.ResolveSkill(root, refs.ParseRef("skill/trick"), nil, false)
+	got := refs.ResolveSkill(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("skill/trick"), nil, false)
 	// The .md path exists but is a directory, not a file: should NOT resolve.
 	if got != refs.ResolveNotFound {
 		t.Errorf("md-is-directory skill: want NotFound, got %v", got)
@@ -163,7 +164,7 @@ func TestResolveSkill_EmptyToolDir(t *testing.T) {
 	// Create an empty tool directory (no spwn.yaml or anything).
 	mustMkdirEdge(t, filepath.Join(root, "tools", "empty-tool"))
 
-	got := refs.ResolveSkill(root, refs.ParseRef("tool/empty-tool"), nil, false)
+	got := refs.ResolveSkill(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("tool/empty-tool"), nil, false)
 	// The directory exists, so ResolveSkill should return OK (it does not
 	// validate contents).
 	if got != refs.ResolveOK {
@@ -172,7 +173,7 @@ func TestResolveSkill_EmptyToolDir(t *testing.T) {
 }
 
 func TestResolveSkill_RegistryAlwaysUnsupported(t *testing.T) {
-	got := refs.ResolveSkill("", refs.ParseRef("github:acme/foo"), nil, false)
+	got := refs.ResolveSkill("", platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("github:acme/foo"), nil, false)
 	if got != refs.ResolveRegistryUnsupported {
 		t.Errorf("registry skill: want RegistryUnsupported, got %v", got)
 	}

@@ -24,8 +24,10 @@ func projectStore(t *testing.T) (s *Store, states, outside string) {
 		t.Fatal(err)
 	}
 	was := platform.ProjectRoot()
-	platform.SetProjectRoot(root)
-	t.Cleanup(func() { platform.SetProjectRoot(was) })
+	platform.SetProject(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"})
+	t.Cleanup(func() {
+		platform.SetProject(was, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"})
+	})
 	states = filepath.Join(root, ".spwn", "world-states")
 	return &Store{dir: states, tree: stateTreeAsFound, written: platform.StateTree}, states, outside
 }

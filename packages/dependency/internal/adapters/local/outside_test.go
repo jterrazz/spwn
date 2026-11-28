@@ -52,7 +52,7 @@ func loadWithin(t *testing.T, root string) (tool.Tool, error) {
 	}
 	done := make(chan result, 1)
 	go func() {
-		tl, err := LoadTool(root, "evil")
+		tl, err := LoadTool(root, "tools", "evil")
 		done <- result{tl, err}
 	}()
 	select {
@@ -177,7 +177,7 @@ func TestAToolFolderThatIsALinkOutIsNeverRead(t *testing.T) {
 func TestAToolFolderThatIsALinkInsideTheProjectIsRefused(t *testing.T) {
 	for name, link := range map[string][2]string{
 		"the tool's folder": {filepath.Join("tools", "evil"), filepath.Join("..", "..")},
-		"tools":        {filepath.Join("tools"), "elsewhere"},
+		"tools":             {filepath.Join("tools"), "elsewhere"},
 	} {
 		t.Run(name, func(t *testing.T) {
 			dir := t.TempDir()

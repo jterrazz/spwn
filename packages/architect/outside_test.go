@@ -54,11 +54,11 @@ func readProject(project string) projectReads {
 	tree := platform.Within(project)
 	defer tree.Close()
 	home := filepath.Join(project, "agents", "neo")
-	body, err := NewCommandFileResolver(project).Resolve("command/evil")
+	body, err := NewCommandFileResolver(project, "commands").Resolve("command/evil")
 	reads := projectReads{
-		skills:    fmt.Sprintf("%q", collectRuntimeSkills(tree, nil)),
-		hooks:     fmt.Sprintf("%q", loadRuntimeHooks(tree)),
-		commands:  fmt.Sprintf("%q", loadRuntimeCommands(tree)),
+		skills:    fmt.Sprintf("%q", collectRuntimeSkills(tree, "skills", nil)),
+		hooks:     fmt.Sprintf("%q", loadRuntimeHooks(tree, "hooks")),
+		commands:  fmt.Sprintf("%q", loadRuntimeCommands(tree, "commands")),
 		soul:      string(readAgentFile(tree, home, "SOUL.md")),
 		playbooks: fmt.Sprintf("%q", loadAgentPlaybookIndex(tree, home)),
 		resolved:  body,
@@ -82,7 +82,7 @@ func projectLinkingOut(t *testing.T) (project, outside string) {
 		"agents/neo/x.md": outsideSecret + "\n",
 	})
 	writeFiles(t, project, map[string]string{
-		"spwn.yaml":                         "version: 1\n",
+		"spwn.yaml":                    "version: 1\n",
 		"skills/kept/SKILL.md":         "---\nname: kept\n---\nkept\n",
 		"agents/neo/playbooks/.keep":   "",
 		"commands/.keep":               "",
@@ -127,7 +127,7 @@ func TestAFIFOInAProjectNeverHoldsItsReads(t *testing.T) {
 	dir := t.TempDir()
 	project := filepath.Join(dir, "project")
 	writeFiles(t, project, map[string]string{
-		"spwn.yaml":                       "version: 1\n",
+		"spwn.yaml":                  "version: 1\n",
 		"skills/s/SKILL.md":          "---\nname: s\n---\n",
 		"agents/neo/.keep":           "",
 		"agents/neo/playbooks/.keep": "",
@@ -183,8 +183,8 @@ func plainFiles(t *testing.T, dir string) map[string][]byte {
 func TestAnHonestProjectReadsAsAPlainReadDoes(t *testing.T) {
 	project := filepath.Join(t.TempDir(), "project")
 	writeFiles(t, project, map[string]string{
-		"spwn.yaml":                         "version: 1\n",
-		"shared/style.md":                   "shared style\n",
+		"spwn.yaml":                    "version: 1\n",
+		"shared/style.md":              "shared style\n",
 		"skills/review/SKILL.md":       "---\nname: review\ndescription: review\n---\nReview.\n",
 		"skills/review/refs/a.md":      "a\n",
 		"skills/review/refs/deep/b.sh": "#!/bin/sh\necho b\n",
@@ -198,7 +198,7 @@ func TestAnHonestProjectReadsAsAPlainReadDoes(t *testing.T) {
 	})
 	tree := platform.Within(project)
 	defer tree.Close()
-	skills := loadUserSkills(tree)
+	skills := loadUserSkills(tree, "skills")
 	byName := map[string]map[string][]byte{}
 	for _, s := range skills {
 		byName[s.Name] = s.Files
@@ -212,13 +212,13 @@ func TestAnHonestProjectReadsAsAPlainReadDoes(t *testing.T) {
 	if len(skills) != 2 {
 		t.Errorf("skills = %d; want review and quick", len(skills))
 	}
-	if hooks := loadRuntimeHooks(tree); len(hooks) != 1 || hooks[0].Name != "lint" || hooks[0].Event != "PostToolUse" || hooks[0].Matcher != "Edit" || hooks[0].Command != "make lint" {
+	if hooks := loadRuntimeHooks(tree, "hooks"); len(hooks) != 1 || hooks[0].Name != "lint" || hooks[0].Event != "PostToolUse" || hooks[0].Matcher != "Edit" || hooks[0].Command != "make lint" {
 		t.Errorf("hooks = %+v; want lint", hooks)
 	}
-	if commands := loadRuntimeCommands(tree); len(commands) != 1 || commands[0].Name != "morning" || string(commands[0].Body) != "Brief: {{ .Now }}.\n" {
+	if commands := loadRuntimeCommands(tree, "commands"); len(commands) != 1 || commands[0].Name != "morning" || string(commands[0].Body) != "Brief: {{ .Now }}.\n" {
 		t.Errorf("commands = %q; want morning", commands)
 	}
-	if body, err := NewCommandFileResolver(project).Resolve("command/morning"); err != nil || body != "Brief: {{ .Now }}.\n" {
+	if body, err := NewCommandFileResolver(project, "commands").Resolve("command/morning"); err != nil || body != "Brief: {{ .Now }}.\n" {
 		t.Errorf("Resolve(command/morning) = %q, %v; want its body", body, err)
 	}
 	if soul := readAgentFile(tree, filepath.Join(project, "agents", "neo"), "SOUL.md"); string(soul) != "I am neo.\n" {
@@ -235,7 +235,7 @@ func TestAnAgentsFolderThatLinksOutIsNotCopiedIn(t *testing.T) {
 	linkAll(t, project, map[string]string{"agents": outside})
 	t.Setenv("SPWN_HOME", t.TempDir())
 	mb := newMockBackend()
-	_, err := platform.WithProjectRoot(project, func() (struct{}, error) {
+	_, err := platform.WithProject(project, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, func() (struct{}, error) {
 		return struct{}{}, deploy.SyncIn(context.Background(), mb, "ctr", map[string]string{"neo": "/agents/neo"})
 	})
 	if err != nil {

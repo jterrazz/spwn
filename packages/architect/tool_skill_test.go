@@ -28,7 +28,7 @@ func (s skillsOnly) Skills() fs.FS             { return s.skills }
 func TestAToolSkillRefusedAsALinkIsReportedNotDropped(t *testing.T) {
 	root := filepath.Join(t.TempDir(), "site")
 	writeFiles(t, root, map[string]string{
-		".env":                               outsideSecret + "\n",
+		".env":                          outsideSecret + "\n",
 		"tools/evil/skills/ok/SKILL.md": "# ok\n",
 	})
 	if err := os.Symlink(filepath.Join("..", "..", "..", "..", ".env"), filepath.Join(root, "tools", "evil", "skills", "SKILL.md")); err != nil {
@@ -58,15 +58,15 @@ func TestSpawnSaysARefusedToolSkillInItsWarnings(t *testing.T) {
 	isolateSpawn(t)
 	root := filepath.Join(t.TempDir(), "site")
 	writeFiles(t, root, map[string]string{
-		".env":                               outsideSecret + "\n",
+		".env":                          outsideSecret + "\n",
 		"tools/evil/tool.yaml":          "name: evil\n",
 		"tools/evil/skills/ok/SKILL.md": "# ok\n",
 	})
 	linkAll(t, root, map[string]string{
 		"tools/evil/skills/SKILL.md": filepath.Join("..", "..", "..", "..", ".env"),
 	})
-	platform.SetProjectRoot(root)
-	t.Cleanup(func() { platform.SetProjectRoot("") })
+	platform.SetProject(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"})
+	t.Cleanup(func() { platform.SetProject("", platform.Folders{}) })
 
 	res, err := New(newMockBackend(), nil).Spawn(context.Background(), SpawnOpts{
 		ConfigName: "neo",

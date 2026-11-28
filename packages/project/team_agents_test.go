@@ -28,8 +28,10 @@ func projectAgents(t *testing.T) (agents, outside string) {
 		}
 	}
 	was := platform.ProjectRoot()
-	platform.SetProjectRoot(root)
-	t.Cleanup(func() { platform.SetProjectRoot(was) })
+	platform.SetProject(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"})
+	t.Cleanup(func() {
+		platform.SetProject(was, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"})
+	})
 	return agents, outside
 }
 

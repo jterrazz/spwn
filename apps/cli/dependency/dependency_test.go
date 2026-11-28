@@ -10,8 +10,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"spwn.sh/packages/agent"
-	"spwn.sh/packages/platform"
 	"spwn.sh/packages/dependency"
+	"spwn.sh/packages/platform"
 )
 
 func runWithOut(t *testing.T, c *cobra.Command, args ...string) (*bytes.Buffer, error) {
@@ -62,9 +62,9 @@ func withProject(t *testing.T) string {
 	if err := os.Chdir(root); err != nil {
 		t.Fatal(err)
 	}
-	platform.SetProjectRoot(root)
+	platform.SetProject(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"})
 	t.Cleanup(func() {
-		platform.SetProjectRoot("")
+		platform.SetProject("", platform.Folders{})
 		os.Chdir(oldCwd)
 	})
 	return root

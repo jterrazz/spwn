@@ -37,7 +37,7 @@ dependencies:
   - "spwn:unix"
 `)
 
-	tl, err := LoadTool(root, "my-tool")
+	tl, err := LoadTool(root, "tools", "my-tool")
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
@@ -70,7 +70,7 @@ func TestLoadLocalPackage_missingManifest(t *testing.T) {
 	if err := os.MkdirAll(filepath.Join(root, "tools", "empty-pkg"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	_, err := LoadTool(root, "empty-pkg")
+	_, err := LoadTool(root, "tools", "empty-pkg")
 	if err == nil {
 		t.Fatal("want error for missing tool.yaml")
 	}
@@ -93,7 +93,7 @@ verify:
 		t.Fatal(err)
 	}
 
-	tl, err := LoadTool(root, "toolish")
+	tl, err := LoadTool(root, "tools", "toolish")
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
@@ -107,7 +107,7 @@ func TestHydrateLocalPackages_passThroughAtRefs(t *testing.T) {
 	reg := resolver.NewRegistry()
 
 	list := []string{"spwn:unix", "spwn:git"}
-	got, err := Hydrate(reg, root, list)
+	got, err := Hydrate(reg, root, "tools", list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}
@@ -128,7 +128,7 @@ verify:
 	reg := resolver.NewRegistry()
 
 	list := []string{"spwn:unix", "tool/mine", "spwn:git"}
-	got, err := Hydrate(reg, root, list)
+	got, err := Hydrate(reg, root, "tools", list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}
@@ -160,7 +160,7 @@ verify:
 	reg := resolver.NewRegistry()
 
 	list := []string{"spwn:unix", "tool/tool-a", "spwn:git", "tool/tool-b", "tool/tool-a"}
-	got, err := Hydrate(reg, root, list)
+	got, err := Hydrate(reg, root, "tools", list)
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}
@@ -179,7 +179,7 @@ func TestHydrateLocalPackages_missingPackageErrors(t *testing.T) {
 	root := t.TempDir()
 	reg := resolver.NewRegistry()
 
-	_, err := Hydrate(reg, root, []string{"tool/nonexistent"})
+	_, err := Hydrate(reg, root, "tools", []string{"tool/nonexistent"})
 	if err == nil {
 		t.Fatal("want error for missing local dependency dir")
 	}
@@ -196,7 +196,7 @@ verify:
 `)
 	reg := resolver.NewRegistry()
 
-	_, err := Hydrate(reg, root, []string{"tool/mine", "tool/mine"})
+	_, err := Hydrate(reg, root, "tools", []string{"tool/mine", "tool/mine"})
 	if err != nil {
 		t.Fatalf("duplicate should not error: %v", err)
 	}
@@ -210,7 +210,7 @@ func TestHydrateLocalPackages_bareRefPassesThrough(t *testing.T) {
 	root := t.TempDir()
 	reg := resolver.NewRegistry()
 
-	got, err := Hydrate(reg, root, []string{"bare-name"})
+	got, err := Hydrate(reg, root, "tools", []string{"bare-name"})
 	if err != nil {
 		t.Fatalf("hydrate: %v", err)
 	}

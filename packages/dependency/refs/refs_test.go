@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"spwn.sh/packages/dependency/refs"
+	"spwn.sh/packages/platform"
 )
 
 func TestParse(t *testing.T) {
@@ -81,12 +82,12 @@ func TestResolveTool_LocalTool(t *testing.T) {
 	root := t.TempDir()
 	mustMkdir(t, filepath.Join(root, "tools", "present"))
 
-	got := refs.ResolveTool(root, refs.ParseRef("tool/present"), nil, false)
+	got := refs.ResolveTool(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("tool/present"), nil, false)
 	if got != refs.ResolveOK {
 		t.Errorf("present local tool: want OK, got %v", got)
 	}
 
-	got = refs.ResolveTool(root, refs.ParseRef("tool/missing"), nil, false)
+	got = refs.ResolveTool(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("tool/missing"), nil, false)
 	if got != refs.ResolveNotFound {
 		t.Errorf("missing local tool: want NotFound, got %v", got)
 	}
@@ -99,12 +100,12 @@ func TestResolveTool_LocalSkill(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got := refs.ResolveTool(root, refs.ParseRef("skill/focus"), nil, false)
+	got := refs.ResolveTool(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("skill/focus"), nil, false)
 	if got != refs.ResolveOK {
 		t.Errorf("present local skill: want OK, got %v", got)
 	}
 
-	got = refs.ResolveTool(root, refs.ParseRef("skill/missing"), nil, false)
+	got = refs.ResolveTool(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("skill/missing"), nil, false)
 	if got != refs.ResolveNotFound {
 		t.Errorf("missing local skill: want NotFound, got %v", got)
 	}
@@ -118,12 +119,12 @@ func TestResolveTool_LocalHook(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got := refs.ResolveTool(root, refs.ParseRef("hook/pre-spawn"), nil, false)
+	got := refs.ResolveTool(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("hook/pre-spawn"), nil, false)
 	if got != refs.ResolveOK {
 		t.Errorf("present local hook: want OK, got %v", got)
 	}
 
-	got = refs.ResolveTool(root, refs.ParseRef("hook/missing"), nil, false)
+	got = refs.ResolveTool(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("hook/missing"), nil, false)
 	if got != refs.ResolveNotFound {
 		t.Errorf("missing local hook: want NotFound, got %v", got)
 	}
@@ -137,12 +138,12 @@ func TestResolveTool_LocalCommand(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got := refs.ResolveTool(root, refs.ParseRef("command/refactor"), nil, false)
+	got := refs.ResolveTool(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("command/refactor"), nil, false)
 	if got != refs.ResolveOK {
 		t.Errorf("present local command: want OK, got %v", got)
 	}
 
-	got = refs.ResolveTool(root, refs.ParseRef("command/missing"), nil, false)
+	got = refs.ResolveTool(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("command/missing"), nil, false)
 	if got != refs.ResolveNotFound {
 		t.Errorf("missing local command: want NotFound, got %v", got)
 	}
@@ -154,7 +155,7 @@ func TestResolveTool_InvalidBareName(t *testing.T) {
 	// ref must NOT resolve: the grammar rejects it up front.
 	mustMkdir(t, filepath.Join(root, "tools", "present"))
 
-	got := refs.ResolveTool(root, refs.ParseRef("present"), nil, false)
+	got := refs.ResolveTool(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("present"), nil, false)
 	if got != refs.ResolveInvalid {
 		t.Errorf("bare ref: want ResolveInvalid, got %v", got)
 	}
@@ -168,7 +169,7 @@ func TestResolveTool_RetiredColonForm(t *testing.T) {
 	mustMkdir(t, filepath.Join(root, "tools", "present"))
 
 	for _, in := range []string{"tool:present", "skill:focus", "hook:pre-spawn"} {
-		if got := refs.ResolveTool(root, refs.ParseRef(in), nil, false); got != refs.ResolveInvalid {
+		if got := refs.ResolveTool(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef(in), nil, false); got != refs.ResolveInvalid {
 			t.Errorf("retired form %q: want ResolveInvalid, got %v", in, got)
 		}
 	}
@@ -180,24 +181,24 @@ func TestResolveTool_Builtin(t *testing.T) {
 		"spwn:git":  {},
 	}
 
-	got := refs.ResolveTool("", refs.ParseRef("spwn:unix"), builtin, true)
+	got := refs.ResolveTool("", platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("spwn:unix"), builtin, true)
 	if got != refs.ResolveOK {
 		t.Errorf("known builtin: want OK, got %v", got)
 	}
 
-	got = refs.ResolveTool("", refs.ParseRef("spwn:nonesuch"), builtin, true)
+	got = refs.ResolveTool("", platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("spwn:nonesuch"), builtin, true)
 	if got != refs.ResolveNotFound {
 		t.Errorf("unknown builtin with catalog: want NotFound, got %v", got)
 	}
 
-	got = refs.ResolveTool("", refs.ParseRef("spwn:nonesuch"), nil, false)
+	got = refs.ResolveTool("", platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("spwn:nonesuch"), nil, false)
 	if got != refs.ResolveOK {
 		t.Errorf("unknown builtin without catalog: want OK (permissive), got %v", got)
 	}
 }
 
 func TestResolveTool_Registry(t *testing.T) {
-	got := refs.ResolveTool("", refs.ParseRef("github:acme/foo"), nil, false)
+	got := refs.ResolveTool("", platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("github:acme/foo"), nil, false)
 	if got != refs.ResolveRegistryUnsupported {
 		t.Errorf("registry ref: want RegistryUnsupported, got %v", got)
 	}
@@ -211,25 +212,25 @@ func TestResolveSkill_PathForm(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(root, "skills", "focus.md"), []byte("# focus"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	got := refs.ResolveSkill(root, refs.ParseRef("skill/focus"), nil, false)
+	got := refs.ResolveSkill(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("skill/focus"), nil, false)
 	if got != refs.ResolveOK {
 		t.Errorf("skill/ form resolves: want OK, got %v", got)
 	}
 
 	// tool/ form: directory.
 	mustMkdir(t, filepath.Join(root, "tools", "debug"))
-	got = refs.ResolveSkill(root, refs.ParseRef("tool/debug"), nil, false)
+	got = refs.ResolveSkill(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("tool/debug"), nil, false)
 	if got != refs.ResolveOK {
 		t.Errorf("tool/ form resolves: want OK, got %v", got)
 	}
 
 	// Bare name is rejected outright.
-	got = refs.ResolveSkill(root, refs.ParseRef("focus"), nil, false)
+	got = refs.ResolveSkill(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("focus"), nil, false)
 	if got != refs.ResolveInvalid {
 		t.Errorf("bare ref via ResolveSkill: want ResolveInvalid, got %v", got)
 	}
 
-	got = refs.ResolveSkill(root, refs.ParseRef("skill/missing"), nil, false)
+	got = refs.ResolveSkill(root, platform.Folders{Agents: "agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"}, refs.ParseRef("skill/missing"), nil, false)
 	if got != refs.ResolveNotFound {
 		t.Errorf("missing skill/ form: want NotFound, got %v", got)
 	}
