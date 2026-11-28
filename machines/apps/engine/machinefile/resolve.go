@@ -3,6 +3,8 @@ package machinefile
 import (
 	"cmp"
 	"errors"
+	"maps"
+	"reflect"
 	"slices"
 	"strconv"
 	"strings"
@@ -165,12 +167,33 @@ type merged struct {
 	// overlay's changes made key by key on them.
 	ports    *catalog.PortRights
 	accounts *catalog.AccountsSpec
-	// value: an overlay's ports or accounts merged into what cannot be
-	// read, by the overlay that made them so.
+	// value: ports or accounts merged into what cannot be read, by the file
+	// that made them so, or two files of which neither extends the other
+	// giving one app or setting two ways.
 	refused error
 	apps    []listed[catalog.AppEntry]
 	set     map[string]listed[catalog.SettingEntry]
 	setting []string
+	// value: each Machinefile's name and the names of every file it
+	// extends, near or far.
+	ancestors map[string][]string
+	// value: what each file of the chain says of each app and setting
+	// that no file extending it says otherwise.
+	appHeads map[string][]claim[catalog.AppEntry]
+	setHeads map[string][]claim[catalog.SettingEntry]
+	// value: the last Machinefile of the chain, the one resolved.
+	top string
+}
+
+// value: what one file says of an app or a setting: its entry, or that it
+// removes it; unit is the Machinefile it belongs to, an overlay's the
+// file it changes.
+
+type claim[T any] struct {
+	unit    string
+	origin  Origin
+	entry   T
+	removed bool
 }
 
 type listed[T any] struct {
@@ -249,10 +272,18 @@ func originOf(p Placed) Origin {
 }
 
 func merge(files []Placed) merged {
-	m := merged{values: map[string]Value{}, set: map[string]listed[catalog.SettingEntry]{}}
+	m := merged{values: map[string]Value{}, set: map[string]listed[catalog.SettingEntry]{}, ancestors: map[string][]string{}, appHeads: map[string][]claim[catalog.AppEntry]{}, setHeads: map[string][]claim[catalog.SettingEntry]{}}
 	for _, p := range files {
 		o := originOf(p)
 		f := p.File
+		u := unitOf(p)
+		if p.Kind != Overlay {
+			var above []string
+			for _, e := range f.Extends {
+				above = append(append(above, e), m.ancestors[e]...)
+			}
+			m.ancestors[u], m.top = above, u
+		}
 		if mc := f.Machine; mc != nil {
 			m.machine = true
 			m.put("machine.kind", string(mc.Kind), o)
@@ -274,10 +305,10 @@ func merge(files []Placed) merged {
 			m.put("prefer", joined(f.Prefer), o)
 		}
 		if a := f.Apps; a != nil {
-			mergeApps(&m, *a, o)
+			mergeApps(&m, *a, o, u)
 		}
 		if s := f.Settings; s != nil {
-			mergeSettings(&m, *s, o)
+			mergeSettings(&m, *s, o, u)
 		}
 		if a := f.Accounts; a != nil {
 			mergeAccounts(&m, *a, p)
@@ -289,7 +320,76 @@ func merge(files []Placed) merged {
 			mergeRun(&m, *r, o)
 		}
 	}
+	if m.refused == nil {
+		m.refused = siblings(m)
+	}
 	return m
+}
+
+// value: the Machinefile a file belongs to: its own name, or for an
+// overlay the file it changes.
+func unitOf(p Placed) string {
+	if p.Kind == Overlay {
+		return p.File.Overrides
+	}
+	return p.File.Name
+}
+
+// invariant: a file's word on a name stands over what the files it
+// extends said of it, and beside what a file it does not extend said:
+// the claims kept are those no later file of their line overrode.
+func claimed[T any](m merged, heads map[string][]claim[T], name string, c claim[T]) {
+	heads[name] = append(slices.DeleteFunc(heads[name], func(h claim[T]) bool {
+		return h.unit == c.unit || slices.Contains(m.ancestors[c.unit], h.unit)
+	}), c)
+}
+
+// invariant: two files of which neither extends the other that give one
+// app or setting different entries are refused, naming both and the
+// name; the same entry twice is one, and a file that extends both settles
+// it by saying it. The apps are judged first, each kind by name.
+func siblings(m merged) error {
+	for _, name := range slices.Sorted(maps.Keys(m.appHeads)) {
+		a, b, ok := differ(m.appHeads[name], func(e catalog.AppEntry) (catalog.AppEntry, int) {
+			line := e.Line
+			e.Line = 0
+			if len(e.Options) == 0 {
+				e.Options = nil
+			}
+			return e, line
+		})
+		if ok {
+			return &SiblingConflictError{Kind: "app", Name: name, First: a, Second: b, Top: m.top}
+		}
+	}
+	for _, name := range slices.Sorted(maps.Keys(m.setHeads)) {
+		a, b, ok := differ(m.setHeads[name], func(e catalog.SettingEntry) (catalog.SettingEntry, int) {
+			line := e.Line
+			e.Line = 0
+			if len(e.Values) == 0 {
+				e.Values = nil
+			}
+			return e, line
+		})
+		if ok {
+			return &SiblingConflictError{Kind: "setting", Name: name, First: a, Second: b, Top: m.top}
+		}
+	}
+	return nil
+}
+
+func differ[T any](heads []claim[T], plain func(T) (T, int)) (first, second Said, differs bool) {
+	if len(heads) < 2 {
+		return first, second, false
+	}
+	said, line := plain(heads[0].entry)
+	for _, h := range heads[1:] {
+		e, at := plain(h.entry)
+		if h.removed != heads[0].removed || !reflect.DeepEqual(e, said) {
+			return Said{Name: heads[0].origin.Name, File: heads[0].origin.File, Line: line}, Said{Name: h.origin.Name, File: h.origin.File, Line: at}, true
+		}
+	}
+	return first, second, false
 }
 
 // invariant: a Machinefile's accounts join those of the files before it
@@ -454,12 +554,14 @@ func mergeVM(m *merged, v catalog.VMSpec, o Origin) {
 	}
 }
 
-func mergeApps(m *merged, a catalog.AppList, o Origin) {
+func mergeApps(m *merged, a catalog.AppList, o Origin, unit string) {
 	for _, r := range a.Remove {
 		m.apps = slices.DeleteFunc(m.apps, func(l listed[catalog.AppEntry]) bool { return l.name == r })
 		m.drop("apps." + r)
+		claimed(*m, m.appHeads, r, claim[catalog.AppEntry]{unit: unit, origin: o, removed: true})
 	}
 	for _, e := range slices.Concat(a.List, a.Add) {
+		claimed(*m, m.appHeads, e.Name, claim[catalog.AppEntry]{unit: unit, origin: o, entry: e})
 		if i := slices.IndexFunc(m.apps, func(l listed[catalog.AppEntry]) bool { return l.name == e.Name }); i >= 0 {
 			m.apps = slices.Delete(m.apps, i, i+1)
 		}
@@ -468,13 +570,15 @@ func mergeApps(m *merged, a catalog.AppList, o Origin) {
 	}
 }
 
-func mergeSettings(m *merged, s catalog.SettingList, o Origin) {
+func mergeSettings(m *merged, s catalog.SettingList, o Origin, unit string) {
 	for _, r := range s.Remove {
 		delete(m.set, r)
 		m.setting = slices.DeleteFunc(m.setting, func(n string) bool { return n == r })
 		m.drop("settings." + r)
+		claimed(*m, m.setHeads, r, claim[catalog.SettingEntry]{unit: unit, origin: o, removed: true})
 	}
 	for _, name := range sortedNames(s.Set) {
+		claimed(*m, m.setHeads, name, claim[catalog.SettingEntry]{unit: unit, origin: o, entry: s.Set[name]})
 		if _, ok := m.set[name]; !ok {
 			m.setting = append(m.setting, name)
 		}

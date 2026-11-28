@@ -946,6 +946,11 @@
       "Detail": "machinefile",
       "Tone": "plain"
     },
+    "machinefile.siblings-differ": {
+      "Word": "siblings differ",
+      "Detail": "machinefile",
+      "Tone": "plain"
+    },
     "machinefile.source-unavailable": {
       "Word": "source unavailable",
       "Detail": "machinefile",

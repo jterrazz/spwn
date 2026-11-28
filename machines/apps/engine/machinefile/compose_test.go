@@ -1,6 +1,7 @@
 package machinefile_test
 
 import (
+	"errors"
 	"slices"
 	"strings"
 	"testing"
@@ -125,6 +126,96 @@ func TestTheChainsAccountsAreTheUnionOfItsFiles(t *testing.T) {
 				t.Errorf("signins %v and grants %v, want %v and %v", signins, grants, tc.signins, tc.grants)
 			}
 		})
+	}
+}
+
+func TestTwoFilesNeitherExtendingTheOtherGiveANameOneWayOrAreRefused(t *testing.T) {
+	top := machine("top", "{ os: ubuntu }", "[]")
+	for _, tc := range []struct {
+		how   string
+		files map[string]string
+		want  string
+		fd    string
+	}{
+		{"two kits list one app two ways", map[string]string{
+			"a":   kit("a", "apps: [{ name: fd, optional: true }]\n"),
+			"b":   kit("b", "apps: [fd]\n"),
+			"top": top + "extends: [a, b]\n",
+		}, "app fd is given two ways, by a (~/.config/station/machinefiles/a.machine.yaml:3) and b (~/.config/station/machinefiles/b.machine.yaml:3), neither extending the other: say it in top, which extends both", ""},
+		{"two kits give one setting two ways", map[string]string{
+			"a":   kit("a", "settings: { hushlogin: { optional: true } }\n"),
+			"b":   kit("b", "settings: { hushlogin: {} }\n"),
+			"top": top + "extends: [a, b]\n",
+		}, "setting hushlogin is given two ways, by a", ""},
+		{"the same entry twice is one", map[string]string{
+			"a":   kit("a", "apps: [fd]\n"),
+			"b":   kit("b", "apps: [{ name: fd }]\n"),
+			"top": top + "extends: [a, b]\n",
+		}, "", "b"},
+		{"the file that extends both settles it", map[string]string{
+			"a":   kit("a", "apps: [{ name: fd, optional: true }]\n"),
+			"b":   kit("b", "apps: [fd]\n"),
+			"top": machine("top", "{ os: ubuntu }", "[fd]") + "extends: [a, b]\n",
+		}, "", "top"},
+		{"a child overrides its parent", map[string]string{
+			"a":   kit("a", "apps: [{ name: fd, optional: true }]\n"),
+			"b":   kit("b", "extends: [a]\napps: [fd]\n"),
+			"top": top + "extends: [b]\n",
+		}, "", "b"},
+		{"a diamond's kit is no conflict with itself", map[string]string{
+			"d":   kit("d", "apps: [{ name: fd, optional: true }]\n"),
+			"b":   kit("b", "extends: [d]\n"),
+			"c":   kit("c", "extends: [d]\n"),
+			"top": top + "extends: [b, c]\n",
+		}, "", "d"},
+		{"a diamond's side overrides the kit both extend", map[string]string{
+			"d":   kit("d", "apps: [{ name: fd, optional: true }]\n"),
+			"b":   kit("b", "extends: [d]\n"),
+			"c":   kit("c", "extends: [d]\napps: [fd]\n"),
+			"top": top + "extends: [b, c]\n",
+		}, "", "c"},
+	} {
+		t.Run(tc.how, func(t *testing.T) {
+			r, err := machinefile.Resolve(library(t, files(tc.files), nil), "top", machinefile.Machine{}, machinefile.Lock{})
+			if tc.want != "" {
+				var conflict *machinefile.SiblingConflictError
+				if !errors.As(err, &conflict) || !strings.Contains(err.Error(), tc.want) {
+					t.Fatalf("resolve: %v, want the siblings refused: %s", err, tc.want)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			for _, v := range r.Values {
+				if v.Key == "apps.fd" && v.Origin.Name != tc.fd {
+					t.Errorf("fd said by %s, want %s", v.Origin.Name, tc.fd)
+				}
+			}
+		})
+	}
+}
+
+func TestAnOverlayIsTheWordOfTheFileItChanges(t *testing.T) {
+	user := files(map[string]string{
+		"a":   kit("a", "apps: [fd]\n"),
+		"b":   kit("b", "apps: [{ name: fd, optional: true }]\n"),
+		"top": machine("top", "{ os: ubuntu }", "[]") + "extends: [a, b]\n",
+	})
+	user["machinefiles/top.local.yaml"] = "machinefile: station.machinefile/v1\noverrides: top\napps: { add: [fd] }\n"
+	if _, err := machinefile.Resolve(library(t, user, nil), "top", machinefile.Machine{}, machinefile.Lock{}); err != nil {
+		t.Errorf("top's overlay saying fd: %v, want it settled as top's word", err)
+	}
+	delete(user, "machinefiles/top.local.yaml")
+	user["machinefiles/a.local.yaml"] = "machinefile: station.machinefile/v1\noverrides: a\napps: { add: [{ name: fd, optional: true }] }\n"
+	user["machinefiles/b.machine.yaml"] = kit("b", "apps: [fd]\n")
+	var conflict *machinefile.SiblingConflictError
+	if _, err := machinefile.Resolve(library(t, user, nil), "top", machinefile.Machine{}, machinefile.Lock{}); !errors.As(err, &conflict) || conflict.First.Name != "a" || conflict.Second.Name != "b" {
+		t.Errorf("a's overlay against b: %v, want a and b refused", err)
+	}
+	user["machinefiles/a.local.yaml"] = "machinefile: station.machinefile/v1\noverrides: a\napps: { remove: [fd] }\n"
+	if _, err := machinefile.Resolve(library(t, user, nil), "top", machinefile.Machine{}, machinefile.Lock{}); !errors.As(err, &conflict) || conflict.First.At() != "~/.config/station/machinefiles/a.local.yaml" {
+		t.Errorf("a's overlay removing what b lists: %v, want refused at the overlay, which names no line", err)
 	}
 }
 

@@ -76,6 +76,7 @@ const (
 	NotATemplate   fail.Code = "machinefile.not-a-template"
 	VMOnComputer   fail.Code = "machinefile.vm-on-a-computer"
 	Cycle          fail.Code = "machinefile.cycle"
+	SiblingsDiffer fail.Code = "machinefile.siblings-differ"
 	NoMethod       fail.Code = "machinefile.no-method"
 	Unpinnable     fail.Code = "machinefile.unpinnable"
 	UnknownPackage fail.Code = "machinefile.unknown-package"
@@ -89,7 +90,7 @@ const (
 
 func resolution() []fail.Code {
 	// value: every code reading the Machinefile may end in.
-	return []fail.Code{NotFound, Invalid, NewerSchema, Mixin, VMOnComputer, Cycle, NoMethod, Unpinnable, UnknownPackage, BadValue, Unavailable, CatalogInvalid, CatalogNewer}
+	return []fail.Code{NotFound, Invalid, NewerSchema, Mixin, VMOnComputer, Cycle, SiblingsDiffer, NoMethod, Unpinnable, UnknownPackage, BadValue, Unavailable, CatalogInvalid, CatalogNewer}
 }
 
 type ExplainIn struct {
@@ -237,6 +238,7 @@ func Worded(err error) error {
 		vm        *machinefile.VMOnComputerError
 		notImage  *machinefile.NotTemplateError
 		cycle     *machinefile.CycleError
+		siblings  *machinefile.SiblingConflictError
 		none      *machinefile.NoMethodError
 		pin       *machinefile.UnpinnableError
 		pkg       *machinefile.UnknownPackageError
@@ -276,6 +278,8 @@ func Worded(err error) error {
 		return refused(fail.Refused, VMOnComputer, vm.Name, map[string]string{"file": vm.File})
 	case errors.As(err, &cycle):
 		return refused(fail.Refused, Cycle, cycle.Said(), map[string]string{"of": cycle.Of})
+	case errors.As(err, &siblings):
+		return refused(fail.Refused, SiblingsDiffer, siblings.Name, map[string]string{"kind": siblings.Kind, "first": siblings.First.Name, "first_at": siblings.First.At(), "second": siblings.Second.Name, "second_at": siblings.Second.At(), "top": siblings.Top})
 	case errors.As(err, &none):
 		return refused(fail.Refused, NoMethod, none.Package, map[string]string{"system": none.System, "manager": none.Manager, "why": none.Why, "at": none.At})
 	case errors.As(err, &pin):

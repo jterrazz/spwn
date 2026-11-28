@@ -1,0 +1,47 @@
+description: 'two mixins that list one app two ways are refused, until the Machinefile extending both says it'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/node-kit.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: node-kit
+          apps: [jq]
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/data-kit.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: data-kit
+          apps: [{ name: jq, optional: true }]
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          extends: [node-kit, data-kit]
+          machine: { kind: workspace, system: { os: ubuntu } }
+      exit: 0
+    - command: 'machinefile explain apps'
+      exit: 2
+      stderr: |
+          Error: app jq is given two ways, by node-kit (~/.config/station/machinefiles/node-kit.machine.yaml:3) and data-kit (~/.config/station/machinefiles/data-kit.machine.yaml:3), neither extending the other
+          Hint: say jq in linux-1, which extends both
+    - command: 'machinefile plan'
+      exit: 2
+      stderr: |
+          Error: app jq is given two ways, by node-kit (~/.config/station/machinefiles/node-kit.machine.yaml:3) and data-kit (~/.config/station/machinefiles/data-kit.machine.yaml:3), neither extending the other
+          Hint: say jq in linux-1, which extends both
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          extends: [node-kit, data-kit]
+          machine: { kind: workspace, system: { os: ubuntu } }
+          apps: [jq]
+      exit: 0
+    - command: 'machinefile explain apps.jq'
+      exit: 0
+      stdout: |
+          # linux-1
+          	apps.jq	listed	user	linux-1
+          	apps.jq.method	apt	built-in	jq
+          	apps.jq.because	its one method for ubuntu	built-in	jq

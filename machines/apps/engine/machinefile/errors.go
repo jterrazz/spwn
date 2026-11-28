@@ -1,6 +1,9 @@
 package machinefile
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+)
 
 // value: where a refused entry is written, `<file>:<line>` (or its file
 // alone when the line is not known); empty for a package another one
@@ -30,6 +33,35 @@ type MixinError struct{ Name string }
 
 func (e *MixinError) Error() string {
 	return e.Name + " is a mixin (it says no machine): it is extended, never applied"
+}
+
+// value: a Machinefile that says something, at its file and line (none
+// for a name it removes).
+
+type Said struct {
+	Name, File string
+	Line       int
+}
+
+func (s Said) At() string {
+	if s.Line == 0 {
+		return s.File
+	}
+	return s.File + ":" + strconv.Itoa(s.Line)
+}
+
+// value: two files of one chain, neither extending the other, that give
+// one app or setting two ways; Top is the Machinefile resolved, which
+// extends both.
+
+type SiblingConflictError struct {
+	Kind, Name    string
+	First, Second Said
+	Top           string
+}
+
+func (e *SiblingConflictError) Error() string {
+	return e.Kind + " " + e.Name + " is given two ways, by " + e.First.Name + " (" + e.First.At() + ") and " + e.Second.Name + " (" + e.Second.At() + "), neither extending the other: say it in " + e.Top + ", which extends both"
 }
 
 type VMOnComputerError struct {

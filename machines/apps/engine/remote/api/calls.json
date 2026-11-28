@@ -884,6 +884,7 @@
         "machinefile.newer-schema",
         "machinefile.no-method",
         "machinefile.not-found",
+        "machinefile.siblings-differ",
         "machinefile.source-unavailable",
         "machinefile.unknown-key",
         "machinefile.unknown-package",
