@@ -13,4 +13,4 @@ runs:
       exit: 2
       stderr: |
           Error: agents/neo/AGENTS.md is neither a file nor a folder: a project's declaration holds only those
-          Hint: move it away, then station project plan
+          Hint: move it away, or move the project's agents elsewhere with folders: agents: <folder> in spwn.yaml, then station project plan

@@ -1,0 +1,16 @@
+description: 'station project drift refuses a name of the declaration past its budget, naming its kind'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit hooks/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q.yaml deep'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project drift'
+      exit: 2
+      stderr: |
+          Error: hooks/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p is past the budget of a project's declaration: 4096 names in its folders, 16 deep, files of 4 MiB
+          Hint: move it away, or move the project's hooks elsewhere with folders: hooks: <folder> in spwn.yaml, then station project plan

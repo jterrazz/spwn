@@ -75,7 +75,7 @@ func linked(root, rel string, err error) error {
 // layout is read, as declared walks it.
 func in[T any](p Projects, root string, act func() (T, error)) (T, error) {
 	var zero T
-	if err := p.walk(root, project.ManifestName, true); err != nil {
+	if err := p.walk(root, project.ManifestName, true, nil); err != nil {
 		return zero, err
 	}
 	l, err := spwnproject.LayoutAt(root)
@@ -90,12 +90,11 @@ func in[T any](p Projects, root string, act func() (T, error)) (T, error) {
 // path, so a link there would bring an outside file into what a harness
 // renders, and a FIFO would hold the read. spwn.yaml and spwn.lock are
 // walked first as files, then spwn.yaml's layout is read through a root at
-// the project, then only the folders it names: nothing else at the root is
-// walked or listed. root itself may be a link.
+// the project, then only the folders it names, within one project.Budget:
+// nothing else at the root is walked or listed. root itself may be a link.
 func (p Projects) declared(root string) error {
-	files := []string{project.ManifestName, project.LockName}
-	for _, rel := range files {
-		if err := p.walk(root, rel, true); err != nil {
+	for _, rel := range []string{project.ManifestName, project.LockName} {
+		if err := p.walk(root, rel, true, nil); err != nil {
 			return err
 		}
 	}
@@ -103,26 +102,34 @@ func (p Projects) declared(root string) error {
 	if err != nil {
 		return refusedLayout(err)
 	}
-	for _, rel := range project.Declaration(l.Folders())[len(files):] {
-		if err := p.walk(root, rel, false); err != nil {
+	var b project.Budget
+	for _, k := range spwnproject.Kinds {
+		if err := p.walk(root, l.Folder(k), false, &b); err != nil {
+			var at *project.Unwritten
+			if errors.As(err, &at) {
+				at.Kind = string(k)
+			}
 			return err
 		}
 	}
 	return nil
 }
 
-// value: the folders of a project held as files, as the walk of declared
-// visits them, agents first: spwnYAML is its spwn.yaml, nil when it has
-// none, and paths every slash path it holds; refused as declared refuses
-// the same project on a disk. A fake world takes it, so the layout it
-// tells is the root module's own.
+// value: the folders of a project held as files, by kind: spwnYAML is its
+// spwn.yaml, nil when it has none, and paths every slash path it holds;
+// refused as declared refuses the same project on a disk. A fake world
+// takes it, so the layout it tells is the root module's own.
 
-func Folders(spwnYAML []byte, paths []string) ([]string, error) {
+func Folders(spwnYAML []byte, paths []string) (map[string]string, error) {
 	l, err := spwnproject.LayoutOfFiles(spwnYAML, paths)
 	if err != nil {
 		return nil, refusedLayout(err)
 	}
-	return l.Folders(), nil
+	out := map[string]string{}
+	for _, k := range spwnproject.Kinds {
+		out[string(k)] = l.Folder(k)
+	}
+	return out, nil
 }
 
 // value: err as the project names a layout spwn.yaml refuses: the old
@@ -141,14 +148,17 @@ func refusedLayout(err error) error {
 }
 
 // value: nil when rel and every name under it is a file or a folder, a
-// file alone when file; else the first that is not, named from root.
-func (p Projects) walk(root, rel string, file bool) error {
+// file alone when file, within b when b is not nil; else the first that
+// is not, named from root.
+func (p Projects) walk(root, rel string, file bool, b *project.Budget) error {
 	e, err := p.under.Lstat(root, rel)
 	switch {
 	case errors.Is(err, fs.ErrNotExist):
 		return nil
 	case err != nil:
 		return unwritten(root, rel, err)
+	case b != nil && b.Past(rel, e.Size):
+		return &project.Unwritten{Path: rel, Err: project.ErrTooLarge}
 	case e.Mode&fs.ModeSymlink != 0:
 		return &project.Unwritten{Path: rel, Err: project.ErrLink}
 	case e.Mode.IsRegular():
@@ -166,7 +176,7 @@ func (p Projects) walk(root, rel string, file bool) error {
 		return unwritten(root, rel, err)
 	}
 	for _, name := range names {
-		if err := p.walk(root, rel+"/"+name, false); err != nil {
+		if err := p.walk(root, rel+"/"+name, false, b); err != nil {
 			return err
 		}
 	}

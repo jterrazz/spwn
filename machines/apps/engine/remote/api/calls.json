@@ -1237,7 +1237,8 @@
         "project.not-a-folder",
         "project.not-found",
         "project.not-written",
-        "project.old-layout"
+        "project.old-layout",
+        "project.too-large"
       ],
       "in": "ApplyIn",
       "out": "Applied"
@@ -1265,7 +1266,8 @@
         "project.link-in-the-way",
         "project.not-a-file",
         "project.not-found",
-        "project.old-layout"
+        "project.old-layout",
+        "project.too-large"
       ],
       "in": "DriftIn",
       "out": "Drift"
@@ -1281,7 +1283,8 @@
         "project.not-a-file",
         "project.not-a-folder",
         "project.not-found",
-        "project.old-layout"
+        "project.old-layout",
+        "project.too-large"
       ],
       "in": "PlanIn",
       "out": "Plan"
@@ -1295,7 +1298,8 @@
         "project.link-in-the-way",
         "project.not-a-file",
         "project.not-found",
-        "project.old-layout"
+        "project.old-layout",
+        "project.too-large"
       ],
       "in": "ShowIn",
       "out": "Project"

@@ -73,6 +73,16 @@ func heldBy(e *fail.Error) string {
 	return ""
 }
 
+// value: a refusal in a folder of a project's layout says the folders:
+// line that moves its kind, for a repository whose folder of that name is
+// its own.
+func moved(e *fail.Error) string {
+	if k := e.Detail["kind"]; k != "" {
+		return ", or move the project's " + k + " elsewhere with folders: " + k + ": <folder> in spwn.yaml"
+	}
+	return ""
+}
+
 func carried(e *fail.Error, generic, advice string) (message, hint string) {
 	// value: the engine words its own refusals where it raises them, naming
 	// the VM, the port or the duration at hand; a caller prints those
@@ -633,7 +643,7 @@ func Codes() map[fail.Code]Wording {
 		},
 		projectcalls.LinkInTheWay: func(e *fail.Error) (string, string) {
 			if !strings.HasPrefix(e.Subject, project.StateFolder+"/") {
-				return e.Subject + " is a link: a project's declaration is never read through one", "put the file it points to there instead, then station project plan"
+				return e.Subject + " is a link: a project's declaration is never read through one", "put the file it points to there instead" + moved(e) + ", then station project plan"
 			}
 			return e.Subject + " is a link: apply never follows one", "remove the link, then station project apply"
 		},
@@ -644,7 +654,10 @@ func Codes() map[fail.Code]Wording {
 			return e.Detail["said"], "fix folders: in spwn.yaml, then station project plan"
 		},
 		projectcalls.NotAFile: func(e *fail.Error) (string, string) {
-			return e.Subject + " is neither a file nor a folder: a project's declaration holds only those", "move it away, then station project plan"
+			return e.Subject + " is neither a file nor a folder: a project's declaration holds only those", "move it away" + moved(e) + ", then station project plan"
+		},
+		projectcalls.TooLarge: func(e *fail.Error) (string, string) {
+			return e.Subject + " is past the budget of a project's declaration: " + strconv.Itoa(project.MaxNames) + " names in its folders, " + strconv.Itoa(project.MaxDepth) + " deep, files of " + strconv.Itoa(project.MaxFileSize>>20) + " MiB", "move it away" + moved(e) + ", then station project plan"
 		},
 		projectcalls.NotAFolder: func(e *fail.Error) (string, string) {
 			return e.Subject + " is a file where apply makes a folder", "move it away, then station project apply"

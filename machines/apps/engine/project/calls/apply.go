@@ -44,7 +44,7 @@ var Apply = call.Call[Deps, ApplyIn, project.Applied]{
 	// value: the project's declared state made true in its run folders:
 	// what its plan lists, and nothing else.
 	Name: "project.apply", Where: call.InProcess, Applies: machine.Anywhere, Confirm: confirm.Overwrite,
-	Errors: []fail.Code{NotFound, Invalid, LinkInTheWay, NotAFile, NotAFolder, NotWritten, OldLayout, FoldersInvalid, confirm.YesNeeded},
+	Errors: []fail.Code{NotFound, Invalid, LinkInTheWay, NotAFile, TooLarge, NotAFolder, NotWritten, OldLayout, FoldersInvalid, confirm.YesNeeded},
 	Run: func(ctx context.Context, d Deps, in ApplyIn, _ call.Progress) (project.Applied, error) {
 		// invariant: a plan with an error writes nothing; an apply that
 		// only adds asks nothing; one that overwrites or removes a file

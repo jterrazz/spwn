@@ -448,6 +448,7 @@
             "project.not-found",
             "project.not-written",
             "project.old-layout",
+            "project.too-large",
             "project.unknown-example",
             "project.unknown-harness",
             "range_full",

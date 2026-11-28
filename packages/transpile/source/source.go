@@ -198,6 +198,12 @@ type CommandSource struct {
 	Body []byte
 }
 
+// value: the folders: line of spwn.yaml that moves kind's folder, for a
+// repository whose folder of that name is its own.
+func moved(k project.Kind) string {
+	return "; it sits in the project's " + string(k) + " folder, which folders: " + string(k) + ": <folder> in spwn.yaml moves"
+}
+
 // Load parses a spwn project rooted at projectRoot and returns a
 // ProjectSource ready for a transpile.Runtime to consume.
 //
@@ -339,7 +345,7 @@ func loadAgent(t *platform.Tree, name, dir string) (AgentSource, error) {
 	if b, err := t.ReadFile(configPath); err == nil {
 		var cfg AgentConfig
 		if err := yaml.Unmarshal(b, &cfg); err != nil {
-			return src, fmt.Errorf("parse %s: %w", configPath, err)
+			return src, fmt.Errorf("parse %s: %w%s", configPath, err, moved(project.KindAgents))
 		}
 		src.Config = cfg
 	} else if !os.IsNotExist(err) {
@@ -442,7 +448,7 @@ func loadHooks(t *platform.Tree, dir string) ([]HookSource, error) {
 			Command string `yaml:"command"`
 		}
 		if uerr := yaml.Unmarshal(data, &parsed); uerr != nil {
-			return nil, fmt.Errorf("parse %s: %w", path, uerr)
+			return nil, fmt.Errorf("parse %s: %w%s", path, uerr, moved(project.KindHooks))
 		}
 		if strings.TrimSpace(parsed.Event) == "" {
 			return nil, fmt.Errorf("%s: missing `event`", path)

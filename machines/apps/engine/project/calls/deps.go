@@ -37,6 +37,9 @@ const (
 	// value: a name of the declaration that is neither a file nor a folder,
 	// a FIFO say: refused before any of the declaration is read.
 	NotAFile fail.Code = "project.not-a-file"
+	// value: a name of the declaration past its budget, too many names,
+	// too deep or too large a file: refused before any of it is read.
+	TooLarge fail.Code = "project.too-large"
 	// value: a file on the way to a rendered file, where apply makes a
 	// folder: refused before anything is written, never removed.
 	NotAFolder fail.Code = "project.not-a-folder"
@@ -64,9 +67,11 @@ func coded(err error, subject string) error {
 	case errors.As(err, &layout):
 		return fail.New(fail.Refused, FoldersInvalid, project.ManifestName+"#folders."+layout.Key, map[string]string{"said": layout.Said})
 	case errors.As(err, &at) && errors.Is(at.Err, project.ErrLink):
-		return fail.New(fail.Refused, LinkInTheWay, at.Path, nil)
+		return fail.New(fail.Refused, LinkInTheWay, at.Path, kind(at))
 	case errors.As(err, &at) && errors.Is(at.Err, project.ErrNotAFile):
-		return fail.New(fail.Refused, NotAFile, at.Path, nil)
+		return fail.New(fail.Refused, NotAFile, at.Path, kind(at))
+	case errors.As(err, &at) && errors.Is(at.Err, project.ErrTooLarge):
+		return fail.New(fail.Refused, TooLarge, at.Path, kind(at))
 	case errors.As(err, &at) && errors.Is(at.Err, project.ErrNotAFolder):
 		return fail.New(fail.Refused, NotAFolder, at.Path, nil)
 	case errors.As(err, &at) && unrecorded(err):
@@ -79,6 +84,15 @@ func coded(err error, subject string) error {
 		return fail.New(fail.Refused, Exists, subject, nil)
 	}
 	return err
+}
+
+// value: the detail of a refusal at at: the kind of the layout's folder it
+// sits in, which folders: moves; none outside them.
+func kind(at *project.Unwritten) map[string]string {
+	if at.Kind == "" {
+		return nil
+	}
+	return map[string]string{"kind": at.Kind}
 }
 
 // value: err holds the record's own write refused, alone or joined to the

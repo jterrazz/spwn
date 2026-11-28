@@ -13,4 +13,4 @@ runs:
       exit: 2
       stderr: |
           Error: commands/refactor.md is a link: a project's declaration is never read through one
-          Hint: put the file it points to there instead, then station project plan
+          Hint: put the file it points to there instead, or move the project's commands elsewhere with folders: commands: <folder> in spwn.yaml, then station project plan

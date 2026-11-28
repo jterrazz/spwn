@@ -1,0 +1,16 @@
+description: 'station project refuses a name of the declaration past its budget, naming its kind'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit skills/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p/q.md deep'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project'
+      exit: 2
+      stderr: |
+          Error: skills/a/b/c/d/e/f/g/h/i/j/k/l/m/n/o/p is past the budget of a project's declaration: 4096 names in its folders, 16 deep, files of 4 MiB
+          Hint: move it away, or move the project's skills elsewhere with folders: skills: <folder> in spwn.yaml, then station project plan

@@ -1,11 +1,13 @@
 package manifest_test
 
 import (
+	"cmp"
 	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -343,6 +345,46 @@ func TestReadingAProjectWritesNoHome(t *testing.T) {
 		if _, err := local.New(nil, nil, nil, nil).FS.Stat(path); !errors.Is(err, fs.ErrNotExist) {
 			t.Errorf("%s after reads = %v; want it absent", path, err)
 		}
+	}
+}
+
+func TestANamePastTheBudgetIsRefusedWithItsKindBeforeAnyRead(t *testing.T) {
+	deep := strings.Repeat("d/", project.MaxDepth)
+	for name, lay := range map[string]struct {
+		lay  func(root string) error
+		want string
+		kind string
+	}{
+		"too deep": {func(root string) error {
+			return os.MkdirAll(filepath.Join(root, "skills", filepath.FromSlash(deep)), 0o750)
+		}, "skills/" + strings.TrimSuffix(deep, "/"), "skills"},
+		"too many": {func(root string) error {
+			dir := filepath.Join(root, "commands")
+			if err := os.MkdirAll(dir, 0o750); err != nil {
+				return err
+			}
+			for i := range project.MaxNames {
+				if err := os.WriteFile(filepath.Join(dir, strconv.Itoa(i)+".md"), nil, 0o600); err != nil {
+					return err
+				}
+			}
+			return nil
+		}, "", "commands"},
+		"too large": {func(root string) error {
+			return os.WriteFile(filepath.Join(root, "agents", "neo", "big.md"), make([]byte, project.MaxFileSize+1), 0o600)
+		}, "agents/neo/big.md", "agents"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			p, m := made(t)
+			if err := lay.lay(m.Root); err != nil {
+				t.Fatal(err)
+			}
+			_, err := p.Plan(t.Context(), m.Root)
+			var at *project.Unwritten
+			if !errors.As(err, &at) || !errors.Is(err, project.ErrTooLarge) || at.Kind != lay.kind || (lay.want != "" && at.Path != lay.want) {
+				t.Fatalf("Plan = %v (%+v); want %s past the budget, kind %s", err, at, cmp.Or(lay.want, "a name"), lay.kind)
+			}
+		})
 	}
 }
 

@@ -25,9 +25,11 @@ func Self() Owner {
 
 type Entry struct {
 	// value: what a name is itself, a link never followed: its type and
-	// permission bits, its owner, and how many names the system gives it.
+	// permission bits, its owner, how many names the system gives it, and
+	// its size in bytes.
 	Mode  fs.FileMode
 	Nlink int
+	Size  int64
 	Owner
 }
 
@@ -598,7 +600,7 @@ func entryOf(st *unix.Stat_t) Entry {
 	default:
 		m |= fs.ModeIrregular
 	}
-	return Entry{Mode: m, Nlink: int(st.Nlink), Owner: Owner{UID: int(st.Uid), GID: int(st.Gid)}}
+	return Entry{Mode: m, Nlink: int(st.Nlink), Size: st.Size, Owner: Owner{UID: int(st.Uid), GID: int(st.Gid)}}
 }
 
 func closeFD(fd int) { _ = unix.Close(fd) }

@@ -1190,6 +1190,11 @@
       "Detail": "project",
       "Tone": "plain"
     },
+    "project.too-large": {
+      "Word": "too large",
+      "Detail": "project",
+      "Tone": "plain"
+    },
     "project.unknown-example": {
       "Word": "unknown example",
       "Detail": "project",

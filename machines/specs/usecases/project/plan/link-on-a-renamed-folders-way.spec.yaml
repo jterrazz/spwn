@@ -1,0 +1,14 @@
+description: 'station project plan refuses a link on the way to a renamed folder, naming it and its kind'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit spwn.yaml "$(printf "name: site\nfolders:\n  skills: lib/skills\n")" && "$STATION" world project "$HOME/site" link lib /tmp/elsewhere && /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 2
+      stderr: |
+          Error: lib is a link: a project's declaration is never read through one
+          Hint: put the file it points to there instead, or move the project's skills elsewhere with folders: skills: <folder> in spwn.yaml, then station project plan

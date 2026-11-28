@@ -89,7 +89,33 @@ var (
 	// value: a name on a rendered file's way that holds a file, where apply
 	// makes a folder: never removed, as it is the owner's.
 	ErrNotAFolder = errors.New("is a file where apply makes a folder")
+	// value: a name of the declaration past its budget: one more than
+	// MaxNames, deeper than MaxDepth, or a file larger than MaxFileSize.
+	ErrTooLarge = errors.New("is past the budget of a project's declaration")
 )
+
+const (
+	// value: the most names the folders of a layout hold together.
+	MaxNames = 4096
+	// value: the most names a slash path of the declaration has, from the
+	// root.
+	MaxDepth = 16
+	// value: the largest file of the declaration, in bytes.
+	MaxFileSize = 4 << 20
+)
+
+// value: what a walk of a layout's folders has counted so far.
+
+type Budget struct{ names int }
+
+// value: true when rel, the next name a walk of a layout's folders visits,
+// a folder itself included, as a slash path from the root holding size
+// bytes, is past the budget; each call counts one name.
+
+func (b *Budget) Past(rel string, size int64) bool {
+	b.names++
+	return b.names > MaxNames || strings.Count(rel, "/") >= MaxDepth || size > MaxFileSize
+}
 
 func Declaration(folders []string) []string {
 	// value: the files and the folders a project is declared in, from its
@@ -123,8 +149,10 @@ func (e *LayoutRefused) Error() string { return e.Said }
 
 type Unwritten struct {
 	// value: the path from the project's root a call cannot reach, read or
-	// write, and why.
+	// write, and why; Kind, the kind of the layout's folder Path sits in,
+	// which folders: in spwn.yaml moves, "" outside them.
 	Path string
+	Kind string
 	Err  error
 }
 

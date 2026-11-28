@@ -3,6 +3,7 @@ package source
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -149,6 +150,28 @@ worlds:
 
 	if len(in.Deps) != 1 || in.Deps[0] != "spwn:python" {
 		t.Errorf("Manifest.Deps = %v, want [spwn:python]", in.Deps)
+	}
+}
+
+func TestAnAgentYAMLThatDoesNotParseNamesTheFoldersLineThatMovesAgents(t *testing.T) {
+	root := scaffoldProject(t, "version: 1\nname: mixed\n", map[string]string{"docs": "runtime: [unclosed\n"})
+	_, err := Load(root)
+	if err == nil || !strings.Contains(err.Error(), filepath.Join(root, "agents", "docs", "agent.yaml")) || !strings.Contains(err.Error(), "folders: agents: <folder> in spwn.yaml") {
+		t.Fatalf("Load = %v; want the parse error naming the file and the folders: line", err)
+	}
+}
+
+func TestAHookThatDoesNotParseNamesTheFoldersLineThatMovesHooks(t *testing.T) {
+	root := scaffoldProject(t, "version: 1\nname: mixed\n", nil)
+	if err := os.MkdirAll(filepath.Join(root, "hooks"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "hooks", "pre-commit.yaml"), []byte("event: [unclosed\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	_, err := Load(root)
+	if err == nil || !strings.Contains(err.Error(), "folders: hooks: <folder> in spwn.yaml") {
+		t.Fatalf("Load = %v; want the parse error naming the folders: line", err)
 	}
 }
 

@@ -31,11 +31,11 @@ func Starter() project.File {
 	return project.File{Path: "CLAUDE.md", Data: []byte("# " + project.Starter + "\n"), Mode: 0o644}
 }
 
-// value: the folders of a project held as files, agents first, out of its
+// value: the folders of a project held as files, by kind, out of its
 // spwn.yaml (nil when it has none) and every path it holds, refused as the
 // real disk refuses them: the real adapter's own reading, handed in.
 
-type Folders func(spwnYAML []byte, paths []string) ([]string, error)
+type Folders func(spwnYAML []byte, paths []string) (map[string]string, error)
 
 func New(folders Folders) *Projects { return Of(&world.World{}, "this-mac", folders) }
 
@@ -65,26 +65,72 @@ func (p *Projects) read(root string) (project.State, error) {
 }
 
 func (p *Projects) declared(s project.State) error {
-	folders, err := p.layoutOf(s)
+	byKind, err := p.layoutOf(s)
 	if err != nil {
+		return err
+	}
+	folders := slices.Sorted(maps.Values(byKind))
+	if err := within(s, byKind); err != nil {
 		return err
 	}
 	for _, at := range slices.Sorted(maps.Keys(s.Disk)) {
 		if project.Declared(folders, at) && s.Disk[at].Link {
-			return &project.Unwritten{Path: at, Err: project.ErrLink}
+			return &project.Unwritten{Path: at, Kind: kindOf(byKind, at), Err: project.ErrLink}
+		}
+		if s.Disk[at].Link {
+			for k, f := range byKind {
+				if strings.HasPrefix(f, at+"/") {
+					return &project.Unwritten{Path: at, Kind: k, Err: project.ErrLink}
+				}
+			}
 		}
 	}
 	for _, at := range s.Irregular {
 		if project.Declared(folders, at) {
-			return &project.Unwritten{Path: at, Err: project.ErrNotAFile}
+			return &project.Unwritten{Path: at, Kind: kindOf(byKind, at), Err: project.ErrNotAFile}
 		}
 	}
 	return nil
 }
 
-// value: the folders the project's spwn.yaml lays out, out of what the
-// world keeps of it, as p.folders reads them.
-func (p *Projects) layoutOf(s project.State) ([]string, error) {
+// value: nil when the names under the layout's folders, each folder on a
+// held path's way counted once with its files, fit one project.Budget, as
+// the real walk counts them; else the first name past it, in path order.
+func within(s project.State, byKind map[string]string) error {
+	names := map[string]int64{}
+	for _, at := range slices.Concat(slices.Collect(maps.Keys(s.Disk)), s.Irregular) {
+		if kindOf(byKind, at) == "" {
+			continue
+		}
+		names[at] = int64(len(s.Disk[at].Data))
+		for dir := path.Dir(at); dir != "."; dir = path.Dir(dir) {
+			if kindOf(byKind, dir) != "" {
+				names[dir] = 0
+			}
+		}
+	}
+	var b project.Budget
+	for _, at := range slices.Sorted(maps.Keys(names)) {
+		if b.Past(at, names[at]) {
+			return &project.Unwritten{Path: at, Kind: kindOf(byKind, at), Err: project.ErrTooLarge}
+		}
+	}
+	return nil
+}
+
+// value: the kind whose folder holds at, or is at; "" when none does.
+func kindOf(byKind map[string]string, at string) string {
+	for k, f := range byKind {
+		if at == f || strings.HasPrefix(at, f+"/") {
+			return k
+		}
+	}
+	return ""
+}
+
+// value: the folders the project's spwn.yaml lays out, by kind, out of
+// what the world keeps of it, as p.folders reads them.
+func (p *Projects) layoutOf(s project.State) (map[string]string, error) {
 	var manifest []byte
 	if f, ok := s.Disk[project.ManifestName]; ok {
 		manifest = f.Data
@@ -127,7 +173,7 @@ func (p *Projects) agentsOf(example string) []string {
 	if err != nil {
 		return nil
 	}
-	entries, _ := fs.ReadDir(files, folders[0])
+	entries, _ := fs.ReadDir(files, folders["agents"])
 	var names []string
 	for _, e := range entries {
 		if e.IsDir() {
