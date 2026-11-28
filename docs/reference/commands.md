@@ -582,7 +582,8 @@ spawn the world with "spwn up <name>".
 
 ```text
 The agents listed via --agent must already exist on disk under
-spwn/agents/<name>/. Use "station agents create" first if they don't.
+agents/<name>/ (the agents folder spwn.yaml's folders: names, if it
+renames it). Use "station agents create" first if they don't.
 ```
 
 ```text
@@ -590,7 +591,7 @@ spwn world create <name> [flags]
 ```
 
 ```text
-  -a, --agent stringArray       Agent name (repeatable). Must already exist under spwn/agents/
+  -a, --agent stringArray       Agent name (repeatable). Must already exist in the agents folder
   -w, --workspace stringArray   Workspace mount. Forms: "path", "name=path", "name=path:ro"
 ```
 

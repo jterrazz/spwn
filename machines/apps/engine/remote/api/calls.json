@@ -1230,12 +1230,14 @@
       "consequence": "Your value of %s is replaced by the one the file asks.",
       "errors": [
         "confirm.yes-needed",
+        "project.folders-invalid",
         "project.invalid",
         "project.link-in-the-way",
         "project.not-a-file",
         "project.not-a-folder",
         "project.not-found",
-        "project.not-written"
+        "project.not-written",
+        "project.old-layout"
       ],
       "in": "ApplyIn",
       "out": "Applied"
@@ -1259,9 +1261,11 @@
       "schema": "station.project.drift/v1",
       "where": "in-process",
       "errors": [
+        "project.folders-invalid",
         "project.link-in-the-way",
         "project.not-a-file",
-        "project.not-found"
+        "project.not-found",
+        "project.old-layout"
       ],
       "in": "DriftIn",
       "out": "Drift"
@@ -1271,11 +1275,13 @@
       "schema": "station.project.plan/v1",
       "where": "in-process",
       "errors": [
+        "project.folders-invalid",
         "project.invalid",
         "project.link-in-the-way",
         "project.not-a-file",
         "project.not-a-folder",
-        "project.not-found"
+        "project.not-found",
+        "project.old-layout"
       ],
       "in": "PlanIn",
       "out": "Plan"
@@ -1285,9 +1291,11 @@
       "schema": "station.project.show/v1",
       "where": "in-process",
       "errors": [
+        "project.folders-invalid",
         "project.link-in-the-way",
         "project.not-a-file",
-        "project.not-found"
+        "project.not-found",
+        "project.old-layout"
       ],
       "in": "ShowIn",
       "out": "Project"
