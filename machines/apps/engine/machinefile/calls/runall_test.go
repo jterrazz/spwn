@@ -54,17 +54,24 @@ func states(ran []machinefile.Ran) []string {
 func TestAPhasesLinesShareOneBoundAcrossItsFiles(t *testing.T) {
 	sh := &timed{now: epoch(), takes: map[string]time.Duration{"a": 12 * time.Minute, "b": 12 * time.Minute, "c": time.Minute}}
 	d := Deps{Shell: sh, Now: func() time.Time { return sh.now }}
-	got := runAll(context.Background(), d, []machinefile.Script{scriptOf("a-kit", "a"), scriptOf("b-kit", "b"), scriptOf("top", "c")}, quiet{})
+	got, spent := runAll(context.Background(), d, []machinefile.Script{scriptOf("a-kit", "a"), scriptOf("b-kit", "b"), scriptOf("top", "c")}, quiet{})
 	want := []string{"a-kit:ok:", "b-kit:broken:exited 137", "top:absent:after b-kit's lines, which failed"}
-	if !slices.Equal(states(got), want) || !slices.Equal(sh.given, []time.Duration{catalog.RunBound, catalog.RunBound - 12*time.Minute}) {
-		t.Errorf("ran %q given %v; want %q, the second kit given what the first left of the bound", states(got), sh.given, want)
+	if !slices.Equal(states(got), want) || spent || !slices.Equal(sh.given, []time.Duration{catalog.RunBound, catalog.RunBound - 12*time.Minute}) {
+		t.Errorf("ran %q given %v spent %v; want %q, the second kit given what the first left of the bound", states(got), sh.given, spent, want)
 	}
-	sh = &timed{now: epoch(), takes: map[string]time.Duration{"a": catalog.RunBound, "c": time.Minute}}
-	d.Now = func() time.Time { return sh.now }
-	d.Shell = sh
-	got = runAll(context.Background(), d, []machinefile.Script{scriptOf("a-kit", "a"), scriptOf("top", "c")}, quiet{})
-	if want := []string{"a-kit:ok:", "top:absent:the phase's lines had run their 20 minutes already"}; !slices.Equal(states(got), want) {
-		t.Errorf("ran %q; want %q, the lines with no time left not run", states(got), want)
+}
+
+func TestLinesWhoseTurnComesWithNoTimeLeftFailThePhase(t *testing.T) {
+	sh := &timed{now: epoch(), takes: map[string]time.Duration{"a": catalog.RunBound, "c": time.Minute, "h": time.Minute}}
+	d := Deps{Shell: sh, Now: func() time.Time { return sh.now }}
+	got, spent := runAll(context.Background(), d, []machinefile.Script{scriptOf("a-kit", "a"), scriptOf("hardening", "h"), scriptOf("top", "c")}, quiet{})
+	want := []string{
+		"a-kit:ok:",
+		"hardening:broken:the phase's 20 minutes were spent before hardening's lines, by a-kit's",
+		"top:broken:the phase's 20 minutes were spent before top's lines, by a-kit's",
+	}
+	if !slices.Equal(states(got), want) || !spent || len(sh.given) != 1 {
+		t.Errorf("ran %q spent %v, %d run; want %q, each file left unrun broken and naming the kit that spent the bound", states(got), spent, len(sh.given), want)
 	}
 }
 
@@ -72,7 +79,7 @@ func TestAnInterruptDuringAFilesLinesIsNoFailure(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	sh := &timed{now: epoch(), cut: cancel}
-	got := runAll(ctx, Deps{Shell: sh, Now: func() time.Time { return sh.now }}, []machinefile.Script{scriptOf("a-kit", "a"), scriptOf("top", "c")}, quiet{})
+	got, _ := runAll(ctx, Deps{Shell: sh, Now: func() time.Time { return sh.now }}, []machinefile.Script{scriptOf("a-kit", "a"), scriptOf("top", "c")}, quiet{})
 	if len(got) != 1 || got[0].Script.Origin.Name != "a-kit" || len(sh.given) != 1 {
 		t.Errorf("ran %q; want the interrupted kit's alone, nothing said of the rest", states(got))
 	}

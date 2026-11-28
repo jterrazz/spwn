@@ -1,0 +1,38 @@
+description: 'lines left no time by a kit''s fail the phase, naming that kit, and the apply is not recorded'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/slow-kit.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: slow-kit
+          run:
+            boot: |
+              sleep 1200
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          extends: [slow-kit]
+          machine: { kind: workspace, system: { os: ubuntu } }
+          run:
+            boot: |
+              sudo ufw enable
+      exit: 0
+    - command: 'machinefile apply --phase boot --yes'
+      exit: 1
+      stdout: |
+          # To run
+          ○	sleep 1200	run.boot	slow-kit
+          ○	sudo ufw enable	run.boot	linux-1
+          ●	run.boot		slow-kit	1 line
+          ✗	run.boot		linux-1	1 line · the phase's 20 minutes were spent before linux-1's lines, by slow-kit's
+      stderr: |
+          Error: 1 of 2 steps failed
+          Hint: station machinefile apply
+    - command: 'guest serve --stdio | /usr/bin/jq -c ''.out | {applied: (.Applied | type)}'''
+      stdin: |
+          {"v":2,"id":"1","call":"machinefile.drift","target":{},"in":{}}
+      exit: 0
+      stdout: |
+          {"applied":"null"}

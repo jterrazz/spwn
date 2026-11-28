@@ -721,9 +721,10 @@ type Applied struct {
 }
 
 // value: one file's lines of a phase once their turn came: how they
-// ended, ok, or broken with their exit and the last line they said; or
-// absent, not run since a file's lines before them failed, Detail naming
-// that file.
+// ended, ok, or broken with their exit and the last line they said, or
+// broken unrun since the phase's bound was spent before their turn,
+// Detail naming the file whose lines spent it; or absent, not run since a
+// file's lines before them failed, Detail naming that file.
 
 type Ran struct {
 	Script Script

@@ -151,12 +151,13 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			removed, blocks := r.remove(ctx, plan)
 			out.Removed, out.Blocks = removed, append(out.Blocks, blocks...)
 		}
-		out.Ran = runAll(ctx, d, plan.PhaseScripts(), p)
+		var spent bool
+		out.Ran, spent = runAll(ctx, d, plan.PhaseScripts(), p)
 		out.Interrupted = ctx.Err() != nil
 		if err := relock(ctx, d, plan, out.Done); err != nil {
 			return out, err
 		}
-		if ctx.Err() == nil && !r.cut {
+		if ctx.Err() == nil && !r.cut && !spent {
 			if err := d.Ledger.PutApply(ctx, plan.Name, d.Now().UTC()); err != nil {
 				return out, err
 			}
@@ -170,14 +171,16 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 
 // invariant: each file's lines of a phase run in the chain's order, all of
 // them within one catalog.RunBound from the first's start, each given the
-// time left; one whose turn comes with none left is not run, said absent,
-// and the first that ends broken ends the phase: the files' after it are
-// not run, each said absent after the file that failed. An interrupt is
-// no failure: a run interrupted before a file's turn, or during it, runs
-// none of the rest and says nothing of them.
-func runAll(ctx context.Context, d Deps, scripts []machinefile.Script, p call.Progress) []machinefile.Ran {
-	var out []machinefile.Ran
-	failed, until := "", d.Now().Add(catalog.RunBound)
+// time left. One whose turn comes with none left is not run and ends
+// broken, naming the file whose lines ran into the bound: the phase fails,
+// since what it leaves unrun (a later file's hardening) is never taken as
+// done. The first that ends broken by its own lines ends the phase: the
+// files' after it are not run, each said absent after the file that
+// failed. An interrupt is no failure: a run interrupted before a file's
+// turn, or during it, runs none of the rest and says nothing of them.
+// spent is whether a file's lines were left for want of time.
+func runAll(ctx context.Context, d Deps, scripts []machinefile.Script, p call.Progress) (out []machinefile.Ran, spent bool) {
+	failed, last, until := "", "", d.Now().Add(catalog.RunBound)
 	for _, s := range scripts {
 		if ctx.Err() != nil {
 			break
@@ -188,11 +191,13 @@ func runAll(ctx context.Context, d Deps, scripts []machinefile.Script, p call.Pr
 			out = append(out, machinefile.Ran{Script: s, State: catalog.StateAbsent, Detail: "after " + failed + "'s lines, which failed"})
 			continue
 		case left <= 0:
-			out = append(out, machinefile.Ran{Script: s, State: catalog.StateAbsent, Detail: "the phase's lines had run their " + strconv.Itoa(int(catalog.RunBound.Minutes())) + " minutes already"})
+			out = append(out, machinefile.Ran{Script: s, State: catalog.StateBroken, Detail: "the phase's " + strconv.Itoa(int(catalog.RunBound.Minutes())) + " minutes were spent before " + s.Origin.Name + "'s lines, by " + last + "'s"})
+			spent = true
 			continue
 		}
 		r := ran(ctx, d, s, left, p)
 		out = append(out, *r)
+		last = s.Origin.Name
 		if ctx.Err() != nil {
 			break
 		}
@@ -200,7 +205,7 @@ func runAll(ctx context.Context, d Deps, scripts []machinefile.Script, p call.Pr
 			failed = s.Origin.Name
 		}
 	}
-	return out
+	return out, spent
 }
 
 // invariant: one file's lines of a phase run once its packages are carried

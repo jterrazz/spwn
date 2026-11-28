@@ -113,7 +113,7 @@ func upgrade(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machin
 		}
 		out.Done = append(out.Done, update(ctx, d, l, p))
 	}
-	out.Ran = runAll(ctx, d, machinefile.ScriptsOf(plan.Scripts, machinefile.RunUpgrade), p)
+	out.Ran, _ = runAll(ctx, d, machinefile.ScriptsOf(plan.Scripts, machinefile.RunUpgrade), p)
 	out.Interrupted = ctx.Err() != nil
 	out.Waiting = machinefile.WaitingOf(out.Done)
 	now := machinefile.Relocked(plan, out.Done, plan.Source)

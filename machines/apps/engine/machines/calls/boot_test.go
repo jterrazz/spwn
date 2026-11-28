@@ -44,6 +44,27 @@ func TestABootPhaseOutlastsItsPackagesAndItsLines(t *testing.T) {
 	}
 }
 
+// value: an engine whose guest's apply ends as the given run.
+type ranEngine struct {
+	Engine
+	ran GuestRan
+}
+
+func (e ranEngine) GuestExec(context.Context, string, string, string) (GuestRan, error) {
+	return e.ran, nil
+}
+
+func TestAFirstBootWhoseLinesRanOutOfTimeFails(t *testing.T) {
+	// invariant: the boot phase's apply exits non-zero when a file's lines
+	// were left for want of time, and the first boot fails with its words,
+	// never taken as done.
+	s := &Machinist{engineAPI: ranEngine{ran: GuestRan{ExitCode: 1, Stderr: "Error: 1 of 2 steps failed\nHint: station machinefile apply\n"}}}
+	err := s.applyBoot(context.Background(), "web", model.Template{Name: "studio-linux"})
+	if err == nil || err.Error() != "the boot phase exited 1: Error: 1 of 2 steps failed" {
+		t.Fatalf("a boot phase whose lines ran out of time: %v; want it failed with the apply's words", err)
+	}
+}
+
 // value: a Mac whose clock stands still and whose kept lines are collected by file.
 type keepingMac struct {
 	ThisMac

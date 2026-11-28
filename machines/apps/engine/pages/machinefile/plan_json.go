@@ -52,7 +52,8 @@ type BlockJSON struct {
 }
 
 // value: one Machinefile's lines of the plan's phase, that Machinefile,
-// and once their turn came how they ended (`absent` when not run).
+// and once their turn came how they ended (`absent` when not run after a
+// file that failed, `broken` when the phase's time was spent before it).
 
 type RunJSON struct {
 	Phase       string   `json:"phase"`
