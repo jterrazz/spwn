@@ -1,0 +1,5 @@
+name: neo
+description: The one agent of a project whose folders are renamed.
+
+runtime:
+  backend: "spwn:claude-code"

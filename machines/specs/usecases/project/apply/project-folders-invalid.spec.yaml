@@ -1,0 +1,18 @@
+description: 'station project apply refuses a folders: entry that is no kind, naming it, and writes nothing'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit spwn.yaml "$(printf "name: site\nfolders:\n  workflows: flows\n")" && /bin/mkdir -p site && cd site && "$STATION" project apply --yes'
+      exit: 2
+      stderr: |
+          Error: folders.workflows in spwn.yaml is not a kind: folders: renames one of agents, skills, tools, hooks, commands, profiles
+          Hint: fix folders: in spwn.yaml, then station project plan
+    - command: '--version >/dev/null; /usr/bin/jq -c ".macs[\"macbook-pro\"].stores.projects[] | (.Record // {} | length)" world.json'
+      exit: 0
+      stdout: |
+          0

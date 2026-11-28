@@ -1,0 +1,11 @@
+version: 1
+name: folders-renamed
+
+folders:
+  agents: crew
+  skills: lib/skills
+
+worlds:
+  ship:
+    agents: [neo]
+    workspaces: [.]

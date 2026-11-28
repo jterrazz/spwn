@@ -1,0 +1,10 @@
+description: a project whose spwn.yaml renames its folders reads its agents and skills there, and nowhere else
+fixture: ./__fixtures__/folders-renamed/
+runs:
+    - command: install skill/refine --agent neo
+      exit: 0
+      stdout: |4
+            ✓  installed skill/refine
+               1 agent updated, spwn.lock pinned
+      files:
+          crew/neo/agent.yaml: { contains: skill/refine }

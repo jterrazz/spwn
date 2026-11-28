@@ -1,0 +1,24 @@
+description: 'station project plan walks spwn.yaml, spwn.lock and the folders it lays out alone: a link anywhere else at the root is not read, a link at a renamed folder is refused'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" link docs /tmp/elsewhere && "$STATION" world project "$HOME/site" link knowledge /tmp/elsewhere && "$STATION" world project "$HOME/site" fifo notes/wait.md'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 0
+      stdout: |
+          ●	{{workdir}}/site/spwn.yaml	valid
+          # Issues
+          	none
+          # To apply
+          ●	.spwn/agents/neo/CLAUDE.md	add
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit spwn.yaml "$(printf "name: site\nfolders:\n  skills: lib/skills\n")" && "$STATION" world project "$HOME/site" link skills /tmp/elsewhere && "$STATION" world project "$HOME/site" link lib/skills /tmp/elsewhere && /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 2
+      stderr: |
+          Error: lib/skills is a link: a project's declaration is never read through one
+          Hint: put the file it points to there instead, then station project plan

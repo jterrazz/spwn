@@ -1,0 +1,14 @@
+description: 'station project drift refuses two kinds laid out in one folder, naming the key that meets the other'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit spwn.yaml "$(printf "name: site\nfolders:\n  hooks: commands\n")" && /bin/mkdir -p site && cd site && "$STATION" project drift'
+      exit: 2
+      stderr: |
+          Error: folders.hooks in spwn.yaml is "commands", which meets commands/, the folder of commands: each kind has a folder of its own, none under another
+          Hint: fix folders: in spwn.yaml, then station project plan

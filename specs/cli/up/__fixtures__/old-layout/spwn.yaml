@@ -1,0 +1,8 @@
+version: 1
+name: old-layout
+
+worlds:
+  ship:
+    agents: [neo]
+    workspaces: [.]
+    knowledge: ./spwn/knowledge

@@ -1,0 +1,49 @@
+description: 'station project plan refuses every folders: entry that names no folder of the project, naming its key, and reads nothing'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit spwn.yaml "$(printf "name: site\nfolders:\n  agents: .\n")" && /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 2
+      stderr: |
+          Error: folders.agents in spwn.yaml is ".", which leaves its own path by .: a folder is a path of the project from its root, its names lowercase letters, digits, - and _
+          Hint: fix folders: in spwn.yaml, then station project plan
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit spwn.yaml "$(printf "name: site\nfolders:\n  skills: ../away\n")" && /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 2
+      stderr: |
+          Error: folders.skills in spwn.yaml is "../away", which leaves its own path by ..: a folder is a path of the project from its root, its names lowercase letters, digits, - and _
+          Hint: fix folders: in spwn.yaml, then station project plan
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit spwn.yaml "$(printf "name: site\nfolders:\n  tools: .git\n")" && /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 2
+      stderr: |
+          Error: folders.tools in spwn.yaml is ".git", a hidden name, .git: a folder is a path of the project from its root, its names lowercase letters, digits, - and _
+          Hint: fix folders: in spwn.yaml, then station project plan
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit spwn.yaml "$(printf "name: site\nfolders:\n  hooks: .spwn\n")" && /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 2
+      stderr: |
+          Error: folders.hooks in spwn.yaml is ".spwn", a hidden name, .spwn: a folder is a path of the project from its root, its names lowercase letters, digits, - and _
+          Hint: fix folders: in spwn.yaml, then station project plan
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit spwn.yaml "$(printf "name: site\nfolders:\n  commands: /etc\n")" && /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 2
+      stderr: |
+          Error: folders.commands in spwn.yaml is "/etc", an absolute path: a folder is a path of the project from its root, its names lowercase letters, digits, - and _
+          Hint: fix folders: in spwn.yaml, then station project plan
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit spwn.yaml "$(printf "name: site\nfolders:\n  profiles: ~/p\n")" && /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 2
+      stderr: |
+          Error: folders.profiles in spwn.yaml is "~/p", which starts with ~, never expanded: a folder is a path of the project from its root, its names lowercase letters, digits, - and _
+          Hint: fix folders: in spwn.yaml, then station project plan
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit spwn.yaml "$(printf "name: site\nfolders:\n  agents: \"c:x\"\n")" && /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 2
+      stderr: |
+          Error: folders.agents in spwn.yaml is "c:x", which holds a colon: a folder is a path of the project from its root, its names lowercase letters, digits, - and _
+          Hint: fix folders: in spwn.yaml, then station project plan
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit spwn.yaml "$(printf "name: site\nfolders:\n  agents: skills/crew\n")" && /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 2
+      stderr: |
+          Error: folders.agents in spwn.yaml is "skills/crew", which meets skills/, the folder of skills: each kind has a folder of its own, none under another
+          Hint: fix folders: in spwn.yaml, then station project plan

@@ -1,0 +1,5 @@
+name: neo
+description: An agent left under the old layout's spwn/ folder.
+
+runtime:
+  backend: "spwn:claude-code"

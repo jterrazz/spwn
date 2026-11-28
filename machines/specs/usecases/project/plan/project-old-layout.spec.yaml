@@ -1,0 +1,16 @@
+description: 'station project plan refuses a project of the old spwn/ layout with the sentence that moves it, and reads nothing'
+env:
+    - two-macs
+    - engine
+runs:
+    - command: 'project create site'
+      exit: 0
+      stdout: |
+          ●	site	created	{{workdir}}/site
+    - command: '--version >/dev/null; "$STATION" world project "$HOME/site" edit spwn/agents/neo/agent.yaml "name: neo"'
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p site && cd site && "$STATION" project plan'
+      exit: 2
+      stderr: |
+          Error: spwn/ is the old project layout: its folders now sit at the project's root. Move each one up (mv spwn/agents agents, and the same for skills, tools, hooks, commands, profiles), point knowledge: at its new path, change any .gitignore line naming spwn/, then run again.
+          Hint: move what spwn/ holds to the root, then station project plan
