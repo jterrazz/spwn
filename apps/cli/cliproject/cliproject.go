@@ -1,10 +1,10 @@
-// Package cliproject centralises the "find the active spwn project"
-// dance every CLI subcommand otherwise reimplements. Two entry points:
+// Package cliproject is the one way a CLI command finds the active spwn
+// project. Two entry points:
 //
-//   - Find()    returns (nil, nil) when no project is present so
-//                 callers can fall back to legacy global mode.
+//   - Find()    returns (nil, nil) only when no spwn.yaml sits on the
+//     way up, so the command runs in the user's own home.
 //   - Require() returns a crisp "no spwn.yaml" error when no
-//                 project is present, for commands that require one.
+//     project is present, for commands that require one.
 package cliproject
 
 import (
@@ -14,10 +14,9 @@ import (
 	"spwn.sh/packages/project"
 )
 
-// Find walks up from cwd looking for a spwn.yaml. Returns (nil, nil)
-// when no project is found (legacy global-mode fallback) and an error
-// only when cwd itself cannot be resolved or the discovered manifest
-// fails to load.
+// Find walks up from cwd looking for a spwn.yaml. It returns (nil, nil)
+// only when no spwn.yaml is found; a spwn.yaml found that does not load,
+// for any reason, is its error, which the caller returns as it is.
 func Find() (*project.Project, error) {
 	cwd, err := os.Getwd()
 	if err != nil {

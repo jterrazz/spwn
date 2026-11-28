@@ -1,0 +1,41 @@
+description: an invalid folders entry stops every command with its code, before Docker or the home
+fixture: ./__fixtures__/folders-invalid/
+env:
+    - DOCKER_HOST=tcp://127.0.0.1:1
+runs:
+    - command: up
+      exit: 1
+      stderr: |4+
+          
+            Error: spwn-yaml.folders: folders.agents in spwn.yaml is "..", which leaves its own path by ..: a folder is a path of the project from its root, its names lowercase letters, digits, - and _
+
+      files:
+          spwn-home: absent
+
+    - command: down
+      exit: 1
+      stderr: |4+
+          
+            Error: spwn-yaml.folders: folders.agents in spwn.yaml is "..", which leaves its own path by ..: a folder is a path of the project from its root, its names lowercase letters, digits, - and _
+
+      files:
+          spwn-home: absent
+
+    - command: logs
+      exit: 1
+      stderr: |4+
+          
+            Error: spwn-yaml.folders: folders.agents in spwn.yaml is "..", which leaves its own path by ..: a folder is a path of the project from its root, its names lowercase letters, digits, - and _
+
+      files:
+          spwn-home: absent
+
+    - command: agent neo
+      exit: 1
+      stderr: |4+
+          
+            Error: spwn-yaml.folders: folders.agents in spwn.yaml is "..", which leaves its own path by ..: a folder is a path of the project from its root, its names lowercase letters, digits, - and _
+
+      files:
+          spwn-home: absent
+          agents: absent

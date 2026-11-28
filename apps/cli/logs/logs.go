@@ -145,7 +145,10 @@ func Run(cmd *cobra.Command, opts RunOpts) error {
 
 func validateWorldFilter(name string) error {
 	proj, err := cliproject.Find()
-	if err != nil || proj == nil || proj.Manifest == nil || len(proj.Manifest.Worlds) == 0 {
+	if err != nil {
+		return err
+	}
+	if proj == nil || proj.Manifest == nil || len(proj.Manifest.Worlds) == 0 {
 		return nil
 	}
 	if _, ok := proj.Manifest.Worlds[name]; ok {

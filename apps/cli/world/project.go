@@ -75,10 +75,6 @@ type projectWorld struct {
 	Runtime string
 }
 
-func loadProject() (*project.Project, error) {
-	return cliproject.Find()
-}
-
 func sortedWorldNames(p *project.Project) []string {
 	if p == nil || p.Manifest == nil {
 		return nil

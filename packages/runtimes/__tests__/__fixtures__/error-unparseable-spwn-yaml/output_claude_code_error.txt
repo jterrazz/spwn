@@ -1,1 +1,1 @@
-load manifest {{fixtures}}/error-unparseable-spwn-yaml/input/spwn.yaml: parse {{fixtures}}/error-unparseable-spwn-yaml/input/spwn.yaml: yaml: line 1: did not find expected ',' or '}'
+load manifest {{fixtures}}/error-unparseable-spwn-yaml/input/spwn.yaml: spwn-yaml.parse: parse {{fixtures}}/error-unparseable-spwn-yaml/input/spwn.yaml: yaml: line 1: did not find expected ',' or '}'

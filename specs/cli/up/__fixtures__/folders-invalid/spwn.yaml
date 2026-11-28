@@ -1,0 +1,10 @@
+version: 1
+name: folders-invalid
+
+folders:
+  agents: ..
+
+worlds:
+  ship:
+    agents: [neo]
+    workspaces: [.]

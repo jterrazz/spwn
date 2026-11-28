@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
+	"spwn.sh/apps/cli/cliproject"
 	"spwn.sh/apps/cli/ui"
 
 	"spwn.sh/packages/architect"
@@ -16,8 +17,11 @@ func composeDownRunE(cmd *cobra.Command, args []string) error {
 	if destroyAll || len(args) > 0 {
 		return destroyCmd.RunE(cmd, args)
 	}
-	p, err := loadProject()
-	if err != nil || p == nil || len(p.Manifest.Worlds) == 0 {
+	p, err := cliproject.Find()
+	if err != nil {
+		return err
+	}
+	if p == nil || len(p.Manifest.Worlds) == 0 {
 		return destroyCmd.RunE(cmd, args)
 	}
 

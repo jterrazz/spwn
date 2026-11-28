@@ -127,8 +127,11 @@ var (
 )
 
 func composeUpRunE(cmd *cobra.Command, args []string) error {
-	p, err := loadProject()
-	if err != nil || p == nil || len(p.Manifest.Worlds) == 0 {
+	p, err := cliproject.Find()
+	if err != nil {
+		return err
+	}
+	if p == nil || len(p.Manifest.Worlds) == 0 {
 		return startWorld(cmd, args, nil)
 	}
 	names := args

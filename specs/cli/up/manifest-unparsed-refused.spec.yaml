@@ -1,0 +1,41 @@
+description: a spwn.yaml that does not parse stops every command with its code, before Docker
+fixture: ./__fixtures__/manifest-unparsed/
+env:
+    - DOCKER_HOST=tcp://127.0.0.1:1
+runs:
+    - command: up
+      exit: 1
+      stderr: |4+
+          
+            Error: spwn-yaml.parse: parse {{workdir}}/spwn.yaml: yaml: line 2: did not find expected ',' or ']'
+
+      files:
+          spwn-home: absent
+
+    - command: down
+      exit: 1
+      stderr: |4+
+          
+            Error: spwn-yaml.parse: parse {{workdir}}/spwn.yaml: yaml: line 2: did not find expected ',' or ']'
+
+      files:
+          spwn-home: absent
+
+    - command: logs
+      exit: 1
+      stderr: |4+
+          
+            Error: spwn-yaml.parse: parse {{workdir}}/spwn.yaml: yaml: line 2: did not find expected ',' or ']'
+
+      files:
+          spwn-home: absent
+
+    - command: agent neo
+      exit: 1
+      stderr: |4+
+          
+            Error: spwn-yaml.parse: parse {{workdir}}/spwn.yaml: yaml: line 2: did not find expected ',' or ']'
+
+      files:
+          spwn-home: absent
+          agents: absent

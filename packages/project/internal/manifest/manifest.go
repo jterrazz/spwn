@@ -258,11 +258,30 @@ func Read(t *platform.Tree, path string) (*Manifest, error) {
 	}
 	var m Manifest
 	if err := yaml.Unmarshal(data, &m); err != nil {
-		return nil, fmt.Errorf("parse %s: %w", path, err)
+		return nil, &ParseError{Path: path, Err: err}
 	}
 	ApplyDefaults(&m)
 	return &m, nil
 }
+
+// ParseCode is the code of a spwn.yaml that does not parse as a manifest.
+const ParseCode = "spwn-yaml.parse"
+
+// ParseError refuses a spwn.yaml that does not parse as a manifest,
+// naming its path.
+type ParseError struct {
+	Path string
+	Err  error
+}
+
+func (e *ParseError) Error() string {
+	return ParseCode + ": parse " + e.Path + ": " + e.Err.Error()
+}
+
+func (e *ParseError) Unwrap() error { return e.Err }
+
+// Code is ParseCode.
+func (e *ParseError) Code() string { return ParseCode }
 
 // ApplyDefaults fills in optional fields that were left blank.
 func ApplyDefaults(m *Manifest) {

@@ -31,10 +31,10 @@ rules (network, filesystem, tools), and each agent keeps its Mind
 	SilenceUsage:  true,
 	SilenceErrors: true,
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		if err := runMigrations(); err != nil {
+		if err := discoverProject(); err != nil {
 			return err
 		}
-		return discoverProject()
+		return runMigrations()
 	},
 }
 
