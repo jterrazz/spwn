@@ -183,6 +183,7 @@ func TestAnAgentLineIsOneShortLine(t *testing.T) {
 		`"open a PR\nthen merge"`:            "an agent line is one line, with no control character",
 		`"tab\there"`:                        "an agent line is one line, with no control character",
 		`"ends with a blank "`:               "an agent line opens and ends with a word, not a blank",
+		"'gh pr create, then `gh pr merge`'": "an agent line holds no backtick",
 		"|\n    a block scalar\n":            "an agent line is one line, with no control character",
 	} {
 		refusedFor(t, agent(line), want)

@@ -69,7 +69,7 @@ The lists stand by category, in the categories' order (`Package Managers`, `Runt
 | `sets`            | setting      | the values it sets, as its check reads them back: `key`, `value`                                                                                                                                                                    |
 | `writes`          | setting      | the files it writes, each a `path`, its `level`, a `note`, and a selector                                                                                                                                                           |
 
-An `agent` line is one line of at most 160 bytes, with no control character and no blank at either end; any other is refused at decode, as is the key on a setting.
+An `agent` line is one line of at most 160 bytes, with no control character, no backtick and no blank at either end; any other is refused at decode, as is the key on a setting.
 
 A disk action (`free`, `erase`, a misplaced row's `free`) runs a command, deletes or prunes paths: `run`, `env`, `delete`, `prune`, `uses` (the command it runs with, which must be on the search path), `exists`, and a selector.
 

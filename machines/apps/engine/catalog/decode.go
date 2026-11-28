@@ -286,8 +286,8 @@ func checkPackage(file string, doc *yaml.Node, it Package) error {
 const AgentMax = 160
 
 // invariant: an agent line is one line of at most AgentMax bytes, with no
-// control character and no blank at either end; absent, the skill says the
-// description.
+// control character, no backtick and no blank at either end; absent, the
+// skill says the description.
 func checkAgent(line string) string {
 	switch {
 	case line == "":
@@ -298,6 +298,8 @@ func checkAgent(line string) string {
 		return "an agent line is one line, with no control character"
 	case strings.TrimSpace(line) != line:
 		return "an agent line opens and ends with a word, not a blank"
+	case strings.Contains(line, "`"):
+		return "an agent line holds no backtick: the skill quotes each name in backticks itself"
 	}
 	return ""
 }
