@@ -2,6 +2,7 @@
 
 **Status:** Proposed
 **Date:** 2026-11-26
+**Amended by:** [ADR-112](112-the-declaration-is-spwn-yaml-spwn-lock-and-the-folders-its-layout-names.md): decision 6's declaration is `spwn.yaml`, `spwn.lock` and the folders the project's layout names, at its root.
 
 Builds on [ADR-088](088-agents-live-in-the-one-binary-as-families-reached-by-calls.md): the project family is a family of the engine, reached by its calls. Root [ADR-021](../../../docs/decisions/021-one-program-spwn-one-command-for-everything.md) rule 5 gives a project's `spwn.yaml` its `plan`, `apply` and `drift`; it does not name `spwn build`, which the programme's lot A2b3 deletes. This record says what replaces its render.
 
