@@ -86,6 +86,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/ports/adapter/funnel"
 	portscontract "github.com/jterrazz/studio-station/apps/engine/ports/contract"
 	projectfake "github.com/jterrazz/studio-station/apps/engine/project/adapter/fake"
+	"github.com/jterrazz/studio-station/apps/engine/project/adapter/manifest"
 	projectcontract "github.com/jterrazz/studio-station/apps/engine/project/contract"
 	remotedoor "github.com/jterrazz/studio-station/apps/engine/remote/adapter/door"
 	remotefake "github.com/jterrazz/studio-station/apps/engine/remote/adapter/fake"
@@ -506,7 +507,7 @@ func (m *worldMac) processes(kernel contract.Processes) contract.Processes {
 }
 func (m *worldMac) minds() agentscontract.Minds        { return agentsfake.Of(m.run.w, m.name) }
 func (m *worldMac) skillFiles() skillscontract.Files   { return skillsfake.Of(m.run.w, m.name) }
-func (m *worldMac) projects() projectcontract.Projects { return projectfake.Of(m.run.w, m.name) }
+func (m *worldMac) projects() projectcontract.Projects { return projectfake.Of(m.run.w, m.name, manifest.Folders) }
 func (m *worldMac) teams() teamscontract.Teams         { return teamsfake.Of(m.run.w, m.name) }
 func (m *worldMac) automations() automationscontract.Automations {
 	return automationsfake.Of(m.run.w, m.name)

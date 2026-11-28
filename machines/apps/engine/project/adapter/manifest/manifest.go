@@ -69,13 +69,14 @@ func linked(root, rel string, err error) error {
 
 // invariant: Agents' packages resolve paths from one process-global
 // project, its root and its folders, which platform.WithProject holds for
-// one act; a root whose spwn.yaml does not read yet, the folder Create is
-// about to make, is held with the default folders, and its walk refuses
-// what its layout refuses before any of it is read.
+// one act; a root with no spwn.yaml yet, the folder Create is about to
+// make, is held with the default folders, and a layout spwn.yaml refuses
+// is refused before act runs.
 func in[T any](root string, act func() (T, error)) (T, error) {
 	l, err := spwnproject.LayoutAt(root)
 	if err != nil {
-		l = spwnproject.DefaultLayout()
+		var zero T
+		return zero, refusedLayout(err)
 	}
 	return platform.WithProject(root, l.Platform(), act)
 }
@@ -104,6 +105,19 @@ func (p Projects) declared(root string) error {
 		}
 	}
 	return nil
+}
+
+// Folders is the folders of a project held as files, as the walk of
+// declared visits them, agents first: spwnYAML is its spwn.yaml, nil when
+// it has none, and paths every slash path it holds; refused as declared
+// refuses the same project on a disk. A fake world takes it, so the layout
+// it tells is the root module's own.
+func Folders(spwnYAML []byte, paths []string) ([]string, error) {
+	l, err := spwnproject.LayoutOfFiles(spwnYAML, paths)
+	if err != nil {
+		return nil, refusedLayout(err)
+	}
+	return l.Folders(), nil
 }
 
 // value: err as the project names a layout spwn.yaml refuses: the old
@@ -655,7 +669,11 @@ func (p Projects) keep(root string, record project.Record) error {
 func rendered(root string) []project.Issue {
 	src, err := source.Load(root)
 	if err != nil {
-		return []project.Issue{{Level: project.Error, Path: root, Message: "the project's files do not read: " + err.Error(), Hint: "every file under spwn/ must be readable", Source: project.SourceCompile}}
+		return []project.Issue{{Level: project.Error, Path: root, Message: "the project's files do not read: " + err.Error(), Hint: "every file of the project's folders must be readable", Source: project.SourceCompile}}
+	}
+	agents := spwnproject.DefaultLayout().Folder(spwnproject.KindAgents)
+	if l, err := spwnproject.LayoutAt(root); err == nil {
+		agents = l.Folder(spwnproject.KindAgents)
 	}
 	var out []project.Issue
 	prompts := map[string]bool{}
@@ -670,8 +688,8 @@ func rendered(root string) []project.Issue {
 		}
 		for _, a := range input.Agents {
 			if have, ok := prompts[a.Name]; ok && !have {
-				out = append(out, project.Issue{Level: project.Error, Path: "agents/" + a.Name + "/AGENTS.md", Message: "agent prompt is missing or empty",
-					Hint: "write agents/" + a.Name + "/AGENTS.md with the agent's system prompt", Source: project.SourceCompile})
+				out = append(out, project.Issue{Level: project.Error, Path: agents + "/" + a.Name + "/AGENTS.md", Message: "agent prompt is missing or empty",
+					Hint: "write " + agents + "/" + a.Name + "/AGENTS.md with the agent's system prompt", Source: project.SourceCompile})
 			}
 		}
 		refused := map[string]bool{}
@@ -687,8 +705,8 @@ func rendered(root string) []project.Issue {
 				continue
 			}
 			if len(files) == 0 {
-				out = append(out, project.Issue{Level: project.Warning, Path: "agents/" + a.Name, Message: "agent renders no file",
-					Hint: "agents/" + a.Name + "/ lacks its AGENTS.md or its agent.yaml", Source: project.SourceCompile})
+				out = append(out, project.Issue{Level: project.Warning, Path: agents + "/" + a.Name, Message: "agent renders no file",
+					Hint: agents + "/" + a.Name + "/ lacks its AGENTS.md or its agent.yaml", Source: project.SourceCompile})
 			}
 		}
 	}

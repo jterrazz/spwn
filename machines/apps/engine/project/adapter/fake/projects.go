@@ -10,9 +10,6 @@ import (
 	"slices"
 	"strings"
 
-	"gopkg.in/yaml.v3"
-	spwnproject "spwn.sh/packages/project"
-
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/project"
 	"github.com/jterrazz/studio-station/apps/engine/project/contract"
@@ -23,6 +20,7 @@ type Projects struct {
 	// invariant: the projects one machine of the world keeps, by root.
 	w       *world.World
 	machine string
+	folders Folders
 }
 
 var _ contract.Projects = (*Projects)(nil)
@@ -33,10 +31,15 @@ func Starter() project.File {
 	return project.File{Path: "CLAUDE.md", Data: []byte("# " + project.Starter + "\n"), Mode: 0o644}
 }
 
-func New() *Projects { return Of(&world.World{}, "this-mac") }
+// Folders is the folders of a project held as files, agents first, out of
+// its spwn.yaml (nil when it has none) and every path it holds, refused as
+// the real disk refuses them: the real adapter's own reading, handed in.
+type Folders func(spwnYAML []byte, paths []string) ([]string, error)
 
-func Of(w *world.World, machine string) *Projects {
-	return &Projects{w: w, machine: machine}
+func New(folders Folders) *Projects { return Of(&world.World{}, "this-mac", folders) }
+
+func Of(w *world.World, machine string, folders Folders) *Projects {
+	return &Projects{w: w, machine: machine, folders: folders}
 }
 
 func (p *Projects) kept() map[string]project.State { return p.w.Mac(p.machine).Store().Projects }
@@ -57,11 +60,11 @@ func (p *Projects) read(root string) (project.State, error) {
 	if err != nil {
 		return s, err
 	}
-	return s, declared(s)
+	return s, p.declared(s)
 }
 
-func declared(s project.State) error {
-	folders, err := layoutOf(s)
+func (p *Projects) declared(s project.State) error {
+	folders, err := p.layoutOf(s)
 	if err != nil {
 		return err
 	}
@@ -78,45 +81,14 @@ func declared(s project.State) error {
 	return nil
 }
 
-// value: the folders the project's spwn.yaml lays out, as the root
-// module reads them from what the world keeps of it; refused as the real
-// disk refuses the old layout's spwn/ folder or a folders: entry naming no
-// folder.
-func layoutOf(s project.State) ([]string, error) {
-	old := &spwnproject.OldLayoutError{}
-	held := false
-	for at := range s.Disk {
-		for _, k := range spwnproject.Kinds {
-			if strings.HasPrefix(at, "spwn/"+string(k)+"/") {
-				held = true
-			}
-		}
-	}
-	if held {
-		for _, k := range spwnproject.Kinds {
-			for at := range s.Disk {
-				if strings.HasPrefix(at, string(k)+"/") && !slices.Contains(old.AtRoot, string(k)) {
-					old.AtRoot = append(old.AtRoot, string(k))
-				}
-			}
-		}
-		return nil, &project.LayoutRefused{Old: true, Said: old.Message()}
-	}
-	l := spwnproject.DefaultLayout()
+// value: the folders the project's spwn.yaml lays out, out of what the
+// world keeps of it, as p.folders reads them.
+func (p *Projects) layoutOf(s project.State) ([]string, error) {
+	var manifest []byte
 	if f, ok := s.Disk[project.ManifestName]; ok {
-		var m struct {
-			Folders map[string]string `yaml:"folders"`
-		}
-		if yaml.Unmarshal(f.Data, &m) == nil {
-			declared, err := spwnproject.NewLayout(m.Folders)
-			var refused *spwnproject.LayoutError
-			if errors.As(err, &refused) {
-				return nil, &project.LayoutRefused{Key: refused.Key, Said: refused.Message()}
-			}
-			l = declared
-		}
+		manifest = f.Data
 	}
-	return l.Folders(), nil
+	return p.folders(manifest, slices.Sorted(maps.Keys(s.Disk)))
 }
 
 func (p *Projects) Find(_ context.Context, folder string) (string, error) {
@@ -124,7 +96,7 @@ func (p *Projects) Find(_ context.Context, folder string) (string, error) {
 	defer p.w.Unlock()
 	for dir := filepath.Clean(folder); ; dir = filepath.Dir(dir) {
 		if s, ok := p.kept()[dir]; ok {
-			if err := declared(s); err != nil {
+			if err := p.declared(s); err != nil {
 				return "", err
 			}
 			return dir, nil
@@ -142,14 +114,24 @@ func (p *Projects) Show(_ context.Context, root string) (project.Project, error)
 	return s.Project, err
 }
 
-func agentsOf(example string) []string {
-	// value: the agents an example holds, by name; the starter alone when
-	// none is named.
+func (p *Projects) agentsOf(example string) []string {
+	// value: the agents an example holds, by name, in the agents folder its
+	// spwn.yaml lays out; the starter alone when none is named.
 	files, ok := catalog.Example(example)
 	if !ok {
 		return []string{project.Starter}
 	}
-	entries, _ := fs.ReadDir(files, spwnproject.DefaultLayout().Folder(spwnproject.KindAgents))
+	manifest, _ := fs.ReadFile(files, project.ManifestName)
+	var paths []string
+	_ = fs.WalkDir(files, ".", func(at string, _ fs.DirEntry, err error) error {
+		paths = append(paths, at)
+		return err
+	})
+	folders, err := p.folders(manifest, paths)
+	if err != nil {
+		return nil
+	}
+	entries, _ := fs.ReadDir(files, folders[0])
 	var names []string
 	for _, e := range entries {
 		if e.IsDir() {
@@ -166,7 +148,7 @@ func (p *Projects) Create(_ context.Context, folder, name, _, example string) (p
 	if _, err := p.state(root); err == nil {
 		return project.Project{}, project.ErrExists
 	}
-	made := project.Project{Name: name, Root: root, Manifest: filepath.Join(root, project.ManifestName), Agents: agentsOf(example)}
+	made := project.Project{Name: name, Root: root, Manifest: filepath.Join(root, project.ManifestName), Agents: p.agentsOf(example)}
 	rendered := map[string][]project.File{}
 	for _, a := range made.Agents {
 		rendered[a] = []project.File{Starter()}

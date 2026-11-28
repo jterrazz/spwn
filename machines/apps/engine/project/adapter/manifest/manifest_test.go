@@ -55,7 +55,7 @@ func TestANewProjectHoldsTheMindLayoutAndNoMore(t *testing.T) {
 			t.Errorf("%s = %v; want the folder", rel, err)
 		}
 	}
-	for _, rel := range []string{"agents/neo/identity", "agents/neo/skills", "agents/neo/knowledge", "knowledge", "spwn/worlds", "hooks.yaml"} {
+	for _, rel := range []string{"agents/neo/identity", "agents/neo/skills", "agents/neo/knowledge", "spwn", "worlds", "hooks.yaml"} {
 		if _, err := (local.Beneath{}).Lstat(m.Root, rel); !errors.Is(err, fs.ErrNotExist) {
 			t.Errorf("%s = %v; want it absent", rel, err)
 		}

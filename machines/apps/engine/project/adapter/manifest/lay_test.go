@@ -10,7 +10,7 @@ import (
 )
 
 func TestAFolderSwappedForALinkAfterItsMkdirIsNeverWrittenThrough(t *testing.T) {
-	for name, swapped := range map[string]string{"the new folder": "site", "a folder under it": "site/spwn"} {
+	for name, swapped := range map[string]string{"the new folder": "site", "a folder under it": "site/agents"} {
 		t.Run(name, func(t *testing.T) {
 			folder, elsewhere := t.TempDir(), t.TempDir()
 			under := local.Beneath{}
