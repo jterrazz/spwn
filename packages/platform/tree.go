@@ -338,6 +338,17 @@ func (t *Tree) Remove(p string) error {
 	return t.root.Remove(rel)
 }
 
+// value: os.RemoveAll of p inside the Tree: a link is removed as itself,
+// never followed, and a link on p's way out of the Tree is refused.
+
+func (t *Tree) RemoveAll(p string) error {
+	rel, err := t.Rel(p)
+	if err != nil {
+		return err
+	}
+	return t.root.RemoveAll(rel)
+}
+
 // Lstat is os.Lstat of p inside the Tree: a link is described as itself.
 func (t *Tree) Lstat(p string) (fs.FileInfo, error) {
 	rel, err := t.Rel(p)

@@ -1,9 +1,9 @@
 package evolution
 
 import (
+	"errors"
 	"fmt"
-	"io"
-	"os"
+	"io/fs"
 	"path/filepath"
 	"regexp"
 	"spwn.sh/packages/platform"
@@ -16,13 +16,19 @@ import (
 func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 	sourceDir := filepath.Join(platform.AgentsDir(), sourceName)
 	targetDir := filepath.Join(platform.AgentsDir(), targetName)
+	files := platform.DataFiles()
+	defer files.Close()
 
-	if _, err := os.Stat(sourceDir); os.IsNotExist(err) {
+	if _, err := files.Stat(sourceDir); errors.Is(err, fs.ErrNotExist) {
 		return nil, fmt.Errorf("source agent %q not found", sourceName)
+	} else if err != nil {
+		return nil, err
 	}
 
-	if _, err := os.Stat(targetDir); err == nil {
+	if _, err := files.Stat(targetDir); err == nil {
 		return nil, fmt.Errorf("target agent %q already exists", targetName)
+	} else if !errors.Is(err, fs.ErrNotExist) {
+		return nil, err
 	}
 
 	allLayers := platform.MindLayers
@@ -39,44 +45,44 @@ func Fork(sourceName, targetName string, layers []string) (*ForkResult, error) {
 	for _, layer := range allLayers {
 		src := filepath.Join(sourceDir, layer)
 		dst := filepath.Join(targetDir, layer)
-		if _, err := os.Stat(src); os.IsNotExist(err) {
-			if err := os.MkdirAll(dst, 0755); err != nil {
+		if _, err := files.Stat(src); errors.Is(err, fs.ErrNotExist) {
+			if err := files.MkdirAll(dst, 0755); err != nil {
 				return nil, fmt.Errorf("creating %s layer: %w", layer, err)
 			}
 			continue
 		}
-		if err := copyDir(src, dst); err != nil {
+		if err := copyDir(files, src, dst); err != nil {
 			return nil, fmt.Errorf("copying layer %s: %w", layer, err)
 		}
 		result.LayersCopied = append(result.LayersCopied, layer)
 	}
 
 	sourceSoul := filepath.Join(sourceDir, platform.SoulFileName)
-	if _, err := os.Stat(sourceSoul); err == nil {
-		if err := copyFile(sourceSoul, filepath.Join(targetDir, platform.SoulFileName)); err != nil {
+	if _, err := files.Stat(sourceSoul); err == nil {
+		if err := copyFile(files, sourceSoul, filepath.Join(targetDir, platform.SoulFileName)); err != nil {
 			return nil, fmt.Errorf("copying %s: %w", platform.SoulFileName, err)
 		}
 	}
 
 	sourceManifest := filepath.Join(sourceDir, "agent.yaml")
-	if _, err := os.Stat(sourceManifest); err == nil {
-		data, err := os.ReadFile(sourceManifest)
+	if _, err := files.Stat(sourceManifest); err == nil {
+		data, err := files.ReadFile(sourceManifest)
 		if err != nil {
 			return nil, fmt.Errorf("reading %s: %w", sourceManifest, err)
 		}
 		data = rewriteAgentName(data, targetName)
-		if err := os.WriteFile(filepath.Join(targetDir, "agent.yaml"), data, 0644); err != nil {
+		if err := files.WriteFile(filepath.Join(targetDir, "agent.yaml"), data, 0644); err != nil {
 			return nil, fmt.Errorf("writing the forked agent.yaml: %w", err)
 		}
 	}
 
 	sourceEntry := filepath.Join(sourceDir, "AGENTS.md")
-	if _, err := os.Stat(sourceEntry); err == nil {
-		data, err := os.ReadFile(sourceEntry)
+	if _, err := files.Stat(sourceEntry); err == nil {
+		data, err := files.ReadFile(sourceEntry)
 		if err != nil {
 			return nil, fmt.Errorf("reading %s: %w", sourceEntry, err)
 		}
-		if err := os.WriteFile(filepath.Join(targetDir, "AGENTS.md"), data, 0644); err != nil {
+		if err := files.WriteFile(filepath.Join(targetDir, "AGENTS.md"), data, 0644); err != nil {
 			return nil, fmt.Errorf("writing the forked AGENTS.md: %w", err)
 		}
 	}
@@ -114,38 +120,37 @@ type ForkResult struct {
 	LayersCopied []string
 }
 
-func copyDir(src, dst string) error {
-	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+// value: src's tree copied to dst through files, folder by folder, so a
+// link on either side is refused as files refuses it.
+func copyDir(files platform.Files, src, dst string) error {
+	if err := files.MkdirAll(dst, 0755); err != nil {
+		return err
+	}
+	entries, err := files.ReadDir(src)
+	if err != nil {
+		return err
+	}
+	for _, e := range entries {
+		from, to := filepath.Join(src, e.Name()), filepath.Join(dst, e.Name())
+		if e.IsDir() {
+			err = copyDir(files, from, to)
+		} else {
+			err = copyFile(files, from, to)
+		}
 		if err != nil {
 			return err
 		}
-
-		rel, _ := filepath.Rel(src, path)
-		target := filepath.Join(dst, rel)
-
-		if info.IsDir() {
-			return os.MkdirAll(target, info.Mode())
-		}
-		return copyFile(path, target)
-	})
+	}
+	return nil
 }
 
-func copyFile(src, dst string) error {
-	in, err := os.Open(src)
+func copyFile(files platform.Files, src, dst string) error {
+	data, err := files.ReadFile(src)
 	if err != nil {
 		return err
 	}
-	defer in.Close()
-
-	if err := os.MkdirAll(filepath.Dir(dst), 0755); err != nil {
+	if err := files.MkdirAll(filepath.Dir(dst), 0755); err != nil {
 		return err
 	}
-	out, err := os.Create(dst)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-
-	_, err = io.Copy(out, in)
-	return err
+	return files.WriteFile(dst, data, 0644)
 }

@@ -5,7 +5,7 @@ package agent
 import (
 	"errors"
 	"fmt"
-	"os"
+	"io/fs"
 	"time"
 
 	"spwn.sh/packages/activity"
@@ -13,6 +13,7 @@ import (
 	"spwn.sh/packages/agent/internal/journal"
 	"spwn.sh/packages/agent/internal/mind"
 	"spwn.sh/packages/agent/internal/session"
+	"spwn.sh/packages/platform"
 )
 
 // ErrNotFound is returned when an agent name has no matching on-disk
@@ -42,10 +43,14 @@ type ForkResult = evolution.ForkResult
 // Returns an error if the agent does not exist.
 func DeleteAgent(name string) error {
 	dir := AgentDir(name)
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
+	files := platform.DataFiles()
+	defer files.Close()
+	if _, err := files.Stat(dir); errors.Is(err, fs.ErrNotExist) {
 		return fmt.Errorf("agent %q %w", name, ErrNotFound)
+	} else if err != nil {
+		return err
 	}
-	if err := os.RemoveAll(dir); err != nil {
+	if err := files.RemoveAll(dir); err != nil {
 		return err
 	}
 	activity.Log(activity.Event{

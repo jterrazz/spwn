@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"spwn.sh/packages/platform"
 )
 
 const movedSentence = "spwn/ is the old project layout: its folders now sit at the project's root. Move each one up (mv spwn/agents agents, and the same for skills, tools, hooks, commands, profiles), point knowledge: at its new path, change any .gitignore line naming spwn/, then run again."
@@ -151,6 +153,33 @@ func TestASpwnThatHoldsNoneOfTheOldLayoutIsNotIt(t *testing.T) {
 				t.Errorf("LayoutAt = %v, %v; want the default layout", l.Folders(), err)
 			}
 		})
+	}
+}
+
+func TestARenamedFolderBehindALinkOutOfTheRootIsNotRead(t *testing.T) {
+	root := projectOf(t, map[string]string{
+		"spwn.yaml": "version: 1\nfolders:\n  agents: vendor/agents\n  skills: vendor/skills\nworlds:\n  w:\n    agents: [neo]\n",
+	})
+	outside := t.TempDir()
+	for rel, data := range map[string]string{"agents/neo/agent.yaml": "name: neo\n", "agents/neo/AGENTS.md": "neo\n", "skills/focus.md": "---\nname: focus\n---\nf\n"} {
+		if err := os.MkdirAll(filepath.Dir(filepath.Join(outside, rel)), 0o755); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(outside, rel), []byte(data), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := os.Symlink(outside, filepath.Join(root, "vendor")); err != nil {
+		t.Fatal(err)
+	}
+	p, err := Load(filepath.Join(root, "spwn.yaml"))
+	if err == nil && len(p.Agents) == 1 && p.Agents[0].Exists {
+		t.Errorf("Agents = %+v; want neo not read through vendor, a link out of the root", p.Agents)
+	}
+	tree := platform.Within(root)
+	defer tree.Close()
+	if skills, err := LoadSkills(tree, filepath.Join(root, "vendor", "skills")); err == nil && len(skills) != 0 {
+		t.Errorf("LoadSkills = %+v; want none read through vendor, a link out of the root", skills)
 	}
 }
 

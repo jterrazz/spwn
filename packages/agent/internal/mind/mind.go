@@ -1,8 +1,9 @@
 package mind
 
 import (
+	"errors"
 	"fmt"
-	"os"
+	"io/fs"
 	"path/filepath"
 	"spwn.sh/packages/platform"
 	"strings"
@@ -73,12 +74,16 @@ func AgentDir(name string) string {
 // skill/<name> in agent.yaml now.
 func Init(name string) (string, error) {
 	dir := AgentDir(name)
-	if _, err := os.Stat(dir); err == nil {
+	files := platform.DataFiles()
+	defer files.Close()
+	if _, err := files.Stat(dir); err == nil {
 		return "", fmt.Errorf("agent %q already exists", name)
+	} else if !errors.Is(err, fs.ErrNotExist) {
+		return "", err
 	}
 
 	for _, layer := range platform.MindLayers {
-		if err := os.MkdirAll(filepath.Join(dir, layer), 0755); err != nil {
+		if err := files.MkdirAll(filepath.Join(dir, layer), 0755); err != nil {
 			return "", fmt.Errorf("create %s: %w", layer, err)
 		}
 	}
@@ -107,14 +112,14 @@ You are a Spwn agent - a persistent AI worker living inside an isolated world.
 - Stay within the Laws - they describe what is physically possible
 `
 	soulPath := filepath.Join(dir, platform.SoulFileName)
-	if err := os.WriteFile(soulPath, []byte(soul), 0644); err != nil {
+	if err := files.WriteFile(soulPath, []byte(soul), 0644); err != nil {
 		return "", fmt.Errorf("create soul: %w", err)
 	}
 
-	if err := os.WriteFile(filepath.Join(dir, "agent.yaml"), renderTmpl(defaultAgentYAMLTmpl, name), 0644); err != nil {
+	if err := files.WriteFile(filepath.Join(dir, "agent.yaml"), renderTmpl(defaultAgentYAMLTmpl, name), 0644); err != nil {
 		return "", fmt.Errorf("create agent.yaml: %w", err)
 	}
-	if err := os.WriteFile(filepath.Join(dir, "AGENTS.md"), renderTmpl(defaultAgentMDTmpl, name), 0644); err != nil {
+	if err := files.WriteFile(filepath.Join(dir, "AGENTS.md"), renderTmpl(defaultAgentMDTmpl, name), 0644); err != nil {
 		return "", fmt.Errorf("create AGENTS.md: %w", err)
 	}
 
@@ -124,7 +129,9 @@ You are a Spwn agent - a persistent AI worker living inside an isolated world.
 // Validate checks that a Mind directory exists and has a SOUL.md.
 func Validate(name string) error {
 	dir := AgentDir(name)
-	info, err := os.Stat(dir)
+	files := platform.DataFiles()
+	defer files.Close()
+	info, err := files.Stat(dir)
 	if err != nil {
 		return fmt.Errorf("agent %q not found", name)
 	}
@@ -133,7 +140,7 @@ func Validate(name string) error {
 	}
 
 	soulPath := filepath.Join(dir, platform.SoulFileName)
-	if _, err := os.Stat(soulPath); err != nil {
+	if _, err := files.Stat(soulPath); err != nil {
 		return fmt.Errorf("agent %q is missing %s", name, platform.SoulFileName)
 	}
 	return nil
@@ -142,9 +149,11 @@ func Validate(name string) error {
 // List returns all agents in ~/.spwn/agents/.
 func List() ([]AgentInfo, error) {
 	dir := platform.AgentsDir()
-	entries, err := os.ReadDir(dir)
+	files := platform.DataFiles()
+	defer files.Close()
+	entries, err := files.ReadDir(dir)
 	if err != nil {
-		if os.IsNotExist(err) {
+		if errors.Is(err, fs.ErrNotExist) {
 			return nil, nil
 		}
 		return nil, err

@@ -103,6 +103,40 @@ func TestAnAgentYAMLThatIsAFIFODoesNotBlock(t *testing.T) {
 	}
 }
 
+func TestARenamedAgentsFolderBehindALinkIsNeitherWrittenNorRemovedThrough(t *testing.T) {
+	_, outside := linkedProject(t)
+	root := platform.ProjectRoot()
+	if err := os.MkdirAll(filepath.Join(outside, "agents", "neo"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(outside, "agents", "neo", "SOUL.md"), []byte("outside\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(outside, filepath.Join(root, "vendor")); err != nil {
+		t.Fatal(err)
+	}
+	platform.SetProject(root, platform.Folders{Agents: "vendor/agents", Skills: "skills", Tools: "tools", Hooks: "hooks", Commands: "commands", Profiles: "profiles"})
+	if _, err := InitMind("trinity"); err == nil {
+		t.Error("InitMind wrote through vendor, a link out of the project")
+	}
+	if _, err := Fork("neo", "smith", nil); err == nil {
+		t.Error("Fork read and wrote through vendor, a link out of the project")
+	}
+	if err := ValidateMind("neo"); err == nil {
+		t.Error("ValidateMind read through vendor, a link out of the project")
+	}
+	if agents, err := ListAgents(); err == nil && len(agents) != 0 {
+		t.Errorf("ListAgents read through vendor: %+v", agents)
+	}
+	if err := DeleteAgent("neo"); err == nil {
+		t.Error("DeleteAgent removed through vendor, a link out of the project")
+	}
+	entries, _ := os.ReadDir(filepath.Join(outside, "agents"))
+	if data, _ := os.ReadFile(filepath.Join(outside, "agents", "neo", "SOUL.md")); string(data) != "outside\n" || len(entries) != 1 {
+		t.Errorf("the outside agents folder was touched: %v, %q", entries, data)
+	}
+}
+
 func TestAnAgentInsideTheProjectIsSavedAndLoaded(t *testing.T) {
 	linkedProject(t)
 	if err := SaveManifest("neo", &Manifest{Description: "inside"}); err != nil {

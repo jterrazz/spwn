@@ -13,6 +13,7 @@ type Files interface {
 	Stat(p string) (fs.FileInfo, error)
 	WriteFile(p string, data []byte, perm fs.FileMode) error
 	MkdirAll(p string, perm fs.FileMode) error
+	RemoveAll(p string) error
 	Close() error
 }
 
@@ -40,5 +41,7 @@ func (userFiles) WriteFile(p string, data []byte, perm fs.FileMode) error {
 }
 
 func (userFiles) MkdirAll(p string, perm fs.FileMode) error { return os.MkdirAll(p, perm) }
+
+func (userFiles) RemoveAll(p string) error { return os.RemoveAll(p) }
 
 func (userFiles) Close() error { return nil }

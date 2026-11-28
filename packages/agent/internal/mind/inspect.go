@@ -2,7 +2,6 @@ package mind
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"spwn.sh/packages/platform"
 
@@ -12,7 +11,9 @@ import (
 // Inspect returns detailed information about an agent's Mind.
 func Inspect(name string) (*AgentInfo, error) {
 	dir := AgentDir(name)
-	if _, err := os.Stat(dir); err != nil {
+	files := platform.DataFiles()
+	defer files.Close()
+	if _, err := files.Stat(dir); err != nil {
 		return nil, fmt.Errorf("agent %q not found", name)
 	}
 
@@ -23,7 +24,7 @@ func Inspect(name string) (*AgentInfo, error) {
 	}
 
 	manifestPath := filepath.Join(dir, "agent.yaml")
-	if data, err := os.ReadFile(manifestPath); err == nil {
+	if data, err := files.ReadFile(manifestPath); err == nil {
 		var p struct {
 			Team string `yaml:"team"`
 		}
@@ -34,7 +35,7 @@ func Inspect(name string) (*AgentInfo, error) {
 
 	for _, layer := range platform.MindLayers {
 		layerDir := filepath.Join(dir, layer)
-		entries, err := os.ReadDir(layerDir)
+		entries, err := files.ReadDir(layerDir)
 		if err != nil {
 			info.Layers[layer] = nil
 			continue
