@@ -24,7 +24,7 @@ func TestANameThatClimbsOutOfTheSkillsNamesNoSkill(t *testing.T) {
 	if _, err := skillsOf.Create(t.Context(), root, "focus"); err != nil {
 		t.Fatal(err)
 	}
-	beside := filepath.Join(root, "spwn", "x"+skills.Suffix)
+	beside := filepath.Join(root, "x"+skills.Suffix)
 	if err := os.WriteFile(beside, []byte("---\nname: x\n---\n"), 0o600); err != nil {
 		t.Fatal(err)
 	}

@@ -107,11 +107,11 @@ func (p Projects) declared(root string) error {
 	return nil
 }
 
-// Folders is the folders of a project held as files, as the walk of
-// declared visits them, agents first: spwnYAML is its spwn.yaml, nil when
-// it has none, and paths every slash path it holds; refused as declared
-// refuses the same project on a disk. A fake world takes it, so the layout
-// it tells is the root module's own.
+// value: the folders of a project held as files, as the walk of declared
+// visits them, agents first: spwnYAML is its spwn.yaml, nil when it has
+// none, and paths every slash path it holds; refused as declared refuses
+// the same project on a disk. A fake world takes it, so the layout it
+// tells is the root module's own.
 func Folders(spwnYAML []byte, paths []string) ([]string, error) {
 	l, err := spwnproject.LayoutOfFiles(spwnYAML, paths)
 	if err != nil {
@@ -403,10 +403,10 @@ func render(harness string, input transpile.Input, agent string) ([]project.File
 func (p Projects) Render(_ context.Context, root, agent string) ([]project.File, error) {
 	// invariant: an agent is rendered in the first grouping that holds it;
 	// one that no grouping holds renders nothing.
+	if err := p.declared(root); err != nil {
+		return nil, err
+	}
 	return in(root, func() ([]project.File, error) {
-		if err := p.declared(root); err != nil {
-			return nil, err
-		}
 		return renders(root, agent)
 	})
 }

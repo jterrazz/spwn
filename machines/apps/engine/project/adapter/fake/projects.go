@@ -31,9 +31,9 @@ func Starter() project.File {
 	return project.File{Path: "CLAUDE.md", Data: []byte("# " + project.Starter + "\n"), Mode: 0o644}
 }
 
-// Folders is the folders of a project held as files, agents first, out of
-// its spwn.yaml (nil when it has none) and every path it holds, refused as
-// the real disk refuses them: the real adapter's own reading, handed in.
+// value: the folders of a project held as files, agents first, out of its
+// spwn.yaml (nil when it has none) and every path it holds, refused as the
+// real disk refuses them: the real adapter's own reading, handed in.
 type Folders func(spwnYAML []byte, paths []string) ([]string, error)
 
 func New(folders Folders) *Projects { return Of(&world.World{}, "this-mac", folders) }
@@ -122,12 +122,7 @@ func (p *Projects) agentsOf(example string) []string {
 		return []string{project.Starter}
 	}
 	manifest, _ := fs.ReadFile(files, project.ManifestName)
-	var paths []string
-	_ = fs.WalkDir(files, ".", func(at string, _ fs.DirEntry, err error) error {
-		paths = append(paths, at)
-		return err
-	})
-	folders, err := p.folders(manifest, paths)
+	folders, err := p.folders(manifest, nil)
 	if err != nil {
 		return nil
 	}

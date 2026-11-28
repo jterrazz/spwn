@@ -638,7 +638,7 @@ func Codes() map[fail.Code]Wording {
 			return e.Subject + " is a link: apply never follows one", "remove the link, then station project apply"
 		},
 		projectcalls.OldLayout: func(e *fail.Error) (string, string) {
-			return e.Detail["said"], "then station project plan"
+			return e.Detail["said"], "move what spwn/ holds to the root, then station project plan"
 		},
 		projectcalls.FoldersInvalid: func(e *fail.Error) (string, string) {
 			return e.Detail["said"], "fix folders: in spwn.yaml, then station project plan"

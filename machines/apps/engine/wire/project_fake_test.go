@@ -1,4 +1,4 @@
-package fake_test
+package wire_test
 
 import (
 	"testing"
@@ -9,6 +9,9 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/project/contract/contracttest"
 )
 
-func TestProjects(t *testing.T) {
+// invariant: the fake projects are wired here, to the real adapter's
+// reading of a layout, as the world wires them: no adapter imports
+// another.
+func TestTheFakeProjectsKeepTheContract(t *testing.T) {
 	contracttest.Projects(t, func(t *testing.T) (contract.Projects, string) { return fake.New(manifest.Folders), t.TempDir() })
 }
