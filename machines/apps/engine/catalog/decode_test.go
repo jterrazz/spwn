@@ -148,8 +148,8 @@ func TestAFileASettingWritesStaysInTheHomeAndOutOfStationsOwn(t *testing.T) {
 			refusedFor(t, setting(mode, to), want)
 		}
 	}
-	for mode, to := range map[string]string{"merge": "~/.ssh/x.json", "block": "~/.zshrc"} {
-		refusedFor(t, setting(mode, to), "another part of Machines writes it")
+	for _, c := range [][2]string{{"merge", "~/.ssh/x.json"}, {"block", "~/.zshrc"}, {"block", "~/.SSH/config"}, {"merge", "~/.Ssh/x.json"}} {
+		refusedFor(t, setting(c[0], c[1]), "another part of Machines writes it")
 	}
 	if err := decoded(t, setting("block", "~/.ssh/config.conf")); err == nil || !strings.Contains(err.Error(), "another part of Machines writes it") {
 		t.Errorf("a block into ~/.ssh: %v", err)
