@@ -93,7 +93,8 @@
           "enum": [
             "",
             "file",
-            "block"
+            "block",
+            "merge"
           ],
           "type": "string"
         },

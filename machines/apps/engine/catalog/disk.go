@@ -205,6 +205,8 @@ var StationDisk = Disk{
 		noted(kept("{state}/station/leases.json"), "the reserved ports of its Mac: deleting it changes every URL"),
 		noted(kept("{state}/station/ledger.json"), "what `station machinefile apply` installed and the `~/.zshrc` blocks it wrote, the only ones `apply --remove` takes back, and what the last night's upgrade did: deleting it makes station remove none"),
 		noted(data("{state}/station/ledger.json.lock"), "empty: the lock two applies at once take in turn to change the ledger"),
+		noted(kept("{state}/station/merged.json"), "what each setting of `mode: merge` or `mode: block` wrote into a file of yours: each value's JSON pointer and digest, a block's digest, the file and folders it made; the only values `station settings off` takes back: deleting it makes off take back none"),
+		noted(data("{state}/station/merged.json.lock"), "empty: the lock two settings writing into one file at once take in turn"),
 		noted(data("{state}/station/runs.lock"), "empty: the turn an apply, an upgrade and the night's upgrade take, so one runs at a time"),
 	},
 	Installed: []string{InstallDir + "/" + StationBinary},

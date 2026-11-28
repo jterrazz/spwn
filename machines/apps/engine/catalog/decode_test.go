@@ -101,6 +101,27 @@ func TestANewerSchemaIsRefusedWithUpdateStation(t *testing.T) {
 	refusedFor(t, strings.Replace(gh, "package: station.package/v1\n", "", 1), "names no schema")
 }
 
+func TestAFragmentGoesIntoAFileOfItsKindAndLeavesItsModeAlone(t *testing.T) {
+	setting := func(file string) string {
+		return "package: station.package/v1\nkind: setting\nname: gh\ndescription: d\nmethods:\n    - os: any\n      file: " + file + "\n"
+	}
+	if err := decoded(t, setting("{copy: [{from: a/b.json, to: ~/.b.json}], mode: merge}")); err != nil {
+		t.Errorf("a merge into JSON: %v", err)
+	}
+	if err := decoded(t, setting("{copy: [{from: a/b.conf, to: ~/.b.conf}], mode: block}")); err != nil {
+		t.Errorf("a block into a text file: %v", err)
+	}
+	for file, want := range map[string]string{
+		"{copy: [{from: a/b.conf, to: ~/.b.conf}], mode: merge}":                                  "mode merge writes JSON",
+		"{copy: [{from: a/b.conf, to: ~/.b.json}], mode: merge}":                                  "mode merge writes JSON",
+		"{copy: [{from: a/b.json, to: ~/.b.json}], mode: block}":                                  "takes mode merge",
+		"{copy: [{from: a/b.json, to: ~/.b.json, permissions: 0o600}], mode: merge}":              "its permissions stay yours",
+		"{copy: [{from: a/b.json, to: ~/.b.json}, {from: a/c.json, to: ~/.b.json}], mode: merge}": "is named twice",
+	} {
+		refusedFor(t, setting(file), want)
+	}
+}
+
 func TestAPackageIsJudgedAlone(t *testing.T) {
 	for body, want := range map[string]string{
 		strings.Replace(gh, "name: gh", "name: hub", 1):                                                                `names "hub", its file "gh"`,

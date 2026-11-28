@@ -397,7 +397,8 @@ type SkillMethod struct {
 }
 
 // value: how a file method writes a file: `file`, the whole file (a backup
-// and a diff in the plan), or `block`, station's delimited block in a file
+// and a diff in the plan); `block`, station's delimited block in a text
+// file the owner keeps; `merge`, station's values merged into a JSON file
 // the owner keeps.
 
 type WriteMode string
@@ -405,9 +406,12 @@ type WriteMode string
 const (
 	WriteFile  WriteMode = "file"
 	WriteBlock WriteMode = "block"
+	WriteMerge WriteMode = "merge"
 )
 
-func (WriteMode) Enum() []string { return []string{string(WriteFile), string(WriteBlock)} }
+func (WriteMode) Enum() []string {
+	return []string{string(WriteFile), string(WriteBlock), string(WriteMerge)}
+}
 
 type FileMethod struct {
 	Touch  string    `yaml:"touch,omitempty"`

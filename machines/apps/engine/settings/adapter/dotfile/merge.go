@@ -1,0 +1,187 @@
+package dotfile
+
+import (
+	"cmp"
+	"slices"
+	"strings"
+)
+
+// invariant: a merge writes into the owner's object key by key: a key he
+// does not have is added, an object or an array he has is merged into,
+// an element goes into an array only when no deep-equal one is there, and
+// a value of his is never replaced; a value Machines wrote and he left as
+// it is is Machines' own, written anew when the fragment moved.
+
+type merging struct {
+	old  []entry
+	used []bool
+	now  []entry
+	// value: the pointers of the owner's values the fragment says
+	// otherwise, left as they are.
+	kept []string
+}
+
+func newMerging(old []entry) *merging {
+	return &merging{old: old, used: make([]bool, len(old))}
+}
+
+func (w *merging) take(e entry) bool {
+	for i, o := range w.old {
+		if !w.used[i] && o == e {
+			w.used[i] = true
+			return true
+		}
+	}
+	return false
+}
+
+func (w *merging) carry(e entry) {
+	if w.take(e) {
+		w.now = append(w.now, e)
+	}
+}
+
+func (w *merging) stale() []entry {
+	var out []entry
+	for i, o := range w.old {
+		if !w.used[i] {
+			out = append(out, o)
+		}
+	}
+	return out
+}
+
+func (w *merging) object(have, frag *node, at string) {
+	for _, m := range frag.keys {
+		p := child(at, m.name)
+		i := have.member(m.name)
+		if i < 0 {
+			have.keys = append(have.keys, member{name: m.name, raw: m.raw, val: w.made(m.val, p)})
+			continue
+		}
+		mine := have.keys[i].val
+		switch {
+		case mine.shape == object && m.val.shape == object:
+			w.carry(entry{Pointer: p, Kind: kindObject})
+			w.object(mine, m.val, p)
+		case mine.shape == array && m.val.shape == array:
+			w.carry(entry{Pointer: p, Kind: kindArray})
+			w.array(mine, m.val, p)
+		case mine.equal(m.val):
+			w.carry(entry{Pointer: p, Kind: kindValue, Digest: mine.digest()})
+		case w.take(entry{Pointer: p, Kind: kindValue, Digest: mine.digest()}):
+			have.keys[i].val = m.val.clone()
+			w.now = append(w.now, entry{Pointer: p, Kind: kindValue, Digest: m.val.digest()})
+		default:
+			w.kept = append(w.kept, p)
+		}
+	}
+}
+
+func (w *merging) array(have, frag *node, at string) {
+	for _, e := range frag.items {
+		d := entry{Pointer: at, Kind: kindElement, Digest: e.digest()}
+		if slices.ContainsFunc(have.items, e.equal) {
+			w.carry(d)
+			continue
+		}
+		have.items = append(have.items, e.clone())
+		w.take(d)
+		w.now = append(w.now, d)
+	}
+}
+
+func (w *merging) made(frag *node, at string) *node {
+	switch frag.shape {
+	case object:
+		n := &node{shape: object}
+		w.now = append(w.now, entry{Pointer: at, Kind: kindObject})
+		w.object(n, frag, at)
+		return n
+	case array:
+		n := &node{shape: array}
+		w.now = append(w.now, entry{Pointer: at, Kind: kindArray})
+		w.array(n, frag, at)
+		return n
+	case scalar:
+	}
+	w.now = append(w.now, entry{Pointer: at, Kind: kindValue, Digest: frag.digest()})
+	return frag.clone()
+}
+
+// invariant: taking back removes only what the entries name and the file
+// still holds exactly: a value whose digest is the one written, the first
+// element deep-equal to the one added, then each object or array Machines
+// made, deepest first, once it is empty. A value changed since is left,
+// and its pointer said.
+func takeBack(root *node, entries []entry) (kept []string) {
+	entries = slices.Clone(entries)
+	slices.SortStableFunc(entries, func(a, b entry) int {
+		return cmp.Compare(rank(b), rank(a))
+	})
+	for _, e := range entries {
+		n, parent, i := root.at(e.Pointer)
+		if n == nil {
+			continue
+		}
+		switch e.Kind {
+		case kindValue:
+			if parent == nil {
+				continue
+			}
+			if n.digest() != e.Digest {
+				kept = append(kept, e.Pointer)
+				continue
+			}
+			parent.keys = slices.Delete(parent.keys, i, i+1)
+		case kindElement:
+			if n.shape != array {
+				continue
+			}
+			if j := slices.IndexFunc(n.items, func(it *node) bool { return it.digest() == e.Digest }); j >= 0 {
+				n.items = slices.Delete(n.items, j, j+1)
+			}
+		case kindObject, kindArray:
+			if (n.shape == object) != (e.Kind == kindObject) || len(n.keys)+len(n.items) > 0 || parent == nil {
+				continue
+			}
+			parent.keys = slices.Delete(parent.keys, i, i+1)
+		}
+	}
+	return kept
+}
+
+// value: values and elements first, then the containers, deepest first.
+func rank(e entry) int {
+	if e.Kind == kindValue || e.Kind == kindElement {
+		return 1 << 20
+	}
+	return strings.Count(e.Pointer, "/")
+}
+
+// value: one place a fragment writes: a value at a key, an element of an
+// array, or an empty object or array.
+
+type leaf struct {
+	pointer string
+	element bool
+	val     *node
+}
+
+func leaves(frag *node, at string) []leaf {
+	var out []leaf
+	for _, m := range frag.keys {
+		p := child(at, m.name)
+		switch {
+		case m.val.shape == object && len(m.val.keys) > 0:
+			out = append(out, leaves(m.val, p)...)
+		case m.val.shape == array && len(m.val.items) > 0:
+			for _, it := range m.val.items {
+				out = append(out, leaf{pointer: p, element: true, val: it})
+			}
+		default:
+			out = append(out, leaf{pointer: p, val: m.val})
+		}
+	}
+	return out
+}

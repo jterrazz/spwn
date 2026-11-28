@@ -1,0 +1,42 @@
+description: a merge adds Machines' values beside the owner's keys, and keeps and says a value of his
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro catalog/terminal/fmt.yaml'
+      stdin: |
+          package: station.package/v1
+          kind: setting
+          name: fmt
+          description: 'The formatter values'
+          reversible: true
+          methods:
+              - os: any
+                file:
+                    copy:
+                        - from: zed/.oxfmtrc.json
+                          to: ~/.oxfmtrc.json
+                    mode: merge
+      exit: 0
+    - command: '--version >/dev/null; printf ''{\n  "semi": false,\n  "tabWidth": 2\n}\n'' > .oxfmtrc.json'
+      exit: 0
+    - command: 'settings apply fmt'
+      exit: 0
+      stdout: |
+          ●	fmt
+          ●	~/.oxfmtrc.json	merged
+          ◐	~/.oxfmtrc.json /tabWidth	yours, kept
+    - command: '--version >/dev/null; /bin/cat .oxfmtrc.json'
+      exit: 0
+      stdout: |
+          {
+            "semi": false,
+            "tabWidth": 2,
+            "printWidth": 100,
+            "useTabs": false,
+            "singleQuote": true,
+            "trailingComma": "all",
+            "endOfLine": "lf"
+          }
+    - command: 'settings fmt | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ●	fmt	applied · ~/.oxfmtrc.json

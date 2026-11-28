@@ -78,7 +78,8 @@ type Observation struct {
 	// value: a drift with nothing of the owner's in it: a mode or an owner
 	// of what holds station's effect, the effect itself still exactly
 	// station's, or station's own earlier effect a write that did not land
-	// left: off takes it away.
+	// left, or a fragment in a file of the owner's, whose Undo takes back
+	// only what is still station's: off takes it away.
 	Loose bool
 }
 

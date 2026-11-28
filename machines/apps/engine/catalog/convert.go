@@ -122,7 +122,7 @@ func (m MethodSpec) effect() Effect {
 	case m.File != nil && m.File.Touch != "":
 		return Touch{Path: m.File.Touch}
 	case m.File != nil:
-		return Dotfiles{Files: m.File.Copy, Reload: m.File.Reload}
+		return Dotfiles{Files: m.File.Copy, Reload: m.File.Reload, Mode: m.File.Mode}
 	case m.GitAliases != nil:
 		return *m.GitAliases
 	case m.AuthorizedKeys != nil:

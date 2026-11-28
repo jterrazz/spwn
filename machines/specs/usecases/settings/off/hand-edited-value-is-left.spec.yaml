@@ -1,0 +1,37 @@
+description: off on a merge leaves a value Machines wrote and the owner changed since, and says it
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro catalog/terminal/fmt.yaml'
+      stdin: |
+          package: station.package/v1
+          kind: setting
+          name: fmt
+          description: 'The formatter values'
+          reversible: true
+          methods:
+              - os: any
+                file:
+                    copy:
+                        - from: zed/.oxfmtrc.json
+                          to: ~/.oxfmtrc.json
+                    mode: merge
+      exit: 0
+    - command: '--version >/dev/null; printf ''{\n  "semi": false\n}\n'' > .oxfmtrc.json'
+      exit: 0
+    - command: 'settings apply fmt >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/sed ''s/"printWidth": 100/"printWidth": 80/'' .oxfmtrc.json > edited && /bin/mv edited .oxfmtrc.json'
+      exit: 0
+    - command: 'settings off fmt --yes'
+      exit: 0
+      stdout: |
+          ●	fmt
+          ●	~/.oxfmtrc.json	taken back
+          ◐	~/.oxfmtrc.json /printWidth	yours, kept
+    - command: '--version >/dev/null; /bin/cat .oxfmtrc.json'
+      exit: 0
+      stdout: |
+          {
+            "semi": false,
+            "printWidth": 80
+          }

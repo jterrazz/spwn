@@ -1,0 +1,34 @@
+description: off on a merge takes back only Machines' values and gives the owner's file back byte for byte
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro catalog/terminal/fmt.yaml'
+      stdin: |
+          package: station.package/v1
+          kind: setting
+          name: fmt
+          description: 'The formatter values'
+          reversible: true
+          methods:
+              - os: any
+                file:
+                    copy:
+                        - from: zed/.oxfmtrc.json
+                          to: ~/.oxfmtrc.json
+                    mode: merge
+      exit: 0
+    - command: '--version >/dev/null; printf ''{\n  "semi": false,\n  "ignore": [\n    "dist"\n  ]\n}\n'' > .oxfmtrc.json; /bin/cp .oxfmtrc.json mine'
+      exit: 0
+    - command: 'settings apply fmt'
+      exit: 0
+      stdout: |
+          ●	fmt	~/.oxfmtrc.json: merged
+    - command: 'settings off fmt --yes'
+      exit: 0
+      stdout: |
+          ●	fmt	~/.oxfmtrc.json: taken back
+    - command: '--version >/dev/null; /usr/bin/cmp .oxfmtrc.json mine && echo same'
+      exit: 0
+      stdout: |
+          same
+      files:
+          .local/state/station/merged.json: absent

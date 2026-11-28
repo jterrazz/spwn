@@ -1,0 +1,34 @@
+description: a file that is not strict JSON is refused with a sentence naming it, and never rewritten
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro catalog/terminal/fmt.yaml'
+      stdin: |
+          package: station.package/v1
+          kind: setting
+          name: fmt
+          description: 'The formatter values'
+          reversible: true
+          methods:
+              - os: any
+                file:
+                    copy:
+                        - from: zed/.oxfmtrc.json
+                          to: ~/.oxfmtrc.json
+                    mode: merge
+      exit: 0
+    - command: '--version >/dev/null; printf ''{\n  // mine\n  "semi": false,\n}\n'' > .oxfmtrc.json'
+      exit: 0
+    - command: 'settings apply fmt'
+      exit: 1
+      stdout: |
+          ✗	fmt	failed: ~/.oxfmtrc.json is not strict JSON (a comment, a trailing comma, a key twice): Machines writes nothing into it
+      stderr: |
+          Error: 1 of 1 settings failed
+          Hint: re-run it: station settings apply fmt
+    - command: '--version >/dev/null; /bin/cat .oxfmtrc.json'
+      exit: 0
+      stdout: |
+          {
+            // mine
+            "semi": false,
+          }

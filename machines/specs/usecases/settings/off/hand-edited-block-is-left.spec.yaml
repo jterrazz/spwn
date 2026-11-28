@@ -1,0 +1,39 @@
+description: a block in a text file is written once, and off leaves it and says it once the owner edited it
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro catalog/terminal/mux.yaml'
+      stdin: |
+          package: station.package/v1
+          kind: setting
+          name: mux
+          description: 'The tmux lines'
+          reversible: true
+          methods:
+              - os: any
+                file:
+                    copy:
+                        - from: tmux/tmux.conf
+                          to: ~/.config/mux.conf
+                    mode: block
+      exit: 0
+    - command: '--version >/dev/null; /bin/mkdir -p .config; printf ''set -g base-index 1\n'' > .config/mux.conf'
+      exit: 0
+    - command: 'settings apply mux'
+      exit: 0
+      stdout: |
+          ●	mux	~/.config/mux.conf [station:mux]: written
+    - command: 'settings apply mux'
+      exit: 0
+      stdout: |
+          ●	mux	~/.config/mux.conf [station:mux]: as Machines wrote it: nothing written
+    - command: '--version >/dev/null; /usr/bin/sed ''s/^# <<< station:mux <<<$/# mine\n&/'' .config/mux.conf > edited && /bin/mv edited .config/mux.conf'
+      exit: 0
+    - command: 'settings off mux --yes'
+      exit: 0
+      stdout: |
+          ●	mux	~/.config/mux.conf [station:mux]: yours, kept
+    - command: '--version >/dev/null; /usr/bin/head -1 .config/mux.conf; /usr/bin/grep -c ''station:mux'' .config/mux.conf'
+      exit: 0
+      stdout: |
+          set -g base-index 1
+          2

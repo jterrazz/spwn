@@ -1,0 +1,38 @@
+description: a merge applied again over its own values writes nothing, the file is the same file
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro catalog/terminal/fmt.yaml'
+      stdin: |
+          package: station.package/v1
+          kind: setting
+          name: fmt
+          description: 'The formatter values'
+          reversible: true
+          methods:
+              - os: any
+                file:
+                    copy:
+                        - from: zed/.oxfmtrc.json
+                          to: ~/.oxfmtrc.json
+                    mode: merge
+      exit: 0
+    - command: '--version >/dev/null; printf ''{\n  "semi": false\n}\n'' > .oxfmtrc.json'
+      exit: 0
+    - command: 'settings apply fmt'
+      exit: 0
+      stdout: |
+          ●	fmt	~/.oxfmtrc.json: merged
+    - command: '--version >/dev/null; /bin/ls -i .oxfmtrc.json > before'
+      exit: 0
+    - command: 'settings apply fmt'
+      exit: 0
+      stdout: |
+          ●	fmt	~/.oxfmtrc.json: as Machines wrote it: nothing written
+    - command: '--version >/dev/null; /bin/ls -i .oxfmtrc.json | /usr/bin/cmp - before && echo same'
+      exit: 0
+      stdout: |
+          same
+    - command: 'settings fmt | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ●	fmt	applied · ~/.oxfmtrc.json

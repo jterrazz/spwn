@@ -821,7 +821,7 @@ export type CatalogDisk = {
 
 export type CatalogFileMethod = {
     Copy: CatalogCopy[] | null;
-    Mode: '' | 'file' | 'block';
+    Mode: '' | 'file' | 'block' | 'merge';
     Reload: string[] | null;
     Touch: string;
 };

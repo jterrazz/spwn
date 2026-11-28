@@ -7,6 +7,7 @@ The application configs `station` puts on a machine are embedded in the binary, 
 | The files          | What is embedded and which setting installs it |
 | The shell block    | What `station init` writes into `~/.zshrc`     |
 | Package blocks     | The block each package may add beside it       |
+| Fragments          | A block or JSON values in a file you keep      |
 | Removing the block | How to take them out by hand                   |
 
 ## The files
@@ -61,6 +62,28 @@ An app's blocks are written by `station machinefile apply` once the app is there
 - **Removal.** A block goes with its package. A block apply wrote for an app this Machinefile installed and lists no longer is extra: a bare apply keeps it, as it keeps the app, and `apply --remove` takes it back only with the app's own removal, once the app is taken back or already gone, and only while it is still what apply last wrote. An app that stays keeps its block: one adopted or yours, one another Machinefile installed, one skipped on this system, one whose removal is judged again next run (required, held, unread, failed); one let go of as yours (Machines cannot uninstall it, or it is there another way since) leaves its block to you too, and so does a block you edited since Machines wrote it (`edited by hand since station wrote it: kept, and yours`), which `apply --remove` lets go of while it keeps it in the file; one you deleted already reads `deleted by hand: already gone`, and its record goes. A block the ledger does not hold is never Machines' to take. A setting's block goes when the setting is turned off.
 
 `station machinefile plan --diff` shows each block's diff, and each file a setting writes, as apply would change it: the file's lines first (`-`), then what apply writes (`+`).
+
+## Fragments
+
+A setting's [`file`](catalog.md#methods) method writes a whole file by default; with `mode: block` or `mode: merge` it writes only a fragment into a file that stays yours, and `station settings off` takes back only that fragment. The package is refused at decode when it names `permissions` (the file's mode stays yours), one file twice, a merge from or into a file that is not `.json`, or a block into a `.json` file.
+
+### What is written
+
+- **A block** (`mode: block`) is the text of the embedded file between the two marker lines `# >>> station:<setting> >>>` and `# <<< station:<setting> <<<`, placed as a [package block](#package-blocks) is: after the last station block, else at the end. The markers open with `#`, so a block goes into a file whose comments do; a fragment holding a marker line of its own is refused.
+- **A merge** (`mode: merge`) reads the embedded file and yours as JSON objects and merges them. Into an object, a key you lack is added and a key both hold is merged again when both values are objects, or arrays; into an array, an element is appended only when no element deep-equal to it is there. A value of yours that is not Machines' (another scalar, another type) is never replaced: apply leaves it and says `yours, kept` for its JSON pointer, and the setting still reads applied, since apply has nothing left to write. A value Machines wrote that you change since reads `changed since`, and apply leaves it too.
+
+### What is kept of your file
+
+- **Strict JSON only.** A file with a comment, a trailing comma, a key twice, two values or no object at its top is refused, naming it, and never rewritten; so is a file past 1 MiB, a fragment past 256 KiB and either nested deeper than 32. A block is refused in a file that is not UTF-8 text, and a damaged block (a start with no end, the id twice) is left as it is.
+- **Preserved**: the order of your keys (Machines' new keys come after them, in the fragment's order), each key's and each value's own spelling (escapes, `1.0` against `1`), the indent of the file's first indented line (two spaces when there is none) and whether it ends with a newline. A file whose bytes would not change is not written at all.
+- **Not preserved**: any other whitespace. A merge writes the file in `JSON.stringify` layout, one key or element per line, `{}` and `[]` when empty, so a compact or hand-aligned file is laid out again on its first write; a file already in that layout comes back byte for byte.
+- **The write** is atomic, as for a package block: beside the file, through the link to the file it names, then renamed over it with the file's own mode and owner; a file Machines makes is 0600, with the folders it lacks. Two settings writing at once take the lock `~/.local/state/station/merged.json.lock` in turn.
+
+### The record and off
+
+Each fragment apply writes is recorded in `~/.local/state/station/merged.json`, per setting and file: each value's JSON pointer and the digest of its canonical form (an element's under its array's pointer), a block's digest, and the file and folders Machines made. Apply judges against that record: a value it wrote that the fragment now holds otherwise is written anew, and one the fragment dropped is taken back while it is unchanged.
+
+`station settings off` removes a value only while its digest is still the recorded one, so a value you changed by hand is left and said (`yours, kept`); an object or array Machines made goes only once empty, and a file and the folders Machines made go only when nothing is left in them. With nothing edited, off gives back your file byte for byte. An element you edited cannot be told from one you deleted, so it is left without a word. With no record (`merged.json` deleted), off takes back nothing.
 
 ## Removing the block
 

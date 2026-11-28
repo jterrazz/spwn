@@ -35,8 +35,15 @@ func (m *memory) WriteFile(p string, b []byte, _ fs.FileMode) error {
 	return nil
 }
 
-func (*memory) MkdirAll(string, fs.FileMode) error { return nil }
-func (*memory) Chmod(string, fs.FileMode) error    { return nil }
+func (m *memory) Replace(p string, b []byte, perm fs.FileMode) error { return m.WriteFile(p, b, perm) }
+
+func (*memory) MkdirAll(string, fs.FileMode) error    { return nil }
+func (*memory) Chmod(string, fs.FileMode) error       { return nil }
+func (*memory) ReadDir(string) ([]fs.DirEntry, error) { return nil, nil }
+func (*memory) Lock(string) (func(), error)           { return func() {}, nil }
+func (*memory) Readlink(p string) (string, error) {
+	return "", &fs.PathError{Op: "readlink", Path: p, Err: fs.ErrInvalid}
+}
 
 func (m *memory) Remove(p string) error {
 	if _, ok := m.files[p]; !ok {

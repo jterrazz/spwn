@@ -57,6 +57,14 @@ type Touch struct{ Path string }
 type Dotfiles struct {
 	Files  []Copy
 	Reload []string
+	// value: how each file is written; empty is the whole file.
+	Mode WriteMode
+}
+
+func (d Dotfiles) Fragment() bool {
+	// value: the files are the owner's, station writes a fragment into
+	// each (a block, merged values), so another app reads what it wrote.
+	return d.Mode == WriteBlock || d.Mode == WriteMerge
 }
 
 type Copy struct {

@@ -82,7 +82,7 @@ func settingAppliers(m machine) []settingscontract.Applier {
 		touch.New(m.sys.FS, m.sys.Env.Home()),
 		gitaliases.New(m.sys.FS, m.sys.Env.Home()),
 		zshblock.New(m.zshrc(), zshblock.Options{Home: m.sys.Env.Home(), OS: machineOf(m.profile).System.OS, Arch: machineOf(m.profile).System.Arch}),
-		dotfile.New(m.sys.FS, m.sys.Run, dotfile.Options{Home: m.sys.Env.Home(), Ours: files}),
+		dotfile.New(lockable{m.sys.FS}, m.sys.Run, dotfile.Options{Home: m.sys.Env.Home(), Ours: files, Record: filepath.Join(m.paths.State, "merged.json")}),
 		neversleeps.New(m.stores.neverSleeps()),
 	}
 	// invariant: a world's files are the run's own: none is given away.

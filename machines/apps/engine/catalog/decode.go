@@ -478,6 +478,8 @@ func (m MethodSpec) checkManager() string {
 		return "apt names its packages"
 	case m.File != nil && m.File.Mode != "" && !known(m.File.Mode):
 		return fmt.Sprintf("file's mode %q is none of %s", m.File.Mode, strings.Join(m.File.Mode.Enum(), ", "))
+	case m.File != nil && m.File.check() != "":
+		return m.File.check()
 	case m.MacOSDefaults != nil:
 		return m.MacOSDefaults.check(m.Selector)
 	case m.AuthorizedKeys != nil && !shellID.MatchString(m.AuthorizedKeys.Block):
@@ -759,6 +761,31 @@ func references(v reflect.Value, options []Option) string {
 			}
 		}
 	default:
+	}
+	return ""
+}
+
+// invariant: a fragment's file is the owner's: its mode stays his, one
+// file takes one fragment of a package, a merge goes into JSON alone and
+// a block, whose markers open with `#`, never into JSON.
+func (f FileMethod) check() string {
+	if f.Mode != WriteBlock && f.Mode != WriteMerge {
+		return ""
+	}
+	seen := map[string]bool{}
+	for _, c := range f.Copy {
+		intoJSON := strings.HasSuffix(c.To, ".json")
+		switch {
+		case c.Mode != 0:
+			return fmt.Sprintf("file %s is yours in mode %s: its permissions stay yours", c.To, f.Mode)
+		case seen[c.To]:
+			return fmt.Sprintf("file %s takes one fragment of a package, and is named twice", c.To)
+		case f.Mode == WriteMerge && (!intoJSON || !strings.HasSuffix(c.From, ".json")):
+			return fmt.Sprintf("mode merge writes JSON: %s from %s is not a .json file into a .json file", c.To, c.From)
+		case f.Mode == WriteBlock && intoJSON:
+			return fmt.Sprintf("JSON has no comment to mark a block: %s takes mode merge", c.To)
+		}
+		seen[c.To] = true
 	}
 	return ""
 }
