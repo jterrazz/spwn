@@ -16,7 +16,14 @@ The overlapping dots: three dots one behind the other, shrinking away from the b
 
 ## The drawn sizes
 
-`sizes/spwn-icon-<px>.svg` is the whole icon, tile included, at 16, 32, 64, 128, 256, 512 and 1024 px. The 32 and 16 px ones are fitted by hand: their dots overlap less and land on whole pixels, so each crescent stays at least 2 px thick, where a scaled-down drawing turns to mush. The drawing and its numbers come from the brand's logo work of 2026-11-25.
+`sizes/spwn-icon-<px>.svg` is the whole icon, tile included, at 16, 32, 64, 128, 256, 512 and 1024 px: the document's flat `#222226` tile and its three dots. A pre-masked `.icns` picture carries its own tile, which is not full-bleed: it is painted at 824 of every 1024 px of the canvas (100 to 924), the one convention of this folder, and the dots are the document's placement scaled by 824/1024 about the canvas centre.
+
+The 32 and 16 px ones are fitted by hand to whole pixels inside that tile (the tile itself is 3 to 29 and 1 to 15), so every dot edge lands on a pixel boundary and each crescent stays at least 2 px thick, where a scaled-down drawing turns to mush. `[cx, cy, r]`, ring 1 px:
+
+| px  | front               | middle        | back               |
+| --- | ------------------- | ------------- | ------------------ |
+| 32  | `[13.5, 18.5, 5.5]` | `[19, 15, 4]` | `[22, 11, 3]`      |
+| 16  | `[6, 9, 3]`         | `[10, 7, 2]`  | `[11.5, 3.5, 1.5]` |
 
 ## How it ships
 
