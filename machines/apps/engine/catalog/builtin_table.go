@@ -3733,6 +3733,24 @@ func builtinCatalog() (Catalog, error) {
 							Token: "betterdisplay"}}},
 				Bundle: "BetterDisplay"},
 			{
+				Name:        "font-jetbrains-mono",
+				Kind:        "app",
+				AppKind:     "app",
+				Description: "JetBrains Mono, the monospaced typeface for code",
+				Category:    "System Utilities",
+				Installs: []LivesOn{
+					{
+						Kinds: []MachineKind{
+							"mac"},
+						Install: CaskInstall{
+							Token: "font-jetbrains-mono"}},
+					{
+						Kinds: []MachineKind{
+							"linux"},
+						Install: AptInstall{
+							Packages: []string{
+								"fonts-jetbrains-mono"}}}}},
+			{
 				Name:        "linux-kernel",
 				Kind:        "app",
 				AppKind:     "app",
@@ -8545,6 +8563,30 @@ func builtinCatalog() (Catalog, error) {
 							Cask: "betterdisplay"}}},
 				Folder: "system-utilities",
 				File:   "packages/system-utilities/betterdisplay.yaml",
+				Origin: "built-in"},
+			{
+				Package: Package{
+					Package:     "station.package/v1",
+					Kind:        "app",
+					Name:        "font-jetbrains-mono",
+					Description: "JetBrains Mono, the monospaced typeface for code",
+					Methods: []MethodSpec{
+						{
+							Selector: Selector{
+								OS: "macos",
+								Machine: Roles{
+									"computer"}},
+							Cask: "font-jetbrains-mono"},
+						{
+							Selector: Selector{
+								Family: "debian"},
+							Needs: []Need{
+								"sudo"},
+							Apt: &AptMethod{
+								Packages: []string{
+									"fonts-jetbrains-mono"}}}}},
+				Folder: "system-utilities",
+				File:   "packages/system-utilities/font-jetbrains-mono.yaml",
 				Origin: "built-in"},
 			{
 				Package: Package{

@@ -21,7 +21,7 @@ runs:
             {warn ◐} {bold ~/.tart is misplaced}   station disk move ~/.tart
             3 more: station overview --all
           {bold Activity}    memory 12.4 of 16 GB · 388 GB free
-          {bold Apps}        {good ●} 7 ok · {warn ◐} 2 updates · {muted ○} 105 not installed
+          {bold Apps}        {good ●} 7 ok · {warn ◐} 2 updates · {muted ○} 106 not installed
           {bold Settings}    set by Machines · {muted ○} 0 of 17 · checked · {good ●} 8 of 9
           {bold Disk}        {warn ◐} 388 GB free · 34.8 GB can rebuild · {warn ◐} 1 misplaced
           {bold Ports}       Public 0 · Private 2
@@ -37,12 +37,12 @@ runs:
           scrollback
       exit: 0
       stdout: |
-          This Mac · 114 apps for this Mac · 2 updates · 105 not installed
+          This Mac · 115 apps for this Mac · 2 updates · 106 not installed
 
           Updates
             ◐ node  22.11.0 → 24.11.0  mise  update available  → station apps update node
             ◐ gh    2.97.0 → 2.98.0    brew  update available  → station apps update gh
-          Not installed  ○ 105 · cocoapods, homebrew, mas, pnpm, skills, uv, bun, java, …
+          Not installed  ○ 106 · cocoapods, homebrew, mas, pnpm, skills, uv, bun, java, …
           OK             ● 7 · github-release, mise, go, ghostty, bat, jq, lazygit
           Not for this machine  14 apps live on other machines
 

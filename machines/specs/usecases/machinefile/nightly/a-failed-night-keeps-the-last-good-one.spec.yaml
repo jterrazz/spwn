@@ -32,7 +32,7 @@ runs:
       stdout: |
           ✗	the night's upgrade of macbook-pro failed: the catalog has no package no-such-app (~/.config/station/machinefiles/macbook-pro.machine.yaml:4)	station machinefile upgrade --machinefile macbook-pro
           ◐	node 25.1.0 available: change '22' to '25'	~/.config/station/machinefiles/macbook-pro.machine.yaml
-          	Apps	● 10 ok · ○ 104 not installed
+          	Apps	● 10 ok · ○ 105 not installed
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.night | del(.at, .last.at)'' world.json'
       exit: 0
       stdout: |

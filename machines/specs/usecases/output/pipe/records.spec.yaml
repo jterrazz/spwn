@@ -9,7 +9,7 @@ runs:
           # Updates	2 ◐
           ◐	node	22.11.0	mise	update available · station apps update node
           ◐	gh	2.97.0	brew	update available · station apps update gh
-          # Not installed	105 ○
+          # Not installed	106 ○
     - command: 'machines | /usr/bin/cut -f2'
       exit: 0
       stdout: |

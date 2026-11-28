@@ -10,6 +10,7 @@ difftastic difft
 dust dust
 eza eza
 fd fdfind
+font-jetbrains-mono
 gemini gemini
 gh gh
 helm helm

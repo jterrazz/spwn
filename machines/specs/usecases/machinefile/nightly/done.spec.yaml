@@ -27,7 +27,7 @@ runs:
           ◐	~/.tart is misplaced	station disk move ~/.tart
           	3 more: station overview --all
           	Activity	memory 12.4 of 16 GB · 388 GB free
-          	Apps	● 8 ok · ◐ 2 updates · ○ 104 not installed
+          	Apps	● 8 ok · ◐ 2 updates · ○ 105 not installed
           	Settings	set by Machines · ○ 0 of 17 · checked · ● 8 of 9
           	Disk	◐ 388 GB free · 34.8 GB can rebuild · ◐ 1 misplaced
           	Ports	Public 0 · Private 2
@@ -48,7 +48,7 @@ runs:
           ◐	com.bjango.istatmenus.installer is left over	sudo launchctl bootout system/com.bjango.istatmenus.installer && sudo rm /Library/LaunchDaemons/com.bjango.istatmenus.installer.plist
           	2 more: station overview --all
           	Activity	memory 12.4 of 16 GB · 388 GB free
-          	Apps	● 10 ok · ○ 104 not installed · 2 moved last night
+          	Apps	● 10 ok · ○ 105 not installed · 2 moved last night
           	Settings	set by Machines · ○ 0 of 17 · checked · ● 8 of 9
           	Disk	◐ 388 GB free · 34.8 GB can rebuild · ◐ 1 misplaced
           	Ports	Public 0 · Private 2
