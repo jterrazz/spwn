@@ -698,7 +698,7 @@ func laidOut(v map[string]any, layout int) (text string, stringify bool) {
 		return string(out), false
 	case 4:
 		out, _ := json.MarshalIndent(v, "", "  ")
-		return strings.ReplaceAll(string(out)+"\n", "\n", "\r\n"), false
+		return strings.ReplaceAll(string(out)+"\n", "\n", "\r\n"), true
 	}
 	out, _ := json.MarshalIndent(v, "", "   ")
 	return strings.ReplaceAll(string(out), `": `, `" : `) + "\n", false

@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"slices"
 	"strconv"
@@ -146,15 +147,19 @@ func (n *node) clone() *node {
 	return c
 }
 
+// value: what a file's layout keeps of the file: its indent, and its line
+// end, `\n` or `\r\n`.
+type layout struct{ indent, eol string }
+
 // value: the file's text: JSON.stringify's layout under the file's own
-// indent, every key and scalar by its bytes.
-func (n *node) encode(indent string) []byte {
+// indent and line end, every key and scalar by its bytes.
+func (n *node) encode(l layout) []byte {
 	var b bytes.Buffer
-	n.write(&b, indent, 0)
+	n.write(&b, l, 0)
 	return b.Bytes()
 }
 
-func (n *node) write(b *bytes.Buffer, indent string, depth int) {
+func (n *node) write(b *bytes.Buffer, indent layout, depth int) {
 	switch {
 	case n.shape == scalar:
 		b.Write(n.raw)
@@ -190,10 +195,10 @@ func (n *node) write(b *bytes.Buffer, indent string, depth int) {
 
 // value: a line break, then the file's indent once per level: JSON's own
 // nesting, which is no layout of Machines' output.
-func newline(b *bytes.Buffer, indent string, depth int) {
-	b.WriteByte('\n')
+func newline(b *bytes.Buffer, l layout, depth int) {
+	b.WriteString(l.eol)
 	for range depth {
-		b.WriteString(indent)
+		b.WriteString(l.indent)
 	}
 }
 
@@ -251,14 +256,25 @@ func digestOf(data []byte) string {
 func (n *node) equal(o *node) bool { return bytes.Equal(n.canonical(), o.canonical()) }
 
 // value: the indent of the file's first indented line, two spaces for a
-// file with none.
-func indentOf(data []byte) string {
+// file with none, and its line end: `\r\n` when every line ends so, `\n`
+// otherwise. A file that mixes both is refused: its line ends cannot be
+// kept, and are never converted.
+func layoutOf(to string, data []byte) (layout, error) {
+	l := layout{indent: "  ", eol: "\n"}
+	lines, crlf := bytes.Count(data, []byte("\n")), bytes.Count(data, []byte("\r\n"))
+	switch {
+	case crlf > 0 && crlf < lines:
+		return layout{}, fmt.Errorf("%s mixes CRLF and LF line ends: Machines writes nothing into it", to)
+	case crlf > 0:
+		l.eol = "\r\n"
+	}
 	for _, line := range bytes.Split(data, []byte("\n"))[1:] {
 		if ws := line[:len(line)-len(bytes.TrimLeft(line, " \t"))]; len(ws) > 0 {
-			return string(ws)
+			l.indent = string(ws)
+			break
 		}
 	}
-	return "  "
+	return l, nil
 }
 
 // value: RFC 6901's pointer of a key under a parent's.

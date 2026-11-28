@@ -2,6 +2,8 @@ package catalog
 
 import (
 	"fmt"
+	"path"
+	"slices"
 	"strings"
 )
 
@@ -37,7 +39,27 @@ func Confined(to string, mode WriteMode) string {
 	if at := within(to, othersOwn); at != "" && (mode == WriteBlock || mode == WriteMerge) {
 		return fmt.Sprintf("file %s is in %s: another part of Machines writes it, so no fragment goes into it", to, at)
 	}
+	if mode == WriteBlock && !hashCommented(to) {
+		names := make([]string, 0, len(hashNames))
+		for _, n := range hashNames {
+			names = append(names, strings.TrimPrefix(n, "/"))
+		}
+		return fmt.Sprintf("file %s is no file known to take `#` comments, which mark a block: mode block writes into a %s file, or one named %s", to, strings.Join(hashExtensions, ", "), strings.Join(names, ", "))
+	}
 	return ""
+}
+
+// value: the files whose format reads a line opening with `#` as a
+// comment, by extension, then by name (each after its `/`): those alone
+// take a block, whose markers are such lines.
+var (
+	hashExtensions = []string{".bash", ".cfg", ".conf", ".env", ".fish", ".ini", ".sh", ".toml", ".yaml", ".yml", ".zsh"}
+	hashNames      = []string{"/.bash_profile", "/.bashrc", "/.curlrc", "/.editorconfig", "/.gitconfig", "/.gitignore", "/.inputrc", "/.npmrc", "/.profile", "/.wgetrc", "/.zprofile", "/.zshenv", "/config"}
+)
+
+func hashCommented(to string) bool {
+	name := strings.ToLower(path.Base(to))
+	return slices.Contains(hashNames, "/"+name) || slices.Contains(hashExtensions, path.Ext(name))
 }
 
 func within(to string, kept []string) string {

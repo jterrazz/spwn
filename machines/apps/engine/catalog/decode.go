@@ -788,8 +788,6 @@ func (f FileMethod) check() string {
 			return fmt.Sprintf("file %s takes one fragment of a package, and is named twice", c.To)
 		case f.Mode == WriteMerge && (!intoJSON || !strings.HasSuffix(c.From, ".json")):
 			return fmt.Sprintf("mode merge writes JSON: %s from %s is not a .json file into a .json file", c.To, c.From)
-		case f.Mode == WriteBlock && intoJSON:
-			return fmt.Sprintf("JSON has no comment to mark a block: %s takes mode merge", c.To)
 		}
 		seen[c.To] = true
 	}

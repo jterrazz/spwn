@@ -55,6 +55,9 @@ func parseTarget(to string, data []byte) (*node, error) {
 	if len(data) > maxTarget {
 		return nil, fmt.Errorf("%s is past 1 MiB: Machines merges into no file that large", to)
 	}
+	if _, err := layoutOf(to, data); err != nil {
+		return nil, err
+	}
 	tree, err := parse(data)
 	switch {
 	case err != nil:
@@ -81,12 +84,13 @@ func mergeInto(to string, data []byte, there bool, frag *node, old []entry) (out
 	return encoded(tree, data, there), w, append(w.kept, stale...), nil
 }
 
-// value: the tree in the file's layout: its indent, and its last newline
-// when it had one; a file Machines makes ends with one.
+// value: the tree in the file's layout: its indent and line end, and its
+// last line end when it had one; a file Machines makes ends with one.
 func encoded(tree *node, data []byte, there bool) []byte {
-	out := tree.encode(indentOf(data))
+	l, _ := layoutOf("", data)
+	out := tree.encode(l)
 	if !there || bytes.HasSuffix(data, []byte("\n")) {
-		out = append(out, '\n')
+		out = append(out, l.eol...)
 	}
 	return out
 }
@@ -124,6 +128,12 @@ func (a *Applier) seeMerge(c catalog.Copy, old []entry) (seen, error) {
 				s.there = true
 				material = append(material, l.pointer+"\x00[]"+l.val.digest()+"\x00"...)
 			}
+		case l.val.shape != scalar && len(l.val.keys)+len(l.val.items) == 0 && n.shape == l.val.shape:
+			// invariant: an empty object or array of the fragment is a
+			// container Machines makes; what the owner puts in it is his,
+			// so only its shape is Machines' to read, never his keys.
+			s.there = true
+			material = append(material, l.pointer+"\x00"+string(l.val.canonical())+"\x00"...)
 		default:
 			s.there = true
 			material = append(append(append(material, l.pointer+"\x00"...), n.canonical()...), 0)
@@ -243,6 +253,8 @@ func textOf(to string, data []byte) (string, error) {
 		return "", fmt.Errorf("%s is past 1 MiB: Machines writes no block into a file that large", to)
 	case !utf8.Valid(data) || bytes.IndexByte(data, 0) >= 0:
 		return "", fmt.Errorf("%s is not a text file: Machines writes no block into it", to)
+	case bytes.Contains(data, []byte("\r\n")):
+		return "", fmt.Errorf("%s ends its lines with CRLF: Machines writes no block into it, and never converts them", to)
 	}
 	return string(data), nil
 }

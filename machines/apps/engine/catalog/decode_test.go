@@ -108,13 +108,18 @@ func TestAFragmentGoesIntoAFileOfItsKindAndLeavesItsModeAlone(t *testing.T) {
 	if err := decoded(t, setting("{copy: [{from: a/b.json, to: ~/.b.json}], mode: merge}")); err != nil {
 		t.Errorf("a merge into JSON: %v", err)
 	}
-	if err := decoded(t, setting("{copy: [{from: a/b.conf, to: ~/.b.conf}], mode: block}")); err != nil {
-		t.Errorf("a block into a text file: %v", err)
+	for _, to := range []string{"~/.b.conf", "~/.config/ghostty/config", "~/.gitconfig", "~/.config/starship.TOML"} {
+		if err := decoded(t, setting("{copy: [{from: a/b.conf, to: "+to+"}], mode: block}")); err != nil {
+			t.Errorf("a block into %s, a file whose comments open with #: %v", to, err)
+		}
+	}
+	for _, to := range []string{"~/.b.txt", "~/.vimrc", "~/.config/app/init.lua", "~/notes"} {
+		refusedFor(t, setting("{copy: [{from: a/b.conf, to: "+to+"}], mode: block}"), "is no file known to take `#` comments")
 	}
 	for file, want := range map[string]string{
 		"{copy: [{from: a/b.conf, to: ~/.b.conf}], mode: merge}":                                  "mode merge writes JSON",
 		"{copy: [{from: a/b.conf, to: ~/.b.json}], mode: merge}":                                  "mode merge writes JSON",
-		"{copy: [{from: a/b.json, to: ~/.b.json}], mode: block}":                                  "takes mode merge",
+		"{copy: [{from: a/b.json, to: ~/.b.json}], mode: block}":                                  "is no file known to take `#` comments",
 		"{copy: [{from: a/b.json, to: ~/.b.json, permissions: 0o600}], mode: merge}":              "its permissions stay yours",
 		"{copy: [{from: a/b.json, to: ~/.b.json}, {from: a/c.json, to: ~/.b.json}], mode: merge}": "is named twice",
 	} {

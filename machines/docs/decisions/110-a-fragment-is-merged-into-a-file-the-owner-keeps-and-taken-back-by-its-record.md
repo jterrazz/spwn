@@ -19,7 +19,7 @@ Objects are merged key by key; into an array an element is appended only when no
 
 ### What the encoder keeps
 
-The tree is held in the file's own order with each key's and scalar's raw bytes, and written back in `JSON.stringify` layout with the file's indent unit. A file already in that layout round-trips byte for byte; any other whitespace is not kept. An output equal to the input is not written.
+The tree is held in the file's own order with each key's and scalar's raw bytes, and written back in `JSON.stringify` layout with the file's indent unit and its line end, LF or CRLF. Only a file already in that layout round-trips byte for byte: off gives back the keys, their order, each key's and value's spelling, the indent unit, the line end and the last line end, and any other whitespace is laid out again on the first write. A file that mixes CRLF and LF is refused rather than converted, and so is a CRLF file for a block. An output equal to the input is not written.
 
 ### The record is the adapter's own
 
@@ -33,5 +33,5 @@ No new key: the package's existing `requires` is the guard. A setting in either 
 
 - Deleting `merged.json` makes off take back nothing: Machines' values stay as the owner's.
 - An element of an array the owner edited cannot be told from one he deleted, so off leaves it without a word.
-- A block goes only into a file whose comments open with `#`.
+- A block goes only into a file known to read a `#` line as a comment, by an allow-list of extensions and names held in the catalog's code; a format outside it (Vim's, Lua's) takes no block until the list names it.
 - The guard checks the app is installed, not that the hook's command is on the PATH of the app that runs it.
