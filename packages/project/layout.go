@@ -1,8 +1,13 @@
 package project
 
 import (
+	"errors"
+	"fmt"
+	"io/fs"
 	"path/filepath"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 
 	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project/internal/discovery"
@@ -47,7 +52,7 @@ const LayoutCode = layout.Code
 
 // LayoutAt reads the layout of the project whose root is root from its
 // spwn.yaml, through a root opened at root, before anything else of it
-// is read.
+// is read; a root with no spwn.yaml yet renames no folder.
 func LayoutAt(root string) (Layout, error) {
 	t := platform.Within(root)
 	defer t.Close()
@@ -55,8 +60,48 @@ func LayoutAt(root string) (Layout, error) {
 		return Layout{}, err
 	}
 	m, err := intmanifest.Read(t, filepath.Join(root, discovery.ManifestFileName))
+	if errors.Is(err, fs.ErrNotExist) {
+		return layout.Default(), nil
+	}
 	if err != nil {
 		return Layout{}, err
+	}
+	return layout.New(m.Folders)
+}
+
+// LayoutOfFiles is the layout of a project held as files rather than read
+// from a disk: manifest is its spwn.yaml, nil when it has none, and paths
+// every slash path it holds from its root. It refuses what LayoutAt
+// refuses of the same project on a disk.
+func LayoutOfFiles(manifest []byte, paths []string) (Layout, error) {
+	held := false
+	for _, p := range paths {
+		for _, n := range oldNames {
+			if p == "spwn/"+n || strings.HasPrefix(p, "spwn/"+n+"/") {
+				held = true
+			}
+		}
+	}
+	if held {
+		refusal := &OldLayoutError{}
+		for _, k := range layout.Kinds {
+			under, at := false, false
+			for _, p := range paths {
+				under = under || p == "spwn/"+string(k) || strings.HasPrefix(p, "spwn/"+string(k)+"/")
+				at = at || p == string(k) || strings.HasPrefix(p, string(k)+"/")
+			}
+			if under && at {
+				refusal.AtRoot = append(refusal.AtRoot, string(k))
+			}
+		}
+		return Layout{}, refusal
+	}
+	if manifest == nil {
+		return layout.Default(), nil
+	}
+	var m intmanifest.Manifest
+	if err := yaml.Unmarshal(manifest, &m); err != nil {
+		return Layout{}, fmt.Errorf("parse %s: %w", discovery.ManifestFileName, err)
 	}
 	return layout.New(m.Folders)
 }
@@ -91,7 +136,7 @@ type OldLayoutError struct {
 	AtRoot []string
 }
 
-const oldLayoutSentence = "spwn/ is the old project layout: its folders now sit at the project's root. Move each one up (mv agents agents, and the same for skills, tools, hooks, commands, profiles), point knowledge: at its new path, change any .gitignore line naming spwn/, then run again."
+const oldLayoutSentence = "spwn/ is the old project layout: its folders now sit at the project's root. Move each one up (mv spwn/agents agents, and the same for skills, tools, hooks, commands, profiles), point knowledge: at its new path, change any .gitignore line naming spwn/, then run again."
 
 func (e *OldLayoutError) Error() string { return OldLayoutCode + ": " + e.Message() }
 
@@ -122,11 +167,19 @@ var oldNames = []string{"agents", "skills", "tools", "hooks", "commands", "profi
 
 // invariant: a project whose root holds a spwn/ folder of the old layout is
 // refused before its manifest is read, so no part of it is read from a
-// folder it no longer means; a link named spwn/ is not followed.
+// folder it no longer means. A spwn at the root that is a link is refused
+// unfollowed, whatever it points to; a file named spwn, or a folder holding
+// none of the old layout's names, is not the old layout.
 func oldLayout(t *platform.Tree, root string) error {
 	old := filepath.Join(root, "spwn")
 	info, err := t.Lstat(old)
-	if err != nil || !info.IsDir() {
+	if err != nil {
+		return nil
+	}
+	if info.Mode()&fs.ModeSymlink != 0 {
+		return &OldLayoutError{Root: root}
+	}
+	if !info.IsDir() {
 		return nil
 	}
 	entries, err := t.ReadDir(old)
