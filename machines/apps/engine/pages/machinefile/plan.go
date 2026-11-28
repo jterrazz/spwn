@@ -230,6 +230,9 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 		sections = append(sections, section("run", "To run", rows))
 		words = append(words, lineCount(len(rows))+" to run")
 	}
+	if rows := accountRows(p); len(rows) > 0 {
+		sections = append(sections, section("accounts", "Accounts", rows))
+	}
 	sections = append(sections, restartsSection(p.Restarts)...)
 	mark := page.OK
 	var hints []page.Hint
@@ -261,6 +264,23 @@ func scriptRows(p machinefile.Plan) []page.Row {
 		for _, l := range machinefile.ScriptLines(s.Lines) {
 			rows = append(rows, page.Row{ID: "run." + string(s.Phase) + "." + strconv.Itoa(len(rows)+1), Label: l, Mark: page.Absent, Cells: []page.Value{page.Texts("run." + string(s.Phase))}, Detail: page.Texts(s.Origin.Name)})
 		}
+	}
+	return rows
+}
+
+// value: the accounts the chain gives, one row per key and file, its
+// programs and who gives them, or who cleared the key; no verdict, since
+// a VM's Mac grants them as it makes it.
+func accountRows(p machinefile.Plan) []page.Row {
+	rows := make([]page.Row, 0, len(p.Accounts))
+	for _, a := range p.Accounts {
+		key := "accounts." + a.Key
+		said := map[string]string{"signins": "signed in by ", "grants": "granted by "}[a.Key]
+		id, label := key+"/"+a.By.Name, strings.Join(a.Programs, ", ")
+		if a.Cleared {
+			id, said, label = id+"/cleared", "cleared by ", "none"
+		}
+		rows = append(rows, page.Row{ID: id, Label: label, Cells: []page.Value{page.Texts(key)}, Detail: page.Texts(said + a.By.Name)})
 	}
 	return rows
 }

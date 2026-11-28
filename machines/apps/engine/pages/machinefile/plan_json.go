@@ -63,6 +63,16 @@ type RunJSON struct {
 	Detail      string   `json:"detail,omitempty"`
 }
 
+// value: one line of the accounts the chain gives: its key, the programs
+// one file gives under it, and that file; or that file's clearing of it.
+
+type AccountJSON struct {
+	Key         string   `json:"key"`
+	Programs    []string `json:"programs"`
+	Machinefile string   `json:"machinefile"`
+	Cleared     bool     `json:"cleared,omitempty"`
+}
+
 func runJSON(s machinefile.Script) RunJSON {
 	return RunJSON{Phase: string(s.Phase), Machinefile: s.Origin.Name, Lines: machinefile.ScriptLines(s.Lines)}
 }
@@ -78,15 +88,16 @@ func ranJSON(ran []machinefile.Ran) []RunJSON {
 }
 
 type PlanJSON struct {
-	Schema      string      `json:"schema"`
-	Machinefile string      `json:"machinefile"`
-	Needs       []NeedJSON  `json:"needs"`
-	Lines       []LineJSON  `json:"lines"`
-	Extra       []ExtraJSON `json:"extra"`
-	Blocks      []BlockJSON `json:"blocks,omitempty"`
-	AfterApply  []string    `json:"after_apply"`
-	Run         []RunJSON   `json:"run,omitempty"`
-	Bound       string      `json:"bound,omitempty"`
+	Schema      string        `json:"schema"`
+	Machinefile string        `json:"machinefile"`
+	Needs       []NeedJSON    `json:"needs"`
+	Lines       []LineJSON    `json:"lines"`
+	Extra       []ExtraJSON   `json:"extra"`
+	Blocks      []BlockJSON   `json:"blocks,omitempty"`
+	AfterApply  []string      `json:"after_apply"`
+	Run         []RunJSON     `json:"run,omitempty"`
+	Bound       string        `json:"bound,omitempty"`
+	Accounts    []AccountJSON `json:"accounts,omitempty"`
 }
 
 func lineJSON(l machinefile.Line, result, detail string) LineJSON {
@@ -103,7 +114,8 @@ func lineJSON(l machinefile.Line, result, detail string) LineJSON {
 func PlanContract(schema string, p machinefile.Plan) PlanJSON {
 	// value: station.machinefile.plan/v3 and station.machinefile.drift/v4:
 	// the plan's needs, its lines, what is extra, what follows an apply,
-	// and each file's lines of its phase.
+	// each file's lines of its phase, and the accounts the chain gives,
+	// one line per key and file.
 	out := PlanJSON{Schema: schema, Machinefile: p.Name, Needs: []NeedJSON{}, Lines: []LineJSON{}, Extra: []ExtraJSON{}, AfterApply: []string{}}
 	for _, a := range p.Needs {
 		out.Needs = append(out.Needs, NeedJSON{Need: string(a.Need), Packages: a.Packages})
@@ -122,6 +134,9 @@ func PlanContract(schema string, p machinefile.Plan) PlanJSON {
 	}
 	for _, s := range p.PhaseScripts() {
 		out.Run = append(out.Run, runJSON(s))
+	}
+	for _, a := range p.Accounts {
+		out.Accounts = append(out.Accounts, AccountJSON{Key: a.Key, Programs: append([]string{}, a.Programs...), Machinefile: a.By.Name, Cleared: a.Cleared})
 	}
 	return out
 }

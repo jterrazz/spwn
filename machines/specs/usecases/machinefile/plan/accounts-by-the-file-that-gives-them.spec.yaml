@@ -1,0 +1,50 @@
+description: 'the plan says each accounts key by the file that gives it, or clears it'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/ai-kit.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: ai-kit
+          accounts: { signins: [gh, claude], grants: [npm] }
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/cloud-kit.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: cloud-kit
+          accounts: { signins: [], grants: [wrangler] }
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          extends: [ai-kit, cloud-kit]
+          machine: { kind: workspace, system: { os: ubuntu } }
+      exit: 0
+    - command: 'machinefile plan | /usr/bin/grep -A4 "^# Accounts"'
+      exit: 0
+      stdout: |
+          # Accounts
+          	npm	accounts.grants	granted by ai-kit
+          	wrangler	accounts.grants	granted by cloud-kit
+          	none	accounts.signins	cleared by cloud-kit
+    - command: 'machinefile plan --json | /usr/bin/jq -c ''.accounts[]'''
+      exit: 0
+      stdout: |
+          {"key":"grants","programs":["npm"],"machinefile":"ai-kit"}
+          {"key":"grants","programs":["wrangler"],"machinefile":"cloud-kit"}
+          {"key":"signins","programs":[],"machinefile":"cloud-kit","cleared":true}
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          extends: [cloud-kit, ai-kit]
+          machine: { kind: workspace, system: { os: ubuntu } }
+      exit: 0
+    - command: 'machinefile plan | /usr/bin/grep -A5 "^# Accounts"'
+      exit: 0
+      stdout: |
+          # Accounts
+          	npm	accounts.grants	granted by ai-kit
+          	wrangler	accounts.grants	granted by cloud-kit
+          	claude, gh	accounts.signins	signed in by ai-kit
+          	none	accounts.signins	cleared by cloud-kit

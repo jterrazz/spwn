@@ -421,6 +421,7 @@
     "type:journal.calls.KeptIn": "",
     "type:journal.calls.KeptOut": "Lines!{\"items\":{\"$ref\":\"#/$defs/core.journal.Line\"},\"type\":[\"array\",\"null\"]}",
     "type:journal.calls.ReadIn": "",
+    "type:machinefile.AccountLine": "By!{\"$ref\":\"#/$defs/machinefile.Origin\"} Key!{\"type\":\"string\"}",
     "type:machinefile.Applied": "Blocks!{\"items\":{\"$ref\":\"#/$defs/machinefile.BlockDone\"},\"type\":[\"array\",\"null\"]} Bound!{\"type\":\"string\"} Done!{\"items\":{\"$ref\":\"#/$defs/machinefile.Done\"},\"type\":[\"array\",\"null\"]} Interrupted!{\"type\":\"boolean\"} Plan!{\"$ref\":\"#/$defs/machinefile.Plan\"} Ran!{\"items\":{\"$ref\":\"#/$defs/machinefile.Ran\"},\"type\":[\"array\",\"null\"]} Removed!{\"items\":{\"$ref\":\"#/$defs/machinefile.Done\"},\"type\":[\"array\",\"null\"]}",
     "type:machinefile.Applying": "Extras!{\"items\":{\"type\":\"string\"},\"type\":[\"array\",\"null\"]} Install!{\"type\":\"integer\"} Leave!{\"type\":\"integer\"} Left!{\"type\":\"string\"} Sentence!{\"type\":\"string\"} Stays!{\"type\":\"string\"}",
     "type:machinefile.Asked": "Need!{\"enum\":[\"sudo\",\"terminal\",\"license\",\"app-store-login\"],\"type\":\"string\"} Packages!{\"items\":{\"type\":\"string\"},\"type\":[\"array\",\"null\"]}",

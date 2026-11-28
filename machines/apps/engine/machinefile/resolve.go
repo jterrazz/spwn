@@ -108,6 +108,8 @@ type Resolved struct {
 	// upgrade, each file's of a phase its own Script in the chain's order,
 	// a phase its files say none of left out.
 	Scripts []Script
+	// value: the accounts the chain gives, one line per key and file.
+	Accounts []AccountLine
 }
 
 // value: the owner's shell lines of one phase (`run.boot`) one file says,
@@ -169,6 +171,9 @@ type merged struct {
 	// value: what the files kept say of each program's account, the key
 	// each lists it under, in the chain's order.
 	accounts map[catalog.ProgramName][]account
+	// value: the file that last cleared each accounts key, by its key
+	// (`accounts.signins.`).
+	cleared map[string]Origin
 	// value: ports merged into what cannot be read, by the overlay that
 	// made them so.
 	refused error
@@ -363,7 +368,7 @@ func originOf(p Placed) Origin {
 // Script of its own (mergeRun). What two files beside each other give is
 // judged once on the whole (merged.judged).
 func merge(files []Placed) merged {
-	m := merged{values: map[string]Value{}, set: map[string]listed[catalog.SettingEntry]{}, ancestors: map[string][]string{}, appHeads: map[string][]claim[catalog.AppEntry]{}, setHeads: map[string][]claim[catalog.SettingEntry]{}, accounts: map[catalog.ProgramName][]account{}}
+	m := merged{values: map[string]Value{}, set: map[string]listed[catalog.SettingEntry]{}, ancestors: map[string][]string{}, appHeads: map[string][]claim[catalog.AppEntry]{}, setHeads: map[string][]claim[catalog.SettingEntry]{}, accounts: map[catalog.ProgramName][]account{}, cleared: map[string]Origin{}}
 	for _, p := range files {
 		o := originOf(p)
 		f := p.File
@@ -610,8 +615,14 @@ func mergeAccounts(m *merged, a catalog.AccountsSpec, p Placed) {
 		}
 		if p.Kind == Overlay || len(list.names) == 0 {
 			m.drop(strings.TrimSuffix(list.key, "."))
+			dropped := len(list.names) == 0
 			for n, heads := range m.accounts {
-				m.accounts[n] = slices.DeleteFunc(heads, func(h account) bool { return h.key == list.key })
+				kept := slices.DeleteFunc(heads, func(h account) bool { return h.key == list.key })
+				dropped = dropped || len(kept) < len(heads)
+				m.accounts[n] = kept
+			}
+			if dropped {
+				m.cleared[list.key] = o
 			}
 		}
 		for _, n := range list.names {
@@ -628,6 +639,51 @@ func mergeAccounts(m *merged, a catalog.AccountsSpec, p Placed) {
 			m.accounts[n] = heads
 		}
 	}
+}
+
+// value: the accounts the merge kept, one line per key and file, its
+// programs in name order, and one per key a file cleared, by that file;
+// in key order, then the file's name, a clearing before what is given.
+func (m merged) accountLines() []AccountLine {
+	type at struct {
+		key string
+		by  Origin
+	}
+	given := map[at]*AccountLine{}
+	var out []*AccountLine
+	for n, heads := range m.accounts {
+		for _, h := range heads {
+			k := at{h.key, h.origin}
+			if given[k] == nil {
+				given[k] = &AccountLine{Key: keyWord(h.key), By: h.origin}
+				out = append(out, given[k])
+			}
+			given[k].Programs = append(given[k].Programs, string(n))
+		}
+	}
+	for key, o := range m.cleared {
+		out = append(out, &AccountLine{Key: keyWord(key), By: o, Cleared: true})
+	}
+	lines := make([]AccountLine, 0, len(out))
+	for _, l := range out {
+		slices.Sort(l.Programs)
+		lines = append(lines, *l)
+	}
+	rank := func(l AccountLine) int {
+		if l.Cleared {
+			return 0
+		}
+		return 1
+	}
+	slices.SortFunc(lines, func(x, y AccountLine) int {
+		return cmp.Or(cmp.Compare(x.Key, y.Key), cmp.Compare(x.By.Name, y.By.Name), cmp.Compare(x.By.File, y.By.File), cmp.Compare(rank(x), rank(y)))
+	})
+	return lines
+}
+
+// value: an accounts key as a file writes it: `signins`, `grants`.
+func keyWord(key string) string {
+	return strings.TrimSuffix(strings.TrimPrefix(key, "accounts."), ".")
 }
 
 // invariant: a program two files of which neither extends the other give
@@ -887,7 +943,7 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 	if err != nil {
 		return Resolved{}, err
 	}
-	r.Steps, r.Skipped, r.Scripts = filed(p.baked(steps, m.bake)), p.skipped, m.phased()
+	r.Steps, r.Skipped, r.Scripts, r.Accounts = filed(p.baked(steps, m.bake)), p.skipped, m.phased(), m.accountLines()
 	r.Values = values(m, r, lib.Catalog)
 	return r, nil
 }

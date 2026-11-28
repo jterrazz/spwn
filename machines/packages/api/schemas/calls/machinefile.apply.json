@@ -631,6 +631,31 @@
       ],
       "type": "object"
     },
+    "machinefile.AccountLine": {
+      "additionalProperties": false,
+      "properties": {
+        "By": {
+          "$ref": "#/$defs/machinefile.Origin"
+        },
+        "Cleared": {
+          "type": "boolean"
+        },
+        "Key": {
+          "type": "string"
+        },
+        "Programs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "By",
+        "Key"
+      ],
+      "type": "object"
+    },
     "machinefile.Applied": {
       "additionalProperties": false,
       "properties": {
@@ -1115,6 +1140,12 @@
     "machinefile.Plan": {
       "additionalProperties": false,
       "properties": {
+        "Accounts": {
+          "items": {
+            "$ref": "#/$defs/machinefile.AccountLine"
+          },
+          "type": "array"
+        },
         "Applied": {
           "format": "date-time",
           "type": "string"

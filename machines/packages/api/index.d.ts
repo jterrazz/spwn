@@ -1817,6 +1817,13 @@ export type JournalCallsReadIn = {
     Subject?: CoreJournalSubjectInput;
 };
 
+export type MachinefileAccountLine = {
+    By: MachinefileOrigin;
+    Cleared?: boolean;
+    Key: string;
+    Programs?: string[];
+};
+
 export type MachinefileApplied = {
     Blocks: MachinefileBlockDone[] | null;
     Bound: string;
@@ -2104,6 +2111,7 @@ export type MachinefileOriginInput = {
 };
 
 export type MachinefilePlan = {
+    Accounts?: MachinefileAccountLine[];
     Applied?: string;
     Blocks: MachinefileBlock[] | null;
     Extra: MachinefileExtraLine[] | null;

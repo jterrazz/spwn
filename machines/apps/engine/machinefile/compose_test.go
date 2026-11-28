@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"maps"
 	"slices"
 	"strconv"
 	"strings"
@@ -432,6 +433,70 @@ func TestSiblingsMeaningOneEntryMergeIntoTheMostSpecificWhateverTheirOrder(t *te
 	}
 	if !bytes.Equal(steps["[a, b]"], steps["[b, a]"]) {
 		t.Errorf("the plan of extends [a, b] is %s, of [b, a] %s; want them byte for byte one", steps["[a, b]"], steps["[b, a]"])
+	}
+}
+
+func TestThePlanSaysEachAccountsKeyByTheFileThatGivesOrClearsIt(t *testing.T) {
+	line := func(l machinefile.AccountLine) string {
+		if l.Cleared {
+			return l.Key + " cleared by " + l.By.Name
+		}
+		return l.Key + " " + strings.Join(l.Programs, ",") + " by " + l.By.Name
+	}
+	top := machine("top", "{ os: ubuntu }", "[]")
+	for _, tc := range []struct {
+		order string
+		want  []string
+	}{
+		{"[a, b]", []string{"grants wrangler by b", "signins cleared by b"}},
+		{"[b, a]", []string{"grants wrangler by b", "signins claude,gh by a", "signins cleared by b"}},
+	} {
+		lib := library(t, files(map[string]string{
+			"a":   kit("a", "accounts: { signins: [gh, claude] }\n"),
+			"b":   kit("b", "accounts: { signins: [], grants: [wrangler] }\n"),
+			"top": top + "extends: " + tc.order + "\n",
+		}), nil)
+		r, err := machinefile.Resolve(lib, "top", machinefile.Machine{}, machinefile.Lock{})
+		if err != nil {
+			t.Fatalf("extends %s: %v", tc.order, err)
+		}
+		got := make([]string, 0, len(r.Accounts))
+		for _, l := range r.Accounts {
+			got = append(got, line(l))
+		}
+		if !slices.Equal(got, tc.want) {
+			t.Errorf("extends %s: accounts %q, want %q: b's [] clears what the files before it gave, a sibling's included", tc.order, got, tc.want)
+		}
+	}
+	user := files(map[string]string{
+		"c":   kit("c", "accounts: { signins: [claude] }\n"),
+		"d":   kit("d", "accounts: { grants: [claude] }\n"),
+		"top": top + "extends: [c, d]\n",
+	})
+	var conflict *machinefile.SiblingConflictError
+	for _, overlay := range []string{
+		"machinefile: station.machinefile/v1\noverrides: d\naccounts: { grants: [claude] }\n",
+		"machinefile: station.machinefile/v1\noverrides: c\naccounts: { signins: [claude] }\n",
+	} {
+		named := maps.Clone(user)
+		of, _, _ := strings.Cut(strings.TrimPrefix(overlay, "machinefile: station.machinefile/v1\noverrides: "), "\n")
+		named["machinefiles/"+of+".local.yaml"] = overlay
+		if _, err := machinefile.Resolve(library(t, named, nil), "top", machinefile.Machine{}, machinefile.Lock{}); !errors.As(err, &conflict) {
+			t.Errorf("one kit's overlay restating its own side: %v, want the siblings still refused", err)
+		}
+	}
+	named := maps.Clone(user)
+	named["machinefiles/top.local.yaml"] = "machinefile: station.machinefile/v1\noverrides: top\naccounts: { grants: [claude] }\n"
+	r, err := machinefile.Resolve(library(t, named, nil), "top", machinefile.Machine{}, machinefile.Lock{})
+	if err != nil {
+		t.Fatalf("the top file's overlay granting claude: %v, want it settled", err)
+	}
+	got := make([]string, 0, len(r.Accounts))
+	for _, l := range r.Accounts {
+		got = append(got, line(l))
+	}
+	if want := []string{"grants cleared by top", "grants claude by top"}; !slices.Equal(got, want) {
+		t.Errorf("accounts %q, want %q", got, want)
 	}
 }
 

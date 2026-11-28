@@ -122,6 +122,18 @@ type Asked struct {
 	Packages []string
 }
 
+// value: what one file of the chain gives under one accounts key
+// (`signins`, `grants`): the programs it is the first to list there, in
+// name order; or, Cleared, that the file cleared the key, the programs
+// of the files before it dropped.
+
+type AccountLine struct {
+	Key      string
+	Programs []string `json:",omitempty"`
+	By       Origin
+	Cleared  bool `json:",omitempty"`
+}
+
 // value: a Machinefile against the machine: what it asks of the owner,
 // each line in the order apply runs it, what station installed that it
 // lists no longer, in the order `apply --remove` takes it back, what is
@@ -146,6 +158,9 @@ type Plan struct {
 	Passwordless bool
 	// value: the owner's lines of every phase the Machinefile says.
 	Scripts []Script
+	// value: the accounts its chain gives, one line per key and file;
+	// absent when it gives none and clears none.
+	Accounts []AccountLine `json:",omitempty"`
 	// value: when this machine last applied the Machinefile; absent when
 	// it never did.
 	Applied *time.Time `json:",omitempty"`
@@ -202,7 +217,7 @@ func Judge(r Resolved, cat catalog.Catalog, seen map[string]Seen, ledger []Insta
 	// package skipped on this system is still listed, so never extra; only
 	// apply's phase has extras, since another phase carries a part.
 	phase = cmp.Or(phase, catalog.PhaseApply)
-	p := Plan{Name: r.Name, Phase: phase, Lock: r.Lock, Source: r.Source, Skipped: r.Skipped, Passwordless: passwordless, Scripts: r.Scripts}
+	p := Plan{Name: r.Name, Phase: phase, Lock: r.Lock, Source: r.Source, Skipped: r.Skipped, Passwordless: passwordless, Scripts: r.Scripts, Accounts: r.Accounts}
 	listed := map[string]bool{}
 	for _, s := range r.Skipped {
 		listed[s.Package] = true
