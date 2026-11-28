@@ -58,14 +58,14 @@ station project create acme-api && cd acme-api
 spwn install node --agent neo
 spwn install git --agent neo
 
-git add spwn.yaml spwn.lock spwn/
+git add spwn.yaml spwn.lock agents skills tools hooks commands
 git commit -m "add neo, our repo maintainer"
 git push
 ```
 
 What happened:
 
-- `spwn.yaml` + `spwn.lock` + `spwn/` are now part of your repo like
+- `spwn.yaml`, `spwn.lock` and the project's folders are now part of your repo like
   any other code. PRs that change `agent.yaml` dependencies show up
   as normal diffs.
 - `spwn.lock` pins every dep's version so two clones of the repo

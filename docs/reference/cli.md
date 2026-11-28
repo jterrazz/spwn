@@ -94,7 +94,7 @@ Decided in ADR-021 and ADR-022. A row whose left column is `station` is built, u
 
 ```bash
 # ── Project workflow ─────────────────────────────────────────────
-station project create site   # a new folder ./site: spwn.yaml + ./spwn/ + .spwn/ ignored
+station project create site   # a new folder ./site: spwn.yaml + agents/ skills/ ... + .spwn/ ignored
 station project plan          # validate the tree
 station project apply         # render each agent into .spwn/agents/<agent>/ (what plan lists)
 spwn up [name]                # bring up every world in spwn.yaml (or one by name)

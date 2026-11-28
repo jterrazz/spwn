@@ -20,8 +20,8 @@ the others are placeholders for when a real schema change lands.
 | Scope    | Root                         | What lives there                                                         | Status                    |
 | -------- | ---------------------------- | ------------------------------------------------------------------------ | ------------------------- |
 | **user** | `~/.spwn/`                   | config.yaml, organizations/, credentials/, activity.jsonl, world-states/ | live, `user/` sub-package |
-| project  | `./spwn.yaml` + `./spwn/`    | manifest, agents, skills, tools, hooks, knowledge                        | not populated             |
-| agent    | `./agents/<name>/`      | SOUL.md, agent.yaml, playbooks/, journal/                                | not populated             |
+| project  | `./spwn.yaml` + its folders  | manifest, agents, skills, tools, hooks, knowledge                        | not populated             |
+| agent    | `./agents/<name>/`           | SOUL.md, agent.yaml, playbooks/, journal/                                | not populated             |
 | world    | `~/.spwn/world-states/<id>/` | runtime.json, manifest snapshot, roster                                  | not populated             |
 
 The `Runner` + `Migration` types are scope-agnostic. Each category

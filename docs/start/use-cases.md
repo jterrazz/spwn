@@ -23,7 +23,7 @@ station project create acme-api && cd acme-api
 spwn install node --agent neo
 spwn install git --agent neo
 
-git add spwn.yaml spwn/
+git add spwn.yaml spwn.lock agents skills tools hooks commands
 git commit -m "add neo, our repo maintainer"
 git push
 

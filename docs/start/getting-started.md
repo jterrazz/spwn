@@ -28,11 +28,11 @@ What `station project create` lays down:
 my-project/
 ├── spwn.yaml              # manifest (the thing that ties everything together)
 ├── spwn.lock              # lockfile (pinned catalog deps)
-├── spwn/                  # committed project assets
-│   ├── agents/            # one subdir per agent
-│   ├── skills/            # reusable skill files (markdown blocks)
-│   ├── tools/             # local tool definitions
-│   └── hooks/             # shell hooks the runtime fires
+├── agents/                # one subdir per agent
+├── skills/                # reusable skill files (markdown blocks)
+├── tools/                 # local tool definitions
+├── hooks/                 # shell hooks the runtime fires
+├── commands/              # slash-invoked commands
 ├── knowledge/             # opt-in world-scoped knowledge base
 └── .spwn/                 # gitignored local state
 ```

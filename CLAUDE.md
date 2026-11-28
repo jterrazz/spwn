@@ -10,7 +10,7 @@ Three abstractions, each owning one concern:
 - **Backend** (`packages/container`): where worlds run (Docker; labels are the source of truth).
 - **Mind** (`packages/agent`): how an agent persists across worlds (`SOUL.md` + `playbooks/` + `journal/`).
 
-Knowledge is world-scoped, not held in the Mind. A Spwn project lives **in the repo** (`./spwn/`), not in `~/.spwn/`.
+Knowledge is world-scoped, not held in the Mind. A Spwn project lives **in the repo**, its folders (`agents/`, `skills/`, `tools/`...) at the root beside `spwn.yaml`, not in `~/.spwn/`.
 
 ## Where knowledge lives
 

@@ -10,7 +10,18 @@ A Spwn project is per-repo: everything an agent is made of is committed beside t
 my-project/
 ├── spwn.yaml       # manifest: version, name, inline worlds map, project-wide deps
 ├── spwn.lock       # lockfile: pinned catalog deps
-├── spwn/           # committed project assets, below
+├── agents/neo/
+│   ├── agent.yaml     # composition: dependencies + runtime.backend
+│   ├── AGENTS.md      # provider-neutral entry point (compiled per runtime)
+│   ├── SOUL.md        # who the agent is (purpose, voice, values)
+│   ├── playbooks/     # promoted patterns (auto-indexed from name:/description: headers)
+│   └── journal/       # per-run history
+├── skills/         # project-scoped skills   (skill/<name> → skills/<name>.md)
+├── tools/          # project-scoped tools    (tool/<name>  → tools/<name>/)
+├── hooks/          # project-scoped hooks    (hook/<name>  → hooks/<name>.yaml)
+├── commands/       # project-scoped commands (command/<name> → commands/<name>.md)
+├── profiles/       # project-scoped profiles
+├── knowledge/      # world-scoped facts, bind-mounted at /world/knowledge/ (default path)
 └── .spwn/          # gitignored local state
     ├── state.json               # live world IDs bound to this project
     ├── runs.jsonl               # automation receipts (one line per fire)
@@ -18,22 +29,29 @@ my-project/
     └── cache/
 ```
 
-The committed assets under `spwn/`:
+### The folders sit at the root
+
+The six kinds a project is made of (agents, skills, tools, hooks, commands, profiles) each have one folder at the project's root, the folder that holds `spwn.yaml`. Nothing else at the root is read as the project's: the repository's own code sits beside them.
+
+`folders:` in `spwn.yaml` renames one kind's folder and keeps the others:
+
+```yaml
+folders:
+    agents: crew
+    skills: lib/skills
+```
+
+A value is a slash path from the root whose every name is lowercase letters, digits, `-` and `_`. It is never `.`, `..`, a name starting with a dot (so never `.git` or `.spwn`), an absolute path, `~`, a colon or `spwn/`, and no two kinds share a folder or sit one inside the other. A refused entry is `spwn-yaml.folders`, naming its key.
+
+### The old layout is refused
+
+A project whose kinds sat under one `spwn/` folder is the old layout, and every command refuses it before it reads anything else:
 
 ```text
-spwn/
-├── agents/neo/
-│   ├── agent.yaml     # composition: dependencies + runtime.backend
-│   ├── AGENTS.md      # provider-neutral entry point (compiled per runtime)
-│   ├── SOUL.md        # who the agent is (purpose, voice, values)
-│   ├── playbooks/     # promoted patterns (auto-indexed from name:/description: headers)
-│   └── journal/       # per-run history
-├── knowledge/         # world-scoped facts, bind-mounted at /world/knowledge/ (default path)
-├── skills/            # project-scoped skills   (skill/<name> → skills/<name>.md)
-├── tools/             # project-scoped tools    (tool/<name>  → tools/<name>/)
-├── hooks/             # project-scoped hooks    (hook/<name>  → hooks/<name>.yaml)
-└── commands/          # project-scoped commands (command/<name> → commands/<name>.md)
+spwn/ is the old project layout: its folders now sit at the project's root. Move each one up (mv spwn/agents agents, and the same for skills, tools, hooks, commands, profiles), point knowledge: at its new path, change any .gitignore line naming spwn/, then run again.
 ```
+
+It is the old layout when the root's `spwn` is a folder holding one of `agents`, `skills`, `tools`, `hooks`, `commands`, `profiles` or `hooks.yaml`, or when `spwn` is a link, which is never followed. When a kind sits both under `spwn/` and at the root, the refusal names those folders to merge. The decision is [ADR-024](../decisions/024-a-projects-folders-sit-at-its-root.md).
 
 ```text
 ~/.spwn/                         # USER-LEVEL only, never per-project

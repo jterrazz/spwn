@@ -88,7 +88,7 @@ The [gate](gate.md) is a separate long-running host container that owns cookie-b
 
 ## Key invariants
 
-- **Per-repository.** Agents and local blocks live in `./spwn/`, not `~/.spwn/`.
+- **Per-repository.** Agents and local blocks live in folders at the repository's root, beside `spwn.yaml`, not in `~/.spwn/`.
 - **Declared deps only.** An agent can use only the dependencies in its (unioned) `dependencies:` list; unlisted means physically absent from the image.
 - **Transitive resolution.** Dependency dependencies are resolved recursively and topologically sorted.
 - **Lock file is text.** `spwn.lock` holds one dep per line, trivially diffable.
