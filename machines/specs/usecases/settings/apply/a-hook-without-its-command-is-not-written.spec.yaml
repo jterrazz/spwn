@@ -1,0 +1,28 @@
+description: a merged fragment that requires an app is refused where the app is absent, and nothing is written
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro catalog/terminal/docker-hook.yaml'
+      stdin: |
+          package: station.package/v1
+          kind: setting
+          name: docker-hook
+          description: 'A hook that runs docker'
+          reversible: true
+          requires: [docker]
+          methods:
+              - os: any
+                file:
+                    copy:
+                        - from: zed/.oxfmtrc.json
+                          to: ~/.config/hooks/settings.json
+                    mode: merge
+      exit: 0
+    - command: 'settings apply docker-hook'
+      exit: 1
+      stdout: |
+          ✗	docker-hook	failed: docker-hook is written only where docker is installed, and here it is not: nothing written; station apps install docker
+      stderr: |
+          Error: 1 of 1 settings failed
+          Hint: re-run it: station settings apply docker-hook
+      files:
+          .config/hooks: absent

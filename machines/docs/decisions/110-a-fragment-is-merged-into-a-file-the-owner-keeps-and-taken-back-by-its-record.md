@@ -25,8 +25,13 @@ The tree is held in the file's own order with each key's and scalar's raw bytes,
 
 What a merge wrote (per setting and file: each JSON pointer and the digest of its canonical value, a block's digest, the file and folders Machines made) is kept in `~/.local/state/station/merged.json`, beside the ledger and not in it. The ledger is the Machinefile family's store, and one store has one owner; the authorized-keys record set that precedent. Off removes a value only while its digest is the recorded one, and a container only when it is empty and Machines made it.
 
+### The guard is `requires`
+
+No new key: the package's existing `requires` is the guard. A setting in either fragment mode is written only where an app it requires is installed; a named apply elsewhere is refused with a sentence naming the app. A Machinefile installs the required app first, and a bare apply skips the setting, as before.
+
 ## Consequences
 
 - Deleting `merged.json` makes off take back nothing: Machines' values stay as the owner's.
 - An element of an array the owner edited cannot be told from one he deleted, so off leaves it without a word.
 - A block goes only into a file whose comments open with `#`.
+- The guard checks the app is installed, not that the hook's command is on the PATH of the app that runs it.

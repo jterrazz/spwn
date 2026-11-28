@@ -1,0 +1,34 @@
+description: a merged fragment that requires an app is written where the app is, file and folder made
+fixture: ../../__fixtures__/docker/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro catalog/terminal/docker-hook.yaml'
+      stdin: |
+          package: station.package/v1
+          kind: setting
+          name: docker-hook
+          description: 'A hook that runs docker'
+          reversible: true
+          requires: [docker]
+          methods:
+              - os: any
+                file:
+                    copy:
+                        - from: zed/.oxfmtrc.json
+                          to: ~/.config/hooks/settings.json
+                    mode: merge
+      exit: 0
+    - command: 'settings apply docker-hook'
+      exit: 0
+      stdout: |
+          ●	docker-hook	~/.config/hooks/settings.json: merged
+    - command: '--version >/dev/null; /bin/ls -l .config/hooks/settings.json | /usr/bin/cut -c1-10'
+      exit: 0
+      stdout: |
+          -rw-------
+    - command: 'settings off docker-hook --yes'
+      exit: 0
+      stdout: |
+          ●	docker-hook	~/.config/hooks/settings.json: removed
+      files:
+          .config/hooks: absent

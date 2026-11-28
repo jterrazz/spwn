@@ -229,6 +229,14 @@ func (s *Catalogue) admit(it catalog.Setting, verb string, interactive bool) err
 
 func (s *Catalogue) Install(ctx context.Context, name string, values map[string]string, interactive bool) (settings.Change, error) {
 	return s.apply(name, verbInstall, interactive, func(h handler, it catalog.Setting) (settings.Change, error) {
+		// invariant: a fragment goes into a file another app reads (a hook
+		// into its settings), so it is written only where the app it requires
+		// is there: never a hook whose command is absent.
+		if d, ok := it.Effect.(catalog.Dotfiles); ok && d.Fragment() && !s.applies(it) {
+			return settings.Change{}, &fail.Said{
+				Message: it.Name + " is written only where " + it.NeedsSaid() + " is installed, and here it is not: nothing written; station apps install " + it.Requires,
+			}
+		}
 		merged := clone(s.o.Defaults[it.Name])
 		for k, v := range values {
 			merged[k] = v
