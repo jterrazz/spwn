@@ -1,0 +1,21 @@
+description: 'a VM is made from its file of the shared source, with the kits it extends'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}} | .sources = {"https://example.com/studio.git": {head: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"machines/macbook-pro/studio-linux.machine.yaml": "machinefile: station.machinefile/v1\nname: studio-linux\nmachine: { kind: workspace, system: { os: ubuntu, version: \"24.04\" } }\nextends: [base-ubuntu, ai-kit]\nvm: { resources: { memory: 4G } }\n", "kits/ai-kit.kit.yaml": "machinefile: station.machinefile/v1\nname: ai-kit\naccounts: { grants: [npm] }\n"}}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machinefile explain accounts --machinefile studio-linux --json | /usr/bin/jq -c ''.files, [.values[] | [.key, .origin, .from, .file]]'''
+      exit: 0
+      stdout: |
+          [{"name":"base-ubuntu","origin":"built-in","file":"built-in/machinefiles/base-ubuntu.machine.yaml"},{"name":"ai-kit","origin":"shared","file":"studio@1a2b3c4/kits/ai-kit.kit.yaml"},{"name":"studio-linux","origin":"shared","file":"studio@1a2b3c4/machines/macbook-pro/studio-linux.machine.yaml"}]
+          [["accounts.grants.npm","shared","ai-kit","studio@1a2b3c4/kits/ai-kit.kit.yaml"]]
+    - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["web"] = .macs["linux-1"]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines create --memory 4G web --from studio-linux | /usr/bin/grep -E "Boot|npm|Created"'
+      exit: 0
+      stdout: |
+          ●	Boot phase	studio-linux	7 apps installed · 2 settings set
+          ●	npm	granted
+          ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB

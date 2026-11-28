@@ -1,0 +1,38 @@
+description: 'a computer''s chain reading run.upgrade from the shared source is refused; its owner''s file may'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}} | .sources = {"https://example.com/studio.git": {head: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"machines/macbook-pro/host.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\nextends: [nightly]\n", "kits/nightly.kit.yaml": "machinefile: station.machinefile/v1\nname: nightly\napps: [gh]\nrun: { upgrade: brew upgrade }\n"}}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machinefile explain apps'
+      exit: 2
+      stderr: |
+          Error: nightly (studio@1a2b3c4/kits/nightly.kit.yaml) says run.upgrade, which macbook-pro's chain reads: a computer runs no line of the shared source at night
+          Hint: remove run.upgrade from nightly: a computer's nights run what its packages say
+    - command: 'machinefile plan --json'
+      exit: 2
+      stdout: |
+          {
+            "schema": "station.error/v1",
+            "type": "refused",
+            "code": "machinefile.upgrade-on-a-computer",
+            "subject": "macbook-pro",
+            "message": "nightly (studio@1a2b3c4/kits/nightly.kit.yaml) says run.upgrade, which macbook-pro's chain reads: a computer runs no line of the shared source at night",
+            "hint": "remove run.upgrade from nightly: a computer's nights run what its packages say",
+            "fix": null
+          }
+      stderr: |
+          Error: nightly (studio@1a2b3c4/kits/nightly.kit.yaml) says run.upgrade, which macbook-pro's chain reads: a computer runs no line of the shared source at night
+          Hint: remove run.upgrade from nightly: a computer's nights run what its packages say
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [gh]
+          run: { upgrade: brew upgrade }
+      exit: 0
+    - command: 'machinefile explain run'
+      exit: 0
+      stdout: |
+          # macbook-pro
+          	run.upgrade	brew upgrade	user	macbook-pro

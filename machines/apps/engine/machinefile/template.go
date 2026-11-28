@@ -85,6 +85,9 @@ func TemplateOf(lib Library, name string, lock []byte) (Template, error) {
 			t.Chain = append(t.Chain, f.File.Name)
 		}
 		file := path.Base(f.Path)
+		if f.Kind != Overlay {
+			file = f.File.Name + catalog.MachinefileSuffix
+		}
 		h.Write([]byte(file + "\x00"))
 		h.Write(f.Body)
 		h.Write([]byte{0})

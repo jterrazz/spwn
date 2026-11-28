@@ -60,11 +60,11 @@ func status(at string, held ...string) local.Output {
 }
 
 func source(run local.Runner, cache, name string) git.Source {
-	return git.New(run, local.New(nil, nil, nil, nil).FS, cache, contract.SharedSource{Name: name, URL: url})
+	return git.New(run, local.New(nil, nil, nil, nil).FS, cache, contract.SharedSource{Name: name, URL: url}, "laptop")
 }
 
 func TestTheSharedSourceKeepsTheContract(t *testing.T) {
-	contracttest.Source(t, func(t *testing.T, held map[string]string) contract.Source {
+	contracttest.Repository(t, func(t *testing.T, held map[string]string) contract.Source {
 		cache := t.TempDir()
 		dir := filepath.Join(cache, "sources", "studio")
 		run := localtest.NewRunner(t)
@@ -147,7 +147,7 @@ func TestPullOnNoCloneClonesItOnce(t *testing.T) {
 }
 
 func TestACloneThatHoldsChangesIsNotTrusted(t *testing.T) {
-	for _, held := range []string{"1 .M N... 100644 100644 100644 a b machinefiles/laptop.machine.yaml", "? machinefiles/planted.machine.yaml", "! catalog/apps/hidden.yaml"} {
+	for _, held := range []string{"1 .M N... 100644 100644 100644 a b machines/laptop/host.machine.yaml", "? kits/planted.kit.yaml", "! packages/apps/hidden.yaml"} {
 		cache := t.TempDir()
 		dir := filepath.Join(cache, "sources", "studio")
 		clone(t, dir, nil)
@@ -187,7 +187,7 @@ func TestAUrlThatIsNoRemoteRunsNothing(t *testing.T) {
 	for _, bad := range []string{"ext::sh -c touch% /tmp/pwned", "file:///etc", "/etc", "../x", "-x", "git://example.com/x.git", "http://example.com/x.git", ""} {
 		cache := t.TempDir()
 		src := contract.SharedSource{Name: "studio", URL: bad}
-		_, err := git.New(localtest.NewRunner(t), local.New(nil, nil, nil, nil).FS, cache, src).Read(t.Context())
+		_, err := git.New(localtest.NewRunner(t), local.New(nil, nil, nil, nil).FS, cache, src, "laptop").Read(t.Context())
 		if err == nil || !strings.Contains(err.Error(), "is no url") {
 			t.Errorf("a source at %q read with %v", bad, err)
 		}
@@ -205,7 +205,7 @@ func TestAnHttpsSshOrShortUrlIsCloned(t *testing.T) {
 		})
 		run.On("git", in(dir, "status", "--porcelain=v2", "--branch", "--untracked-files=all", "--ignored")...).Reply(status(pinned))
 		src := contract.SharedSource{Name: "studio", URL: good}
-		if _, err := git.New(run, local.New(nil, nil, nil, nil).FS, cache, src).Read(t.Context()); err != nil {
+		if _, err := git.New(run, local.New(nil, nil, nil, nil).FS, cache, src, "laptop").Read(t.Context()); err != nil {
 			t.Errorf("%s: %v", good, err)
 		}
 		if clones.Seen != 1 {

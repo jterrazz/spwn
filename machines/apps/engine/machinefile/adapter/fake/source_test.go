@@ -25,11 +25,8 @@ const (
 )
 
 func TestARepositoryOfTheWorldKeepsTheContract(t *testing.T) {
-	contracttest.Source(t, func(_ *testing.T, held map[string]string) contract.Source {
+	contracttest.Repository(t, func(_ *testing.T, held map[string]string) contract.Source {
 		src := contract.SharedSource{Name: "studio", URL: "https://example.com/studio.git"}
-		if held == nil {
-			held = map[string]string{}
-		}
 		w := &world.World{Sources: map[string]*world.Repository{src.URL: {Head: head, Commits: map[string]map[string]string{head: maps.Clone(held)}}}}
 		return fake.SharedOf(w, "laptop", src)
 	})

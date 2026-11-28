@@ -11,10 +11,10 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 )
 
-// value: the links a source's folders may hold: none, in a shared
-// source's clone (its content is the remote's, and a link there is a door
-// to any file of the machine); a link to a regular file, in the owner's
-// own folders, which owners keep in a dotfiles repository.
+// value: the links a source's folders may hold: none, in the built-in
+// tree (a shared source is a fleet, which follows none either: Fleet);
+// a link to a regular file, in the owner's own folders, which owners
+// keep in a dotfiles repository.
 
 type Links string
 
@@ -99,7 +99,7 @@ func regular(dir folders, links Links, at string, e fs.DirEntry) error {
 			return &catalog.FileError{File: p, Problem: "is a link to no file: a link in your folders points at a regular file"}
 		}
 	case t&fs.ModeSymlink != 0:
-		return &catalog.FileError{File: p, Problem: "is a link: Machines reads a shared source's files as they are, never through a link"}
+		return &catalog.FileError{File: p, Problem: "is a link: Machines reads these files as they are, never through a link"}
 	case !t.IsRegular():
 		return &catalog.FileError{File: p, Problem: "is no regular file: a source holds files and folders alone"}
 	}

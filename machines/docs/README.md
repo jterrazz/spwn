@@ -156,5 +156,6 @@ The records of decisions this repository alone took go in [`decisions/`](decisio
 - [107 Activity is sampled by who looks, kept in tiers of mean and max for 30 days, and streamed as points](decisions/107-activity-is-sampled-by-who-looks-kept-in-tiers-of-mean-and-max-for-30-days-and-streamed-as-points.md) (Proposed)
 - [108 A panic breaks its call or its job, never the engine](decisions/108-a-panic-breaks-its-call-or-its-job-never-the-engine.md) (Proposed)
 - [109 One repository declares every machine](decisions/109-one-repository-declares-every-machine.md) (Proposed)
+- [113 The shared source is read in one layout, confined to its clone](decisions/113-the-shared-source-is-read-in-one-layout-confined-to-its-clone.md) (Proposed)
 
 A decision spanning several repositories is recorded by the corpus that spans them. What was left for later is `TODO.md` at the repository root.

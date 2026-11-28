@@ -15,7 +15,7 @@ while [ "$1" = "-c" ]; do shift 2; done
 case "$1" in
     clone)
         for a; do dir="$a"; done
-        /bin/mkdir -p "$dir/.git" "$dir/machinefiles"
+        /bin/mkdir -p "$dir/.git" "$dir/kits"
         echo 1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d > "$dir/.git/HEAD"
         ;;
     checkout) echo "$4" > "$dir/.git/HEAD" ;;

@@ -82,6 +82,18 @@ func (e *SiblingConflictError) Error() string {
 	return e.Kind + " " + e.Name + " is given two ways, by " + e.First.Name + " (" + e.First.At() + ") and " + e.Second.Name + " (" + e.Second.At() + "), neither extending the other: say it in " + e.Top + ", which extends both"
 }
 
+// value: a computer's chain that reads `run.upgrade` from the shared
+// source: Name the Machinefile resolved, Says the file of the source
+// that carries it, File where it is read.
+
+type UpgradeOnComputerError struct {
+	Name, Says, File string
+}
+
+func (e *UpgradeOnComputerError) Error() string {
+	return e.Says + " (" + e.File + ") says run.upgrade, which " + e.Name + "'s chain reads: a computer runs no line of the shared source at night"
+}
+
 type VMOnComputerError struct {
 	Name string
 	// value: the file that says vm.

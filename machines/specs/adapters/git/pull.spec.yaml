@@ -4,7 +4,7 @@ fixture:
     - ./__fixtures__/source/
 env: engine
 runs:
-    - command: 'machinefile explain machine.kind --machinefile base-macos >/dev/null; /usr/bin/printf "machinefile: station.machinefile/v1\nname: bare\nmachine: { kind: computer, system: { os: macos } }\n" > .cache/station/sources/studio/machinefiles/bare.machine.yaml; echo ffffffffffffffffffffffffffffffffffffffff > .origin; : > .calls; "$STATION" machinefile update --machinefile bare'
+    - command: 'machinefile explain machine.kind --machinefile base-macos >/dev/null; /usr/bin/printf "machinefile: station.machinefile/v1\nname: tools\n" > .cache/station/sources/studio/kits/tools.kit.yaml; /bin/mkdir -p .config/station/machinefiles; /usr/bin/printf "machinefile: station.machinefile/v1\nname: bare\nmachine: { kind: computer, system: { os: macos } }\nextends: [tools]\n" > .config/station/machinefiles/bare.machine.yaml; echo ffffffffffffffffffffffffffffffffffffffff > .origin; : > .calls; "$STATION" machinefile update --machinefile bare'
       exit: 0
       stdout: |
           	none

@@ -54,6 +54,62 @@ func Source(t *testing.T, subject Subject) {
 	})
 }
 
+// value: a shared source's repository, by slash path, as the computer
+// named laptop reads it: its own folder, the kits, the packages; another
+// computer's folder and every other file beside them unread.
+func repositoryHeld() map[string]string {
+	return map[string]string{
+		"machines/laptop/host.machine.yaml":  "machinefile: station.machinefile/v1\n",
+		"machines/laptop/api.machine.yaml":   "machinefile: station.machinefile/v1\n",
+		"machines/desktop/host.machine.yaml": "another computer's",
+		"kits/essentials.kit.yaml":           "machinefile: station.machinefile/v1\n",
+		"packages/apps/jq.yaml":              "package: station.package/v1\n",
+		"files/zshrc":                        "not read",
+		"notes/readme.md":                    "not read",
+	}
+}
+
+// value: a shared source over a repository holding files, read by the
+// computer named laptop, built by the adapter under test.
+
+type RepositorySubject func(t *testing.T, repository map[string]string) contract.Source
+
+func Repository(t *testing.T, subject RepositorySubject) {
+	t.Run("reads the computer's own folder, its kits and its packages, named as every source names them, in path order", func(t *testing.T) {
+		held := repositoryHeld()
+		tree, err := subject(t, held).Read(context.Background())
+		if err != nil {
+			t.Fatal(err)
+		}
+		type read struct{ path, repo string }
+		got := make([]read, 0, len(tree.Files))
+		for _, f := range tree.Files {
+			got = append(got, read{f.Path, f.Repo})
+			if string(f.Body) != held[f.Repo] {
+				t.Errorf("%s reads %q, holds %q", f.Repo, f.Body, held[f.Repo])
+			}
+		}
+		want := []read{
+			{"catalog/apps/jq.yaml", "packages/apps/jq.yaml"},
+			{"machinefiles/api.machine.yaml", "machines/laptop/api.machine.yaml"},
+			{"machinefiles/essentials.machine.yaml", "kits/essentials.kit.yaml"},
+			{"machinefiles/laptop.machine.yaml", "machines/laptop/host.machine.yaml"},
+		}
+		if !slices.Equal(got, want) {
+			t.Errorf("read %v, want %v", got, want)
+		}
+		if tree.Root == "" || tree.Kind == "" {
+			t.Errorf("a tree names its root and its origin: %+v", tree)
+		}
+	})
+	t.Run("a repository holding none of machines/, kits/, packages/ reads no file", func(t *testing.T) {
+		tree, err := subject(t, map[string]string{"catalog/apps/jq.yaml": "package: station.package/v1\n", "machinefiles/laptop.machine.yaml": "x"}).Read(context.Background())
+		if err != nil || len(tree.Files) != 0 {
+			t.Errorf("read %v, %v; want no file", tree.Files, err)
+		}
+	})
+}
+
 // value: a source that follows a branch, built by the adapter under test;
 // the gesture that moves its branch forward to a new commit, and the one
 // that rewrites it to a commit that does not follow the clone's, each

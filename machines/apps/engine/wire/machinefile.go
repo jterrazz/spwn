@@ -49,15 +49,15 @@ func builtinSource() machinefilecontract.Source {
 }
 
 // invariant: the sources strongest first: the owner's, the shared source
-// preferences.json names (read from its clone in the cache), the
-// built-in.
+// preferences.json names (a repository read from its clone in the cache,
+// by this machine's own name), the built-in.
 func (m machine) machinefileSources() []machinefilecontract.Source {
 	sources := []machinefilecontract.Source{m.userSource()}
 	if shared, ok, err := machinefilecontract.NewSourcePrefs(m.stores.prefs).Get(); err == nil && ok {
 		if m.world != nil {
 			sources = append(sources, m.world.sharedSource(shared))
 		} else {
-			sources = append(sources, git.New(m.sys.Run, m.sys.FS, m.paths.Cache, shared))
+			sources = append(sources, git.New(m.sys.Run, m.sys.FS, m.paths.Cache, shared, m.profile.Ref.Name))
 		}
 	}
 	return append(sources, builtinSource())

@@ -11,12 +11,14 @@ import (
 
 const GroupSource = "machinefile"
 
-// value: the shared source: a repository read at its default branch,
-// named as the plan names it (`studio`).
+// value: the shared source: a repository read at its default branch
+// (ADR-109's layout), named as the plan names it (`studio`), and the
+// folder of it its machines are declared in, empty for its root.
 
 type SharedSource struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
+	Path string `json:"path,omitempty"`
 }
 
 type SourcePrefs struct{ p corecontract.Preferences }

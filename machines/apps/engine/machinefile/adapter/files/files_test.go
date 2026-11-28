@@ -82,10 +82,10 @@ func TestTheOwnersFoldersFollowALinkToAFileAlone(t *testing.T) {
 	}
 }
 
-func TestASharedSourceFollowsNoLink(t *testing.T) {
+func TestASourceOfNoLinksFollowsNone(t *testing.T) {
 	for _, at := range []string{"machinefiles/laptop.machine.yaml", "catalog/apps/jq.yaml"} {
 		dir := linked{MapFS: fstest.MapFS{at: &fstest.MapFile{Mode: fs.ModeSymlink}}, targets: map[string]fs.FileMode{at: 0}}
-		_, err := files.New(dir, contract.NoLinks, "catalog", "machinefiles", machinefile.Shared, "studio@1a2b3c4").Read(t.Context())
+		_, err := files.New(dir, contract.NoLinks, "catalog", "machinefiles", machinefile.Builtin, "built-in").Read(t.Context())
 		if err == nil || !strings.Contains(err.Error(), at+": is a link") {
 			t.Errorf("a link at %s read with %v, want it refused", at, err)
 		}
@@ -96,7 +96,7 @@ func TestAnEntryThatIsNoYamlIsSkippedWhateverItsType(t *testing.T) {
 	for _, at := range []string{"machinefiles/notes", "catalog/apps/readme", "catalog/apps/jq.md"} {
 		for _, mode := range []fs.FileMode{fs.ModeSymlink, fs.ModeNamedPipe, fs.ModeDevice, 0} {
 			dir := linked{MapFS: fstest.MapFS{at: &fstest.MapFile{Mode: mode}}, targets: map[string]fs.FileMode{at: fs.ModeDir}}
-			tree, err := files.New(dir, contract.NoLinks, "catalog", "machinefiles", machinefile.Shared, "studio@1a2b3c4").Read(t.Context())
+			tree, err := files.New(dir, contract.NoLinks, "catalog", "machinefiles", machinefile.Builtin, "built-in").Read(t.Context())
 			if err != nil || len(tree.Files) != 0 {
 				t.Errorf("%s of mode %v read %v, %v; want it skipped", at, mode, tree.Files, err)
 			}

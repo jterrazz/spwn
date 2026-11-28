@@ -40,11 +40,13 @@ type Source struct {
 	fs  local.FS
 	dir string
 	src contract.SharedSource
+	// value: the computer that reads the repository, by its own name.
+	computer string
 }
 
-func New(run local.Runner, fsys local.FS, cache string, src contract.SharedSource) Source {
+func New(run local.Runner, fsys local.FS, cache string, src contract.SharedSource, computer string) Source {
 	// value: the source read from its clone, `<cache>/sources/<name>`.
-	return Source{run: run, fs: fsys, dir: filepath.Join(cache, "sources", src.Name), src: src}
+	return Source{run: run, fs: fsys, dir: filepath.Join(cache, "sources", src.Name), src: src, computer: computer}
 }
 
 func (s Source) Read(ctx context.Context) (machinefile.Tree, error) {
@@ -52,9 +54,10 @@ func (s Source) Read(ctx context.Context) (machinefile.Tree, error) {
 	if err != nil {
 		return machinefile.Tree{}, &contract.UnavailableError{Source: s.src.Name, Cause: err}
 	}
-	files, err := contract.ReadFolders(s.fs, contract.NoLinks, filepath.Join(s.dir, "catalog"), filepath.Join(s.dir, "machinefiles"))
+	root := s.src.Name + "@" + head[:7]
+	files, err := contract.Repository{Dir: s.fs, At: s.dir, Sub: s.src.Path, Computer: s.computer, Source: s.src.Name, Root: root}.Read()
 	return machinefile.Tree{
-		Kind: machinefile.Shared, Root: s.src.Name + "@" + head[:7], Files: files,
+		Kind: machinefile.Shared, Root: root, Files: files,
 		Source: &catalog.LockSource{Name: s.src.Name, Commit: head},
 	}, err
 }

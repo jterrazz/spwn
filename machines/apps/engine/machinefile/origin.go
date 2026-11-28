@@ -76,6 +76,12 @@ type File struct {
 	// value: where a reader finds the file when it is not under its tree's
 	// root: a Machinefile named by its own path, read where it is.
 	At string
+	// value: a shared source's file, its slash path in the repository
+	// (`machines/<computer>/host.machine.yaml`, `kits/<name>.kit.yaml`,
+	// `packages/<category>/<name>.yaml`) and the slot that names it;
+	// empty for every other source, whose paths are their own.
+	Repo string
+	Slot catalog.Slot
 }
 
 const (
@@ -125,8 +131,11 @@ func refusedFile(format string, err error) error {
 }
 
 func (t Tree) display(f File) string {
-	if f.At != "" {
+	switch {
+	case f.At != "":
 		return f.At
+	case f.Repo != "":
+		return t.Root + "/" + f.Repo
 	}
 	return t.Root + "/" + f.Path
 }
@@ -193,11 +202,17 @@ func Load(trees []Tree) (Library, error) {
 			if _, _, named := catalog.MachinefileOf(rest); !named {
 				return Library{}, refusedFile("machinefile", catalog.MisnamedMachinefile(file, "machinefiles/<name>"+catalog.MachinefileSuffix))
 			}
-			mf, err := catalog.DecodeMachinefile(file, f.Body)
+			name, overlay, _ := catalog.MachinefileOf(path.Base(f.Path))
+			decoded := func() (catalog.Machinefile, error) { return catalog.DecodeMachinefile(file, f.Body) }
+			if f.Slot != "" {
+				decoded = func() (catalog.Machinefile, error) {
+					return catalog.DecodeSlottedMachinefile(file, name, f.Slot, f.Body)
+				}
+			}
+			mf, err := decoded()
 			if err != nil {
 				return Library{}, refusedFile("machinefile", err)
 			}
-			name, overlay, _ := catalog.MachinefileOf(path.Base(f.Path))
 			placed := Placed{File: mf, Kind: t.Kind, Path: file, Body: f.Body}
 			switch {
 			case overlay && t.Kind != User:

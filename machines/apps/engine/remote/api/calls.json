@@ -885,11 +885,13 @@
         "machinefile.newer-schema",
         "machinefile.no-method",
         "machinefile.not-found",
+        "machinefile.outside-the-source",
         "machinefile.siblings-differ",
         "machinefile.source-unavailable",
         "machinefile.unknown-key",
         "machinefile.unknown-package",
         "machinefile.unpinnable",
+        "machinefile.upgrade-on-a-computer",
         "machinefile.vm-on-a-computer"
       ],
       "in": "ExplainIn",

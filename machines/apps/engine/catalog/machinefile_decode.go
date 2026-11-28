@@ -42,18 +42,66 @@ var (
 const PublicPorts = 3
 
 func DecodeMachinefile(file string, body []byte) (Machinefile, error) {
-	var mf Machinefile
-	if _, _, ok := MachinefileOf(file); !ok {
+	name, overlay, ok := MachinefileOf(file)
+	if !ok {
 		return Machinefile{}, MisnamedMachinefile(file, "<name>"+MachinefileSuffix)
 	}
+	return decodeMachinefile(file, name, overlay, "", body)
+}
+
+// value: the slot a shared source's file stands in, which says what it may
+// say (ADR-109): a kit, `kits/<name>.kit.yaml`, only ever extended; a
+// computer's own file, `machines/<computer>/host.machine.yaml`; a VM of
+// that computer, `machines/<computer>/<vm>.machine.yaml`.
+
+type Slot string
+
+const (
+	SlotKit      Slot = "kit"
+	SlotComputer Slot = "computer"
+	SlotVM       Slot = "vm"
+)
+
+func DecodeSlottedMachinefile(file, name string, slot Slot, body []byte) (Machinefile, error) {
+	// invariant: a shared source's file is named by its slot, never by its
+	// file's base, and its slot bounds what it says.
+	return decodeMachinefile(file, name, false, slot, body)
+}
+
+func decodeMachinefile(file, name string, overlay bool, slot Slot, body []byte) (Machinefile, error) {
+	var mf Machinefile
 	doc, err := strict(file, body, machinefiles, &mf)
 	if err != nil {
 		return Machinefile{}, err
 	}
-	if err := checkMachinefile(file, doc, mf); err != nil {
+	if err := checkMachinefile(file, name, overlay, doc, mf); err != nil {
 		return Machinefile{}, err
 	}
+	if problem, key := checkSlot(slot, mf); problem != "" {
+		return Machinefile{}, refused(file, doc, key, problem)
+	}
 	return mf, nil
+}
+
+// value: what a slot refuses, and the key it is refused at: a kit that
+// says what a machine is or how it runs, a computer's file that says no
+// computer, a VM's that says no workspace or server.
+func checkSlot(slot Slot, mf Machinefile) (problem, key string) {
+	kind := RoleComputer
+	if mf.Machine != nil {
+		kind = mf.Machine.Kind
+	}
+	switch {
+	case slot == SlotKit && mf.Machine != nil:
+		return "a kit composes what a machine carries: `machine` is a machine file's, under machines/<computer>/", "machine"
+	case slot == SlotKit && mf.VM != nil:
+		return "a kit composes what a machine carries: `vm` is a machine file's, under machines/<computer>/", "vm"
+	case slot == SlotComputer && (mf.Machine == nil || kind != RoleComputer):
+		return "`host.machine.yaml` is its computer's own file: it says `machine: { kind: computer }`", "machine"
+	case slot == SlotVM && (mf.Machine == nil || kind == RoleComputer):
+		return "a VM's file says `machine: { kind: workspace }` or `server`: a computer's own file is `host.machine.yaml`", "machine"
+	}
+	return "", ""
 }
 
 func MisnamedMachinefile(file, rule string) *FileError {
@@ -78,8 +126,7 @@ func MachinefileOf(file string) (name string, overlay, ok bool) {
 // it judges. What needs the catalog or the files a Machinefile extends (an
 // package, an option, a method for the system, vm on a computer) is the
 // resolution's, never the file's.
-func checkMachinefile(file string, doc *yaml.Node, mf Machinefile) error {
-	name, overlay, _ := MachinefileOf(file)
+func checkMachinefile(file, name string, overlay bool, doc *yaml.Node, mf Machinefile) error {
 	if problem := checkHead(mf, name, overlay); problem != "" {
 		key := "name"
 		if overlay {

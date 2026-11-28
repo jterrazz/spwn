@@ -1,0 +1,28 @@
+description: 'a computer binds to its own file of the shared source through its kits, never to another''s'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git"}} | .sources = {"https://example.com/studio.git": {head: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"machines/macbook-pro/host.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\nextends: [essentials]\n", "machines/mac-mini/host.machine.yaml": "machinefile: station.machinefile/v1\nname: mac-mini\nmachine: { kind: computer, system: { os: macos } }\napps: [gh]\n", "kits/essentials.kit.yaml": "machinefile: station.machinefile/v1\nname: essentials\napps: [jq]\n"}}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machinefile apply --machinefile macbook-pro'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of jq
+          ●	jq	1.8.1	brew
+    - command: 'machinefile explain apps.jq'
+      exit: 0
+      stdout: |
+          # macbook-pro
+          	apps.jq	listed	shared	essentials
+          	apps.jq.method	brew	lock	macbook-pro
+          	apps.jq.because	locked	lock	macbook-pro
+    - command: 'machinefile explain apps.jq --json | /usr/bin/jq -c ''.files, [.values[] | [.key, .origin, .from, .file]]'''
+      exit: 0
+      stdout: |
+          [{"name":"essentials","origin":"shared","file":"studio@1a2b3c4/kits/essentials.kit.yaml"},{"name":"macbook-pro","origin":"shared","file":"studio@1a2b3c4/machines/macbook-pro/host.machine.yaml"}]
+          [["apps.jq","shared","essentials","studio@1a2b3c4/kits/essentials.kit.yaml"],["apps.jq.method","lock","macbook-pro","~/.config/station/machinefiles/macbook-pro.lock"],["apps.jq.because","lock","macbook-pro","~/.config/station/machinefiles/macbook-pro.lock"]]
+    - command: 'machinefile explain --machinefile mac-mini'
+      exit: 2
+      stderr: |
+          Error: no Machinefile named mac-mini
+          Hint: give this machine one: station init --machinefile <name>

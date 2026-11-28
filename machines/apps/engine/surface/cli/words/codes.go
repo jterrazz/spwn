@@ -323,6 +323,12 @@ func Codes() map[fail.Code]Wording {
 		machinefilecalls.Unavailable: func(e *fail.Error) (string, string) {
 			return "the source " + e.Subject + " cannot be read: " + e.Detail["cause"], "check its url in ~/.config/station/preferences.json"
 		},
+		machinefilecalls.OutsideTheSource: func(e *fail.Error) (string, string) {
+			return "the source " + e.Subject + " reads " + strconv.Quote(e.Detail["at"]) + " outside its clone: " + e.Detail["problem"], "Machines reads a shared source inside its clone alone: check the source's `path` in ~/.config/station/preferences.json, and take the link out of its repository"
+		},
+		machinefilecalls.UpgradeOnComputer: func(e *fail.Error) (string, string) {
+			return e.Detail["says"] + " (" + e.Detail["file"] + ") says run.upgrade, which " + e.Subject + "'s chain reads: a computer runs no line of the shared source at night", "remove run.upgrade from " + e.Detail["says"] + ": a computer's nights run what its packages say"
+		},
 		imagescalls.Unknown: func(e *fail.Error) (string, string) {
 			return "no image \"" + e.Subject + "\"", "station images"
 		},

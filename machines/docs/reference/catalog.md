@@ -15,7 +15,7 @@ A package of the catalog is one YAML file in the schema `station.package/v1`: wh
 
 ## The file
 
-The built-in packages are embedded in the binary, `catalog/packages/<category>/<name>.yaml`: the folder is the package's category (`git`, `ai-agents`, `security`...), the file's name its `name`. Its first key names the schema, `package: station.package/v1`. The owner's own packages, `~/.config/station/catalog/<category>/<name>.yaml`, and a shared source's stand above them: a same-name package replaces the built-in one whole, never merged ([Machinefiles](machinefiles.md#sources-and-origins)), and an owner's file refused stops every command that reads the catalog at its line ([what is read today](machinefiles.md#what-is-read-today)).
+The built-in packages are embedded in the binary, `catalog/packages/<category>/<name>.yaml`: the folder is the package's category (`git`, `ai-agents`, `security`...), the file's name its `name`. Its first key names the schema, `package: station.package/v1`. The owner's own packages, `~/.config/station/catalog/<category>/<name>.yaml`, and a shared source's, `packages/<category>/<name>.yaml` of its repository ([the shared layout](machinefiles.md#the-shared-layout)), stand above them: a same-name package replaces the built-in one whole, never merged ([Machinefiles](machinefiles.md#sources-and-origins)), and an owner's file refused stops every command that reads the catalog at its line ([what is read today](machinefiles.md#what-is-read-today)).
 
 A file is read strictly, so a typo is a refusal with its line, never a silent default:
 

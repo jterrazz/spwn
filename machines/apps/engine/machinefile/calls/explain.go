@@ -84,14 +84,18 @@ const (
 	BadValue       fail.Code = "machinefile.bad-value"
 	UnknownKey     fail.Code = "machinefile.unknown-key"
 	Unavailable    fail.Code = "machinefile.source-unavailable"
-	Busy           fail.Code = "machinefile.busy"
-	CatalogInvalid fail.Code = "catalog.invalid"
-	CatalogNewer   fail.Code = "catalog.newer-schema"
+	// value: a shared source read through a way that leaves its clone.
+	OutsideTheSource fail.Code = "machinefile.outside-the-source"
+	// value: a computer's chain reading run.upgrade from the shared source.
+	UpgradeOnComputer fail.Code = "machinefile.upgrade-on-a-computer"
+	Busy              fail.Code = "machinefile.busy"
+	CatalogInvalid    fail.Code = "catalog.invalid"
+	CatalogNewer      fail.Code = "catalog.newer-schema"
 )
 
 func resolution() []fail.Code {
 	// value: every code reading the Machinefile may end in.
-	return []fail.Code{NotFound, Invalid, NewerSchema, Mixin, VMOnComputer, Cycle, SiblingsDiffer, ChainTooLong, NoMethod, Unpinnable, UnknownPackage, BadValue, Unavailable, CatalogInvalid, CatalogNewer}
+	return []fail.Code{NotFound, Invalid, NewerSchema, Mixin, VMOnComputer, Cycle, SiblingsDiffer, ChainTooLong, NoMethod, Unpinnable, UnknownPackage, BadValue, Unavailable, OutsideTheSource, UpgradeOnComputer, CatalogInvalid, CatalogNewer}
 }
 
 type ExplainIn struct {
@@ -247,6 +251,8 @@ func Worded(err error) error {
 		value     *machinefile.BadValueError
 		key       *machinefile.UnknownKeyError
 		gone      *contract.UnavailableError
+		outside   *contract.OutsideError
+		upgrade   *machinefile.UpgradeOnComputerError
 		newer     *catalog.NewerSchemaError
 		fileError *catalog.FileError
 	)
@@ -296,6 +302,10 @@ func Worded(err error) error {
 		return refused(fail.NotFound, UnknownKey, key.Key, map[string]string{"name": key.Name})
 	case errors.As(err, &gone):
 		return refused(fail.Failed, Unavailable, gone.Source, map[string]string{"cause": gone.Cause.Error()})
+	case errors.As(err, &outside):
+		return refused(fail.Refused, OutsideTheSource, outside.Source, map[string]string{"at": outside.At, "problem": outside.Problem})
+	case errors.As(err, &upgrade):
+		return refused(fail.Refused, UpgradeOnComputer, upgrade.Name, map[string]string{"says": upgrade.Says, "file": upgrade.File})
 	}
 	return err
 }

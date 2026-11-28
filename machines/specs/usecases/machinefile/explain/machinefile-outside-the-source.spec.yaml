@@ -1,0 +1,32 @@
+description: 'a shared source whose path climbs out of its clone, or is absolute, is refused unread'
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.machinefile = {source: {name: "studio", url: "https://example.com/studio.git", path: "../elsewhere"}} | .sources = {"https://example.com/studio.git": {head: "1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d", commits: {"1a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d": {"machines/macbook-pro/host.machine.yaml": "machinefile: station.machinefile/v1\nname: macbook-pro\nmachine: { kind: computer, system: { os: macos } }\napps: [gh]\n"}}}}'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machinefile explain apps'
+      exit: 2
+      stderr: |
+          Error: the source studio reads "../elsewhere" outside its clone: a source's `path` is a folder of it, relative and with no `..`
+          Hint: Machines reads a shared source inside its clone alone: check the source's `path` in ~/.config/station/preferences.json, and take the link out of its repository
+    - command: 'machinefile explain apps --json'
+      exit: 2
+      stdout: |
+          {
+            "schema": "station.error/v1",
+            "type": "refused",
+            "code": "machinefile.outside-the-source",
+            "subject": "studio",
+            "message": "the source studio reads \"../elsewhere\" outside its clone: a source's `path` is a folder of it, relative and with no `..`",
+            "hint": "Machines reads a shared source inside its clone alone: check the source's `path` in ~/.config/station/preferences.json, and take the link out of its repository",
+            "fix": null
+          }
+      stderr: |
+          Error: the source studio reads "../elsewhere" outside its clone: a source's `path` is a folder of it, relative and with no `..`
+          Hint: Machines reads a shared source inside its clone alone: check the source's `path` in ~/.config/station/preferences.json, and take the link out of its repository
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["macbook-pro"].preferences.machinefile.source.path = "/etc"'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machinefile plan'
+      exit: 2
+      stderr: |
+          Error: the source studio reads "/etc" outside its clone: a source's `path` is a folder of it, relative and with no `..`
+          Hint: Machines reads a shared source inside its clone alone: check the source's `path` in ~/.config/station/preferences.json, and take the link out of its repository
