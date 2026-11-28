@@ -3,9 +3,9 @@
   - searchbox "Search the catalog"
   - group "Show":
     - button "On your machines1"
-    - button "Everything96" [pressed]
+    - button "Everything97" [pressed]
   - group "Category":
-    - button "All apps96" [pressed]
+    - button "All apps97" [pressed]
     - button "Package Managers8"
     - button "Runtimes7"
     - button "Shell & Terminal5"
@@ -15,7 +15,7 @@
     - button "Containers & VMs6"
     - button "Deploy4"
     - button "AI Agents8"
-    - button "AI Tooling5"
+    - button "AI Tooling6"
     - button "AI Apps3"
     - button "Browsers2"
     - button "Communication4"
@@ -95,7 +95,8 @@
     - button "herdr-app Desktop app that keeps coding agents running in the background not installed"
     - button "herdr-core Herdr's engine and its hc command not installed"
     - button "opencode Open-source AI coding agent CLI not installed"
-    - paragraph: AI Tooling 5
+    - paragraph: AI Tooling 6
+    - button "caveman-cli The caveman runtime, its terse-output modes and stats for coding agents not installed"
     - button "inferrs TurboQuant LLM inference server not installed"
     - button "ollama Run large language models locally, on the Mac's GPU not installed"
     - button "plannotator Review AI agent plans and code before committing not installed"

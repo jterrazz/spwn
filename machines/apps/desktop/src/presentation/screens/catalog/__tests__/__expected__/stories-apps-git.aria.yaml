@@ -3,9 +3,9 @@
   - searchbox "Search the catalog"
   - group "Show":
     - button "On your machines6"
-    - button "Everything96" [pressed]
+    - button "Everything97" [pressed]
   - group "Category":
-    - button "All apps96"
+    - button "All apps97"
     - button "Package Managers8"
     - button "Runtimes7"
     - button "Shell & Terminal5"
@@ -15,7 +15,7 @@
     - button "Containers & VMs6"
     - button "Deploy4"
     - button "AI Agents8"
-    - button "AI Tooling5"
+    - button "AI Tooling6"
     - button "AI Apps3"
     - button "Browsers2"
     - button "Communication4"
