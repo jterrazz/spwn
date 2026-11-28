@@ -169,22 +169,18 @@ func (p Plan) WithWaiting(n Nights) Plan {
 	return p
 }
 
-func (p Plan) Script() (Script, bool) {
+func (p Plan) PhaseScripts() []Script {
 	// value: the owner's lines this plan's phase runs once its packages are
-	// carried out: the image's as it is built, the boot's at a first
-	// start; apply's phase runs none.
+	// carried out, each file's a step in the chain's order: the image's as
+	// it is built, the boot's at a first start; apply's phase runs none.
 	switch p.Phase {
 	case catalog.PhaseImage:
-		return p.ScriptOf(RunImage)
+		return ScriptsOf(p.Scripts, RunImage)
 	case catalog.PhaseBoot:
-		return p.ScriptOf(RunBoot)
+		return ScriptsOf(p.Scripts, RunBoot)
 	case catalog.PhaseApply:
 	}
-	return Script{}, false
-}
-
-func (p Plan) ScriptOf(phase RunPhase) (Script, bool) {
-	return Resolved{Scripts: p.Scripts}.ScriptOf(phase)
+	return nil
 }
 
 func InPhase(s Step, phase catalog.Phase) bool {
@@ -578,8 +574,7 @@ func (p Plan) Calm() bool {
 	// value: the plan holds nothing for apply to do: no install, no setting
 	// set, no extra `apply --remove` would take back or let go of, no
 	// block to write or let go of, none of the owner's lines to run.
-	_, runs := p.Script()
-	return !runs && !slices.ContainsFunc(p.Lines, Line.Acts) && !slices.ContainsFunc(p.Extra, ExtraLine.Forgets) && !p.WritesBlocks() && !slices.ContainsFunc(p.Blocks, Block.Forgets)
+	return len(p.PhaseScripts()) == 0 && !slices.ContainsFunc(p.Lines, Line.Acts) && !slices.ContainsFunc(p.Extra, ExtraLine.Forgets) && !p.WritesBlocks() && !slices.ContainsFunc(p.Blocks, Block.Forgets)
 }
 
 func (p Plan) Interactive(remove bool) []Asked {
@@ -716,15 +711,19 @@ type Applied struct {
 	Plan    Plan
 	Done    []Done
 	Removed []Done
-	Ran     *Ran
+	// value: each file's lines of the phase as they ended, in the order
+	// they ran.
+	Ran []Ran
 	// value: what each block of ~/.zshrc the plan carries came to.
 	Blocks      []BlockDone
 	Bound       string
 	Interrupted bool
 }
 
-// value: the owner's lines of a phase once they ran: how they ended, ok,
-// or broken with their exit and the last line they said.
+// value: one file's lines of a phase once their turn came: how they
+// ended, ok, or broken with their exit and the last line they said; or
+// absent, not run since a file's lines before them failed, Detail naming
+// that file.
 
 type Ran struct {
 	Script Script
@@ -795,7 +794,7 @@ func (p Plan) UpgradeNeeds() []Asked {
 type Upgraded struct {
 	Plan        Plan
 	Done        []Done
-	Ran         *Ran
+	Ran         []Ran
 	Lock        LockDiff
 	Waiting     []Waiting
 	Interrupted bool

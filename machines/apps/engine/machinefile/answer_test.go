@@ -65,11 +65,11 @@ func TestARunAndAnUpgradeLeaveTheirCallScreened(t *testing.T) {
 	line, script := carried()
 	plan := machinefile.Plan{Lines: []machinefile.Line{line}, Scripts: []machinefile.Script{script}}
 	done := machinefile.Done{Line: line, State: catalog.StateBroken, Detail: "exited 1: " + planted}
-	ran := &machinefile.Ran{Script: script, State: catalog.StateBroken, Detail: "exited 1: station: exit 1 at: export KEY=" + planted}
+	ran := []machinefile.Ran{{Script: script, State: catalog.StateBroken, Detail: "exited 1: station: exit 1 at: export KEY=" + planted}}
 	applied := machinefile.Applied{Plan: plan, Done: []machinefile.Done{done}, Removed: []machinefile.Done{done}, Ran: ran,
 		Blocks: []machinefile.BlockDone{{Block: machinefile.Block{ID: "served", Zsh: planted}, Detail: "write refused: " + planted}}}
 	leaked(t, "the run's answer", applied.Answered())
-	if !strings.Contains(ran.Detail, planted) {
+	if !strings.Contains(ran[0].Detail, planted) {
 		t.Error("answering the run changed the run it reports")
 	}
 	upgraded := machinefile.Upgraded{Plan: plan, Done: []machinefile.Done{done}, Ran: ran, Unpulled: "fetch refused for https://bot:" + planted + "@example.com/x"}

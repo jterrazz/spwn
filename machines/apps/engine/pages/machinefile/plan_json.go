@@ -51,8 +51,8 @@ type BlockJSON struct {
 	Detail    string `json:"detail,omitempty"`
 }
 
-// value: the owner's lines of the plan's phase, the Machinefile that says
-// them, and once run how they ended.
+// value: one Machinefile's lines of the plan's phase, that Machinefile,
+// and once their turn came how they ended (`absent` when not run).
 
 type RunJSON struct {
 	Phase       string   `json:"phase"`
@@ -62,16 +62,17 @@ type RunJSON struct {
 	Detail      string   `json:"detail,omitempty"`
 }
 
-func runJSON(s machinefile.Script) *RunJSON {
-	return &RunJSON{Phase: string(s.Phase), Machinefile: s.Origin.Name, Lines: machinefile.ScriptLines(s.Lines)}
+func runJSON(s machinefile.Script) RunJSON {
+	return RunJSON{Phase: string(s.Phase), Machinefile: s.Origin.Name, Lines: machinefile.ScriptLines(s.Lines)}
 }
 
-func ranJSON(r *machinefile.Ran) *RunJSON {
-	if r == nil {
-		return nil
+func ranJSON(ran []machinefile.Ran) []RunJSON {
+	out := make([]RunJSON, 0, len(ran))
+	for _, r := range ran {
+		j := runJSON(r.Script)
+		j.Result, j.Detail = string(r.State), r.Detail
+		out = append(out, j)
 	}
-	out := runJSON(r.Script)
-	out.Result, out.Detail = string(r.State), r.Detail
 	return out
 }
 
@@ -83,7 +84,7 @@ type PlanJSON struct {
 	Extra       []ExtraJSON `json:"extra"`
 	Blocks      []BlockJSON `json:"blocks,omitempty"`
 	AfterApply  []string    `json:"after_apply"`
-	Run         *RunJSON    `json:"run,omitempty"`
+	Run         []RunJSON   `json:"run,omitempty"`
 	Bound       string      `json:"bound,omitempty"`
 }
 
@@ -99,8 +100,9 @@ func lineJSON(l machinefile.Line, result, detail string) LineJSON {
 }
 
 func PlanContract(schema string, p machinefile.Plan) PlanJSON {
-	// value: station.machinefile.plan/v2 and station.machinefile.drift/v3:
-	// the plan's needs, its lines, what is extra and what follows an apply.
+	// value: station.machinefile.plan/v3 and station.machinefile.drift/v4:
+	// the plan's needs, its lines, what is extra, what follows an apply,
+	// and each file's lines of its phase.
 	out := PlanJSON{Schema: schema, Machinefile: p.Name, Needs: []NeedJSON{}, Lines: []LineJSON{}, Extra: []ExtraJSON{}, AfterApply: []string{}}
 	for _, a := range p.Needs {
 		out.Needs = append(out.Needs, NeedJSON{Need: string(a.Need), Packages: a.Packages})
@@ -117,14 +119,14 @@ func PlanContract(schema string, p machinefile.Plan) PlanJSON {
 	for _, r := range p.Restarts {
 		out.AfterApply = append(out.AfterApply, string(r))
 	}
-	if s, ok := p.Script(); ok {
-		out.Run = runJSON(s)
+	for _, s := range p.PhaseScripts() {
+		out.Run = append(out.Run, runJSON(s))
 	}
 	return out
 }
 
 func AppliedContract(schema string, a machinefile.Applied, done, removed []Worded) PlanJSON {
-	// value: station.machinefile.apply/v2: the plan's shape, each line with
+	// value: station.machinefile.apply/v3: the plan's shape, each line with
 	// what the run did with it, then each extra removed, and each block the
 	// run judged with what it did.
 	out := PlanContract(schema, a.Plan)

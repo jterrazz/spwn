@@ -34,7 +34,7 @@ func (a Applied) Answered() Applied {
 	a.Plan = a.Plan.Answered()
 	a.Done = each(a.Done, Done.answered)
 	a.Removed = each(a.Removed, Done.answered)
-	a.Ran = a.Ran.answered()
+	a.Ran = each(a.Ran, Ran.answered)
 	a.Blocks = each(a.Blocks, func(b BlockDone) BlockDone {
 		b.Block, b.Detail = b.answered(), secret.Kept(b.Detail)
 		return b
@@ -45,7 +45,7 @@ func (a Applied) Answered() Applied {
 func (u Upgraded) Answered() Upgraded {
 	u.Plan = u.Plan.Answered()
 	u.Done = each(u.Done, Done.answered)
-	u.Ran = u.Ran.answered()
+	u.Ran = each(u.Ran, Ran.answered)
 	u.Unpulled = secret.Kept(u.Unpulled)
 	return u
 }
@@ -69,13 +69,9 @@ func (d Done) answered() Done {
 	return d
 }
 
-func (r *Ran) answered() *Ran {
-	if r == nil {
-		return nil
-	}
-	out := *r
-	out.Script, out.Detail = r.Script.answered(), secret.Kept(r.Detail)
-	return &out
+func (r Ran) answered() Ran {
+	r.Script, r.Detail = r.Script.answered(), secret.Kept(r.Detail)
+	return r
 }
 
 func (s Script) answered() Script {

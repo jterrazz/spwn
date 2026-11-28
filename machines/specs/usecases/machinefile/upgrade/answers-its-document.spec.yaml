@@ -1,4 +1,4 @@
-description: 'update --json answers station.machinefile.upgrade/v2: its Machinefile and what moved in the lock'
+description: 'update --json answers station.machinefile.upgrade/v3: its Machinefile and what moved in the lock'
 fixture: ../../__fixtures__/homebrew/
 env: versions
 runs:
@@ -17,4 +17,4 @@ runs:
     - command: 'machinefile update --json | /usr/bin/jq -r ''[.schema, .machinefile, (.lock[] | .app + ": " + .was + " -> " + .now)] | @tsv'''
       exit: 0
       stdout: |
-          station.machinefile.upgrade/v2	macbook-pro	gh: 2.97.0 by brew -> 2.98.0 by brew
+          station.machinefile.upgrade/v3	macbook-pro	gh: 2.97.0 by brew -> 2.98.0 by brew

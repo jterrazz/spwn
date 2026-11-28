@@ -24,4 +24,4 @@ runs:
     - command: 'machinefile plan --phase boot --json | /usr/bin/jq -c .run'
       exit: 0
       stdout: |
-          {"phase":"boot","machinefile":"linux-1","lines":["export API_KEY=withheld"]}
+          [{"phase":"boot","machinefile":"linux-1","lines":["export API_KEY=withheld"]}]

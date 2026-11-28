@@ -27,7 +27,7 @@ runs:
     - command: 'machinefile plan --phase boot --json | /usr/bin/jq -c .run'
       exit: 0
       stdout: |
-          {"phase":"boot","machinefile":"linux-1","lines":["git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os","cd ~/Developer/studio-os && make install"]}
+          [{"phase":"boot","machinefile":"linux-1","lines":["git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os","cd ~/Developer/studio-os && make install"]}]
     - command: 'machinefile plan'
       exit: 0
       stdout: |

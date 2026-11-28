@@ -34,7 +34,7 @@ var Upgrade = call.Call[Deps, UpgradeIn, machinefile.Upgraded]{
 	// version a method holds no range around kept; then the owner's
 	// run.upgrade lines; then the lock written anew, its moves shown, and
 	// each newer version past a range said waiting.
-	Name: "machinefile.upgrade", Document: 2, Where: call.AtTarget, Applies: machine.Anywhere, Journal: keptUpgrade,
+	Name: "machinefile.upgrade", Document: 3, Where: call.AtTarget, Applies: machine.Anywhere, Journal: keptUpgrade,
 	Errors: []fail.Code{NotFound, NeedsTerminal, Busy},
 	Run: func(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machinefile.Upgraded, error) {
 		// invariant: every night is recorded, one that failed with its
@@ -113,9 +113,7 @@ func upgrade(ctx context.Context, d Deps, in UpgradeIn, p call.Progress) (machin
 		}
 		out.Done = append(out.Done, update(ctx, d, l, p))
 	}
-	if s, ok := plan.ScriptOf(machinefile.RunUpgrade); ok && ctx.Err() == nil {
-		out.Ran = ran(ctx, d, s, p)
-	}
+	out.Ran = runAll(ctx, d, machinefile.ScriptsOf(plan.Scripts, machinefile.RunUpgrade), p)
 	out.Interrupted = ctx.Err() != nil
 	out.Waiting = machinefile.WaitingOf(out.Done)
 	now := machinefile.Relocked(plan, out.Done, plan.Source)

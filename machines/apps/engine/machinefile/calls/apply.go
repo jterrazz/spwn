@@ -86,7 +86,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 	// by the method and at the version its step chose, or set by
 	// settings.apply, one at a time in the plan's order; then the owner's
 	// lines of its phase.
-	Name: "machinefile.apply", Document: 2, Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove, Journal: keptApply,
+	Name: "machinefile.apply", Document: 3, Where: call.AtTarget, Applies: machine.Anywhere, Confirm: confirm.Remove, Journal: keptApply,
 	Errors:    []fail.Code{NotFound, NeedsTerminal, NameTaken, BadPhase, confirm.YesNeeded, Busy},
 	Abilities: []string{LeaveAskingAbility, WithinAbility},
 	Run: func(ctx context.Context, d Deps, in ApplyIn, p call.Progress) (answer machinefile.Applied, err error) {
@@ -151,9 +151,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			removed, blocks := r.remove(ctx, plan)
 			out.Removed, out.Blocks = removed, append(out.Blocks, blocks...)
 		}
-		if s, ok := plan.Script(); ok && ctx.Err() == nil {
-			out.Ran = ran(ctx, d, s, p)
-		}
+		out.Ran = runAll(ctx, d, plan.PhaseScripts(), p)
 		out.Interrupted = ctx.Err() != nil
 		if err := relock(ctx, d, plan, out.Done); err != nil {
 			return out, err
@@ -170,7 +168,31 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 	},
 }
 
-// invariant: the owner's lines of a phase run once its packages are carried
+// invariant: each file's lines of a phase run in the chain's order, and
+// the first that ends broken ends the phase: the files' after it are not
+// run, each said absent after the file that failed. A run interrupted
+// before a file's turn runs none of the rest and says nothing of them.
+func runAll(ctx context.Context, d Deps, scripts []machinefile.Script, p call.Progress) []machinefile.Ran {
+	var out []machinefile.Ran
+	failed := ""
+	for _, s := range scripts {
+		if failed != "" {
+			out = append(out, machinefile.Ran{Script: s, State: catalog.StateAbsent, Detail: "after " + failed + "'s lines, which failed"})
+			continue
+		}
+		if ctx.Err() != nil {
+			break
+		}
+		r := ran(ctx, d, s, p)
+		if r.State == catalog.StateBroken {
+			failed = s.Origin.Name
+		}
+		out = append(out, *r)
+	}
+	return out
+}
+
+// invariant: one file's lines of a phase run once its packages are carried
 // out, as this machine's user from its home, and stop at the first line
 // that fails: their run ends broken, with the last words they said
 // (saidLines), and what was applied stays applied.

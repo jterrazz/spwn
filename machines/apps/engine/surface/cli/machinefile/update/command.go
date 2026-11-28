@@ -49,9 +49,9 @@ func Command(d Deps, env kit.Env) *cobra.Command {
 					failed++
 				}
 			}
-			if out.Ran != nil {
+			for _, r := range out.Ran {
 				total, noun = total+1, "steps"
-				if out.Ran.State == catalog.StateBroken {
+				if r.State == catalog.StateBroken {
 					failed++
 				}
 			}

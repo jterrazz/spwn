@@ -36,7 +36,7 @@ var Plan = call.Call[Deps, PlanIn, machinefile.Plan]{
 	// value: what apply would do here: what it asks of the owner, then
 	// each package to install, set, adopt or leave, what is extra, and what
 	// has to happen once it is applied. It changes nothing.
-	Name: "machinefile.plan", Document: 2, Where: call.AtTarget, Applies: machine.Anywhere,
+	Name: "machinefile.plan", Document: 3, Where: call.AtTarget, Applies: machine.Anywhere,
 	Errors: []fail.Code{NotFound, BadPhase},
 	Run: func(ctx context.Context, d Deps, in PlanIn, _ call.Progress) (machinefile.Plan, error) {
 		if bad := badPhase(in.Phase, false); bad != nil {
@@ -60,7 +60,7 @@ var Drift = call.Call[Deps, DriftIn, machinefile.Drift]{
 	// outdated, changed, not managed, extra or unknown), then counted by
 	// chapter, a VM's ports and accounts included, with what apply would do
 	// and the verdict. It never acts.
-	Name: "machinefile.drift", Document: 3, Where: call.InProcess, Applies: machine.Anywhere,
+	Name: "machinefile.drift", Document: 4, Where: call.InProcess, Applies: machine.Anywhere,
 	Errors: []fail.Code{NotFound},
 	Run: func(ctx context.Context, d Deps, in DriftIn, _ call.Progress) (answer machinefile.Drift, err error) {
 		defer func() { answer = answer.Answered() }()

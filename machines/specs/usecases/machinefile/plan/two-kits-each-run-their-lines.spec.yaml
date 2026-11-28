@@ -1,0 +1,72 @@
+description: 'two mixins that each say run.boot both run, in the chain''s order, a broken one stopping the rest'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/node-kit.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: node-kit
+          run:
+            boot: |
+              npm install --global pnpm
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/repo-kit.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: repo-kit
+          run:
+            boot: |
+              git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          extends: [node-kit, repo-kit]
+          machine: { kind: workspace, system: { os: ubuntu } }
+          run:
+            boot: |
+              cd ~/Developer/studio-os && make install
+      exit: 0
+    - command: 'machinefile plan --phase boot'
+      exit: 0
+      stdout: |
+          # To run
+          ○	npm install --global pnpm	run.boot	node-kit
+          ○	git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os	run.boot	repo-kit
+          ○	cd ~/Developer/studio-os && make install	run.boot	linux-1
+    - command: 'machinefile plan --phase boot --json | /usr/bin/jq -c ''[.run[] | .machinefile]'''
+      exit: 0
+      stdout: |
+          ["node-kit","repo-kit","linux-1"]
+    - command: 'machinefile explain run'
+      exit: 0
+      stdout: |
+          # linux-1
+          	run.boot	npm install --global pnpm	user	node-kit
+          	run.boot	git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os	user	repo-kit
+          	run.boot	cd ~/Developer/studio-os && make install	user	linux-1
+    - command: 'machinefile apply --phase boot --yes'
+      exit: 0
+      stdout: |
+          # To run
+          ○	npm install --global pnpm	run.boot	node-kit
+          ○	git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os	run.boot	repo-kit
+          ○	cd ~/Developer/studio-os && make install	run.boot	linux-1
+          ●	run.boot		node-kit	1 line
+          ●	run.boot		repo-kit	1 line
+          ●	run.boot		linux-1	1 line
+    - command: 'world fault Shell.Run 1 times'
+      exit: 0
+    - command: 'machinefile apply --phase boot --yes'
+      exit: 1
+      stdout: |
+          # To run
+          ○	npm install --global pnpm	run.boot	node-kit
+          ○	git clone https://github.com/jterrazz/studio-os.git ~/Developer/studio-os	run.boot	repo-kit
+          ○	cd ~/Developer/studio-os && make install	run.boot	linux-1
+          ✗	run.boot		node-kit	1 line · exited 1: bash: line 1: the line failed; station: exit 1 at: npm install --global pnpm
+          ○	run.boot		repo-kit	1 line · not run · after node-kit's lines, which failed
+          ○	run.boot		linux-1	1 line · not run · after node-kit's lines, which failed
+      stderr: |
+          Error: 1 of 3 steps failed
+          Hint: station machinefile apply

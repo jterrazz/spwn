@@ -237,8 +237,7 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 	case !p.Calm():
 		mark = page.Absent
 		removes := p.RemovesBlocks() || slices.ContainsFunc(p.Extra, machinefile.ExtraLine.Removes)
-		_, runs := p.Script()
-		if p.WritesBlocks() || runs || slices.ContainsFunc(p.Lines, machinefile.Line.Acts) {
+		if p.WritesBlocks() || len(p.PhaseScripts()) > 0 || slices.ContainsFunc(p.Lines, machinefile.Line.Acts) {
 			hints = append(hints, page.Hint{Command: "station machinefile apply", Text: "carries it out"})
 		}
 		switch {
@@ -254,27 +253,30 @@ func Plan(p machinefile.Plan, thisMac page.Context) page.Page {
 	return page.Seal(page.Page{ID: ID, Command: "machinefile plan", Context: thisMac, Sections: sections, Hints: hints})
 }
 
-// value: the owner's lines the plan's phase runs, one row a line, each
-// with the Machinefile that says it.
+// value: the owner's lines the plan's phase runs, one row a line in the
+// order they run, each with the Machinefile that says it.
 func scriptRows(p machinefile.Plan) []page.Row {
-	s, ok := p.Script()
-	if !ok {
-		return nil
-	}
-	lines := machinefile.ScriptLines(s.Lines)
-	rows := make([]page.Row, 0, len(lines))
-	for i, l := range lines {
-		rows = append(rows, page.Row{ID: "run." + string(s.Phase) + "." + strconv.Itoa(i+1), Label: l, Mark: page.Absent, Cells: []page.Value{page.Texts("run." + string(s.Phase))}, Detail: page.Texts(s.Origin.Name)})
+	var rows []page.Row
+	for _, s := range p.PhaseScripts() {
+		for _, l := range machinefile.ScriptLines(s.Lines) {
+			rows = append(rows, page.Row{ID: "run." + string(s.Phase) + "." + strconv.Itoa(len(rows)+1), Label: l, Mark: page.Absent, Cells: []page.Value{page.Texts("run." + string(s.Phase))}, Detail: page.Texts(s.Origin.Name)})
+		}
 	}
 	return rows
 }
 
-// value: the step a phase's lines are once they ran, in a run's page.
-func ranStep(r *machinefile.Ran) []pages.RunStep {
-	if r == nil {
-		return nil
+// value: the steps a phase's lines are once their turn came, in a run's
+// page, one a file, named by its file; one not run says so.
+func ranSteps(ran []machinefile.Ran) []pages.RunStep {
+	out := make([]pages.RunStep, 0, len(ran))
+	for _, r := range ran {
+		why := []string{lineCount(len(machinefile.ScriptLines(r.Script.Lines)))}
+		if r.State == catalog.StateAbsent {
+			why = append(why, "not run")
+		}
+		out = append(out, pages.RunStep{ID: "run." + string(r.Script.Phase) + "/" + r.Script.Origin.Name, Label: "run." + string(r.Script.Phase), State: r.State, Cells: []page.Value{page.Version(""), page.Texts(r.Script.Origin.Name)}, Why: why, Detail: r.Detail})
 	}
-	return []pages.RunStep{{ID: "run." + string(r.Script.Phase), State: r.State, Cells: []page.Value{page.Version(""), page.Texts(r.Script.Origin.Name)}, Why: []string{lineCount(len(machinefile.ScriptLines(r.Script.Lines)))}, Detail: r.Detail}}
+	return out
 }
 
 // value: a condition in the owner's words.
@@ -423,12 +425,14 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 			block(b)
 		}
 	}
-	for _, s := range ranStep(a.Ran) {
+	for _, s := range ranSteps(a.Ran) {
 		steps = append(steps, s)
-		if s.State == catalog.StateBroken {
+		switch s.State {
+		case catalog.StateBroken:
 			failed++
-		} else {
+		case catalog.StateOK:
 			changed++
+		default:
 		}
 	}
 	r := pages.Run{Command: "machinefile apply", Columns: []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "version", Kind: page.KindVersion, Keep: 50}, {Key: "method", Kind: page.KindList, Keep: 30}}, Steps: steps, Empty: "packages in " + a.Plan.Name, Extra: restartsSection(a.Plan.Restarts)}

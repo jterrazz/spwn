@@ -44,11 +44,19 @@ func Contract(name string, files []machinefile.Origin, values []machinefile.Valu
 
 func Explain(name, key string, values []machinefile.Value, thisMac page.Context) page.Page {
 	// value: one row per value, its key, the value, and where it was read;
-	// a key asked explains it and every key under it.
+	// a key asked explains it and every key under it. A key several files
+	// say, each its own (`run.boot`), is a row per file, the first by its
+	// key alone.
 	cols := []page.Column{{Key: "key", Kind: page.KindListing, Keep: 100}, {Key: "value", Kind: page.KindText, Keep: 40}, {Key: "origin", Kind: page.KindText, Keep: 60}, {Key: "from", Kind: page.KindText, Keep: 50}}
 	items := make([]page.Item, 0, len(values))
+	seen := map[string]bool{}
 	for _, v := range values {
-		row := page.Row{ID: v.Key, Label: v.Key, Cells: []page.Value{page.Text(v.Text), page.Text(string(v.Origin.Kind)), page.Text(v.Origin.Name)}}
+		id := v.Key
+		if seen[id] {
+			id += "/" + v.Origin.Name
+		}
+		seen[v.Key] = true
+		row := page.Row{ID: id, Label: v.Key, Cells: []page.Value{page.Text(v.Text), page.Text(string(v.Origin.Kind)), page.Text(v.Origin.Name)}}
 		items = append(items, page.Item{Row: &row})
 	}
 	if len(items) == 0 {

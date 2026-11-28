@@ -662,13 +662,12 @@
           "$ref": "#/$defs/machinefile.Plan"
         },
         "Ran": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/machinefile.Ran"
-            },
-            {
-              "type": "null"
-            }
+          "items": {
+            "$ref": "#/$defs/machinefile.Ran"
+          },
+          "type": [
+            "array",
+            "null"
           ]
         },
         "Removed": {

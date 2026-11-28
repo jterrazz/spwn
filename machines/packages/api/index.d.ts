@@ -1823,7 +1823,7 @@ export type MachinefileApplied = {
     Done: MachinefileDone[] | null;
     Interrupted: boolean;
     Plan: MachinefilePlan;
-    Ran: MachinefileRan | null;
+    Ran: MachinefileRan[] | null;
     Removed: MachinefileDone[] | null;
 };
 
@@ -2187,7 +2187,7 @@ export type MachinefileUpgraded = {
     Interrupted: boolean;
     Lock: MachinefileLockDiff;
     Plan: MachinefilePlan;
-    Ran: MachinefileRan | null;
+    Ran: MachinefileRan[] | null;
     Unbound: boolean;
     Unpulled: string;
     Waiting: MachinefileWaiting[] | null;

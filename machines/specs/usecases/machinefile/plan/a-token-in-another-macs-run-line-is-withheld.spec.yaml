@@ -19,4 +19,4 @@ runs:
     - command: 'machinefile plan --on mac-mini --phase boot --json | /usr/bin/jq -c .run'
       exit: 0
       stdout: |
-          {"phase":"boot","machinefile":"mac-mini","lines":["export API_KEY=withheld"]}
+          [{"phase":"boot","machinefile":"mac-mini","lines":["export API_KEY=withheld"]}]

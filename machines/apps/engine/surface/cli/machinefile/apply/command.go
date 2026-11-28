@@ -68,7 +68,7 @@ func Run(ctx context.Context, d Deps, env kit.Env, in Input, io kit.IO) error {
 		return err
 	})
 	steps.Stop()
-	if len(out.Done) == 0 && len(out.Removed) == 0 && out.Ran == nil {
+	if len(out.Done) == 0 && len(out.Removed) == 0 && len(out.Ran) == 0 {
 		return err
 	}
 	done, removed := worded(out.Done), worded(out.Removed)
@@ -90,9 +90,9 @@ func Run(ctx context.Context, d Deps, env kit.Env, in Input, io kit.IO) error {
 			failed++
 		}
 	}
-	if out.Ran != nil {
+	for _, r := range out.Ran {
 		total, noun = total+1, "steps"
-		if out.Ran.State == catalog.StateBroken {
+		if r.State == catalog.StateBroken {
 			failed++
 		}
 	}

@@ -122,7 +122,7 @@ func Upgraded(u machinefile.Upgraded, done []Worded, thisMac page.Context) page.
 			updated++
 		}
 	}
-	for _, s := range ranStep(u.Ran) {
+	for _, s := range ranSteps(u.Ran) {
 		steps = append(steps, s)
 		if s.State == catalog.StateBroken {
 			failed++
@@ -170,7 +170,7 @@ type UpgradedJSON struct {
 	Source []string `json:"source,omitempty"`
 	// value: each newer version past its range, waiting for the owner.
 	Waiting     []WaitingJSON `json:"waiting"`
-	Run         *RunJSON      `json:"run,omitempty"`
+	Run         []RunJSON     `json:"run,omitempty"`
 	Interrupted bool          `json:"interrupted"`
 	// value: why the shared source was not pulled, when it was not.
 	Unpulled string `json:"unpulled,omitempty"`
@@ -185,7 +185,7 @@ type WaitingJSON struct {
 }
 
 func UpgradedContract(schema string, u machinefile.Upgraded, done []Worded) UpgradedJSON {
-	// value: station.machinefile.upgrade/v2: each app as the upgrade left
+	// value: station.machinefile.upgrade/v3: each app as the upgrade left
 	// it, and what moved in the lock.
 	out := UpgradedJSON{Schema: schema, Machinefile: u.Plan.Name, Lines: []LineJSON{}, Lock: []LockChangeJSON{}, Waiting: []WaitingJSON{}, Run: ranJSON(u.Ran), Interrupted: u.Interrupted, Unpulled: u.Unpulled}
 	for _, w := range u.Waiting {

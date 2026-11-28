@@ -845,7 +845,7 @@
     },
     {
       "name": "machinefile.apply",
-      "schema": "station.machinefile.apply/v2",
+      "schema": "station.machinefile.apply/v3",
       "where": "at-target",
       "confirm": "remove",
       "consequence": "%s leaves this machine; its data stays.",
@@ -863,7 +863,7 @@
     },
     {
       "name": "machinefile.drift",
-      "schema": "station.machinefile.drift/v3",
+      "schema": "station.machinefile.drift/v4",
       "where": "in-process",
       "errors": [
         "machinefile.not-found"
@@ -916,7 +916,7 @@
     },
     {
       "name": "machinefile.plan",
-      "schema": "station.machinefile.plan/v2",
+      "schema": "station.machinefile.plan/v3",
       "where": "at-target",
       "errors": [
         "machinefile.bad-phase",
@@ -927,7 +927,7 @@
     },
     {
       "name": "machinefile.upgrade",
-      "schema": "station.machinefile.upgrade/v2",
+      "schema": "station.machinefile.upgrade/v3",
       "where": "at-target",
       "errors": [
         "machinefile.busy",

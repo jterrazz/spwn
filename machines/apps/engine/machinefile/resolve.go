@@ -103,12 +103,13 @@ type Resolved struct {
 	Steps   []Step
 	Skipped []Skip
 	// value: the owner's lines of each phase, in the order image, boot,
-	// upgrade, a phase its files say none of left out.
+	// upgrade, each file's of a phase its own Script in the chain's order,
+	// a phase its files say none of left out.
 	Scripts []Script
 }
 
-// value: the owner's shell lines of one phase (`run.boot`), and the file
-// that says them.
+// value: the owner's shell lines of one phase (`run.boot`) one file says,
+// and that file.
 
 type Script struct {
 	Phase  RunPhase
@@ -127,13 +128,14 @@ const (
 	RunUpgrade RunPhase = "upgrade"
 )
 
-func (r Resolved) ScriptOf(phase RunPhase) (Script, bool) {
-	for _, s := range r.Scripts {
+func ScriptsOf(scripts []Script, phase RunPhase) []Script {
+	var out []Script
+	for _, s := range scripts {
 		if s.Phase == phase {
-			return s, true
+			out = append(out, s)
 		}
 	}
-	return Script{}, false
+	return out
 }
 
 // value: this machine, for what a Machinefile does not say of its system.
@@ -155,8 +157,9 @@ type merged struct {
 	bake []listed[struct{}]
 	// value: the folders a VM made from it shares with its computer, as
 	// the strongest file that says them lists them.
-	mounts  []catalog.Mount
-	scripts map[RunPhase]Script
+	mounts []catalog.Mount
+	// value: each file's lines of each phase, in the chain's order.
+	scripts []Script
 	prefer  []catalog.ManagerKey
 	// value: the ports of the strongest file that says them, whole, an
 	// overlay's changes made key by key on them.
@@ -246,7 +249,7 @@ func originOf(p Placed) Origin {
 }
 
 func merge(files []Placed) merged {
-	m := merged{values: map[string]Value{}, set: map[string]listed[catalog.SettingEntry]{}, scripts: map[RunPhase]Script{}}
+	m := merged{values: map[string]Value{}, set: map[string]listed[catalog.SettingEntry]{}}
 	for _, p := range files {
 		o := originOf(p)
 		f := p.File
@@ -360,17 +363,35 @@ func mergeRefused(p Placed, key, problem string) error {
 	return refusedFile("machinefile", &catalog.FileError{File: p.Path, Problem: "its " + key + " with those of " + p.File.Overrides + "'s chain: " + problem})
 }
 
-// invariant: a file that says a phase's lines replaces those of the files
-// it extends, whole; a phase it says nothing of keeps theirs.
+// invariant: each file's lines of a phase are a Script of their own, after
+// those of the files before it in the chain: no file's lines replace
+// another's.
 func mergeRun(m *merged, r catalog.RunSpec, o Origin) {
 	for _, s := range []Script{{Phase: RunImage, Lines: r.Image}, {Phase: RunBoot, Lines: r.Boot}, {Phase: RunUpgrade, Lines: r.Upgrade}} {
 		if strings.TrimSpace(s.Lines) == "" {
 			continue
 		}
 		s.Origin = o
-		m.scripts[s.Phase] = s
-		m.put("run."+string(s.Phase), strings.Join(ScriptLines(s.Lines), "; "), o)
+		m.scripts = append(m.scripts, s)
 	}
+}
+
+// value: the scripts in the order they run: the image's, the boot's, the
+// upgrade's, each phase's in the chain's order.
+func (m merged) phased() []Script {
+	return slices.Concat(ScriptsOf(m.scripts, RunImage), ScriptsOf(m.scripts, RunBoot), ScriptsOf(m.scripts, RunUpgrade))
+}
+
+// value: the values of the owner's lines, one per Script, each its lines
+// joined, said by its file.
+func (m merged) runValues() []Value {
+	scripts := m.phased()
+	out := make([]Value, 0, len(scripts))
+	for _, s := range scripts {
+		text, withheld := secret.Screen(strings.Join(ScriptLines(s.Lines), "; "))
+		out = append(out, Value{Key: "run." + string(s.Phase), Text: text, Origin: s.Origin, Withheld: withheld})
+	}
+	return out
 }
 
 func ScriptLines(text string) []string {
@@ -527,12 +548,7 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 	if err != nil {
 		return Resolved{}, err
 	}
-	r.Steps, r.Skipped = filed(p.baked(steps, m.bake)), p.skipped
-	for _, phase := range []RunPhase{RunImage, RunBoot, RunUpgrade} {
-		if s, ok := m.scripts[phase]; ok {
-			r.Scripts = append(r.Scripts, s)
-		}
-	}
+	r.Steps, r.Skipped, r.Scripts = filed(p.baked(steps, m.bake)), p.skipped, m.phased()
 	r.Values = values(m, r, lib.Catalog)
 	return r, nil
 }
@@ -981,7 +997,7 @@ func values(m merged, r Resolved, c catalog.Catalog) []Value {
 		}
 		out = append(out, Value{Key: group + s.Package, Text: s.Why, Origin: s.Origin})
 	}
-	return append(out, m.family("accounts", "ports", "run")...)
+	return append(append(out, m.family("accounts", "ports")...), m.runValues()...)
 }
 
 func optionDefault(c catalog.Catalog, s Step, name string) (string, *Origin) {
@@ -1058,7 +1074,7 @@ func Own(lib Library, name string) (Resolved, error) {
 			r.Values = append(r.Values, Value{Key: "settings." + n + ".from", Text: l.entry.From, Origin: l.origin})
 		}
 	}
-	r.Values = append(r.Values, m.family("accounts", "ports", "run")...)
+	r.Values = append(append(r.Values, m.family("accounts", "ports")...), m.runValues()...)
 	return r, nil
 }
 
