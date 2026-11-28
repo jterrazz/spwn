@@ -83,6 +83,9 @@ func TestAWalkPastItsBudgetIsRefusedBeforeItListsTheRest(t *testing.T) {
 	if !errors.As(err, &file) || !strings.Contains(file.Problem, "more than "+strconv.Itoa(contract.RepositoryEntries)+" entries") {
 		t.Errorf("read 5000 empty categories with %v; want them refused past the budget", err)
 	}
+	if file != nil && file.File != "studio@1a2b3c4/packages" {
+		t.Errorf("the refusal names %q; want studio@1a2b3c4/packages, the folder that crossed the bound", file.File)
+	}
 	if opens != 2 {
 		t.Errorf("opened %d entries; want 2, the top and packages/, refused as it is listed", opens)
 	}

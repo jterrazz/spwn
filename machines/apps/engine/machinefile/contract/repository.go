@@ -185,7 +185,7 @@ func (w *walk) list(at, repo string) (entries []fs.DirEntry, ok bool, err error)
 		return nil, false, err
 	}
 	if len(entries) > w.left {
-		return nil, false, w.refused("machinefile", w.r.Sub, "holds more than "+strconv.Itoa(RepositoryEntries)+" entries to read")
+		return nil, false, w.refused("machinefile", repo, "holds more than "+strconv.Itoa(RepositoryEntries)+" entries to read")
 	}
 	w.left -= len(entries)
 	slices.SortFunc(entries, func(a, b fs.DirEntry) int { return strings.Compare(a.Name(), b.Name()) })
