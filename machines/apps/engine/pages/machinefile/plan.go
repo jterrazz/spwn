@@ -277,6 +277,15 @@ func ranStep(r *machinefile.Ran) []pages.RunStep {
 	return []pages.RunStep{{ID: "run." + string(r.Script.Phase), State: r.State, Cells: []page.Value{page.Version(""), page.Texts(r.Script.Origin.Name)}, Why: []string{lineCount(len(machinefile.ScriptLines(r.Script.Lines)))}, Detail: r.Detail}}
 }
 
+// invariant: the `spwn` skill is a step of a run's page only when it was
+// not written, and never counted: a run's head and exit are its packages'.
+func skillStep(failed string) []pages.RunStep {
+	if failed == "" {
+		return nil
+	}
+	return []pages.RunStep{{ID: "skill/spwn", Label: "spwn", State: catalog.StateBroken, Cells: []page.Value{page.Version(""), page.Texts("skill")}, Detail: "not written: " + failed}}
+}
+
 // value: a condition in the owner's words.
 func condition(c machinefile.Condition) string { return strings.ReplaceAll(string(c), "-", " ") }
 
@@ -450,5 +459,6 @@ func Applied(a machinefile.Applied, done, removed []Worded, thisMac page.Context
 		words = append(words, "this machine carries "+a.Bound)
 	}
 	r.Head.Words = words
+	r.Steps = append(r.Steps, skillStep(a.SkillFailed)...)
 	return pages.RunPage(r, thisMac)
 }

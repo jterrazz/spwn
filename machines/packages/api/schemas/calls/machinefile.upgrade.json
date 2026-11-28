@@ -1491,6 +1491,9 @@
             }
           ]
         },
+        "SkillFailed": {
+          "type": "string"
+        },
         "Unbound": {
           "type": "boolean"
         },
@@ -1513,6 +1516,7 @@
         "Lock",
         "Plan",
         "Ran",
+        "SkillFailed",
         "Unbound",
         "Unpulled",
         "Waiting"

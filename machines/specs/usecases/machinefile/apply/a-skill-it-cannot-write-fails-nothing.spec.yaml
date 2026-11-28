@@ -1,0 +1,23 @@
+description: 'a spwn skill its folder refuses fails nothing: the apply is done, exit 0, and its step says why'
+fixture: ../../__fixtures__/homebrew/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: macbook-pro
+          machine: { kind: computer, system: { os: macos } }
+          apps: [jq]
+      exit: 0
+    - command: 'world fault Skill.Write'
+      exit: 0
+    - command: 'machinefile apply'
+      exit: 0
+      stdout: |
+          ●	homebrew	5.0.1	script	the manager of jq
+          ●	jq	1.8.1	brew
+          ✗	spwn		skill	not written: open ~/.agents/skills/spwn/SKILL.md: permission denied
+    - command: '--version >/dev/null; /usr/bin/jq -c ''[.macs["macbook-pro"].stores.spwn_skill, .macs["macbook-pro"].files["machinefiles/macbook-pro.lock"] != null]'' world.json'
+      exit: 0
+      stdout: |
+          [null,true]

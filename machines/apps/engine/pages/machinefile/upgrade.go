@@ -149,6 +149,7 @@ func Upgraded(u machinefile.Upgraded, done []Worded, thisMac page.Context) page.
 		words = append(words, counted(len(u.Lock.Apps), "moved in "+u.Plan.Lock.File))
 	}
 	r.Head.Words = words
+	r.Steps = append(r.Steps, skillStep(u.SkillFailed)...)
 	return pages.RunPage(r, thisMac)
 }
 

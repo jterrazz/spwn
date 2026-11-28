@@ -30,4 +30,5 @@ The file holds at most 8 KiB, an invariant of its writer for any input, since an
 - An agent on any machine reads where it is and what it may run, in its own skill list, with no command to know first.
 - An app's `agent:` line is catalog data: it changes by a package file, and a wrong line is fixed there for every machine at its next apply.
 - A machine that never applies a Machinefile carries no skill, and an interrupted run leaves the last one as it was.
+- The skill is best-effort. Its run's effects are done before it is written, so a skill that cannot be written fails nothing: the run's page says the step failed and why, and its outcome and exit code stay its packages'.
 - **Open question:** does the `spwn` skill retire the static `studio-toolbelt` projection? Both now tell an agent what tools exist. The toolbelt says the whole catalog with its replacements, and the `spwn` skill says one machine. This record does not remove the toolbelt; the owner decides.

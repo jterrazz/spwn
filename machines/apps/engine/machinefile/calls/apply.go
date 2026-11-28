@@ -167,9 +167,7 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 			_ = d.Ledger.Write(context.WithoutCancel(ctx), n.Reread(plan))
 		}
 		if in.Phase != catalog.PhaseImage {
-			if err := spwnSkill(ctx, d, plan.Name); err != nil {
-				return out, err
-			}
+			out.SkillFailed = spwnSkill(ctx, d, plan.Name)
 		}
 		return out, ctx.Err()
 	},

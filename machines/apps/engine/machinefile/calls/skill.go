@@ -3,6 +3,7 @@ package calls
 import (
 	"context"
 	"slices"
+	"strings"
 
 	"github.com/jterrazz/studio-station/apps/engine/apps"
 	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
@@ -20,22 +21,26 @@ import (
 // run's shared reading dropped first, so what it installed is seen), each
 // with its agent line; the skill's adapter writes it only where its bytes
 // changed. An interrupted run leaves the last one as it was.
-func spwnSkill(ctx context.Context, d Deps, name string) error {
+// The skill is best-effort: its run's effects are done when it is written,
+// so a skill that cannot be written (its folder refused, the apps or the
+// resolution unread) fails nothing; it answers why, the run's own outcome
+// and exit staying what they were.
+func spwnSkill(ctx context.Context, d Deps, name string) (failed string) {
 	if d.Skill == nil {
-		return nil
+		return ""
 	}
 	select {
 	case <-ctx.Done():
-		return nil
+		return ""
 	default:
 	}
 	r, err := resolveValues(ctx, d, name)
 	if err != nil {
-		return err
+		return why(err)
 	}
 	reports, err := call.Read(ctx, d.Calls, machine.Ref{}, appscalls.List, appscalls.ListIn{Fresh: true}, nil)
 	if err != nil {
-		return err
+		return why(err)
 	}
 	var present []catalog.App
 	for _, report := range reports {
@@ -44,6 +49,13 @@ func spwnSkill(ctx context.Context, d Deps, name string) error {
 		}
 	}
 	where := machinefile.Where{Name: d.Name, Kind: r.Kind, System: r.System, Values: r.Values}
-	_, err = d.Skill.Write(ctx, machinefile.Skill(where, present, catalog.SpwnDrive))
-	return err
+	if _, err := d.Skill.Write(ctx, machinefile.Skill(where, present, catalog.SpwnDrive)); err != nil {
+		return why(err)
+	}
+	return ""
+}
+
+func why(err error) string {
+	line, _, _ := strings.Cut(err.Error(), "\n")
+	return line
 }

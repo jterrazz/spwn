@@ -39,6 +39,7 @@ func (a Applied) Answered() Applied {
 		b.Block, b.Detail = b.answered(), secret.Kept(b.Detail)
 		return b
 	})
+	a.SkillFailed = secret.Kept(a.SkillFailed)
 	return a
 }
 
@@ -47,6 +48,7 @@ func (u Upgraded) Answered() Upgraded {
 	u.Done = each(u.Done, Done.answered)
 	u.Ran = u.Ran.answered()
 	u.Unpulled = secret.Kept(u.Unpulled)
+	u.SkillFailed = secret.Kept(u.SkillFailed)
 	return u
 }
 

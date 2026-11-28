@@ -721,6 +721,9 @@ type Applied struct {
 	Blocks      []BlockDone
 	Bound       string
 	Interrupted bool
+	// value: why the machine's `spwn` skill was not written at the run's
+	// end, in its error's words; empty when it was, or none is kept.
+	SkillFailed string
 }
 
 // value: the owner's lines of a phase once they ran: how they ended, ok,
@@ -802,4 +805,7 @@ type Upgraded struct {
 	Unpulled    string
 	// value: the machine is bound to no Machinefile, so no night upgrades it.
 	Unbound bool
+	// value: why the machine's `spwn` skill was not written at the run's
+	// end, in its error's words; empty when it was, or none is kept.
+	SkillFailed string
 }

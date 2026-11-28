@@ -679,6 +679,9 @@
             "array",
             "null"
           ]
+        },
+        "SkillFailed": {
+          "type": "string"
         }
       },
       "required": [
@@ -688,7 +691,8 @@
         "Interrupted",
         "Plan",
         "Ran",
-        "Removed"
+        "Removed",
+        "SkillFailed"
       ],
       "type": "object"
     },
