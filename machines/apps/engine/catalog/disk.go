@@ -239,6 +239,8 @@ var HomeExceptions = []Exception{
 	{Path: ".claude", Reason: "Claude Code reads no settings file for its home"},
 	{Path: ".codex", Reason: "Codex reads no settings file for its home"},
 	{Path: ".zshrc", Reason: "a dotfile"},
+	{Path: ".zshenv", Reason: "a dotfile: zsh reads it for every command"},
+	{Path: ".bashrc", Reason: "a dotfile: bash run by sshd reads it"},
 	{Path: ".npmrc", Reason: "a dotfile: npm's own settings"},
 	{Path: ".gitconfig", Reason: "a dotfile"},
 	{Path: ".bunfig.toml", Reason: "a dotfile: bun's global settings"},

@@ -544,6 +544,20 @@ Free: delete `~/.cache/opencode/*`. Erase: delete `~/.local/share/opencode/*`, d
 
 Erase: none (the browsers are the app: station apps remove agent-browser).
 
+### desktop-session
+
+| Path                                                      | Group         | Note                                                                                                                                                                        |
+| --------------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `~/.zshenv`                                               | never touched | linux; the block station:desktop-session, between its two marker lines, at the top; in a linked file's target when that is a file of the home                               |
+| `~/.bashrc`                                               | never touched | linux; the block station:desktop-session, between its two marker lines, at the top, before the interactive guard; in a linked file's target when that is a file of the home |
+| `~/.config/systemd/user/station-xvfb.service`             | never touched | linux; the virtual screen :99, a unit enabled in default.target.wants                                                                                                       |
+| `~/.config/systemd/user/station-matchbox.service`         | never touched | linux; the window manager, a unit enabled in default.target.wants                                                                                                           |
+| `~/.config/environment.d/60-station-desktop-session.conf` | never touched | linux; DISPLAY=:99 for the user's units and the bus's activations                                                                                                           |
+| `~/.local/state/station/desktop-session`                  | never touched | linux; `linger`, whether lingering was the person's before the first run, and `made`, the rc files the run created: undo reads both to take back only what Machines did     |
+| `/var/lib/systemd/linger/*`                               | never touched | linux; lingering, by `loginctl enable-linger`; undo disables it only when it was not on before the first run                                                                |
+
+Erase: none (nothing to erase: undo takes back what the run wrote).
+
 ### ollama
 
 | Path               | Group       | Note |
@@ -689,6 +703,8 @@ What an app keeps at the root of the home folder, declared with its reason; anyt
 | `~/.claude`        | Claude Code reads no settings file for its home                         |
 | `~/.codex`         | Codex reads no settings file for its home                               |
 | `~/.zshrc`         | a dotfile                                                               |
+| `~/.zshenv`        | a dotfile: zsh reads it for every command                               |
+| `~/.bashrc`        | a dotfile: bash run by sshd reads it                                    |
 | `~/.npmrc`         | a dotfile: npm's own settings                                           |
 | `~/.gitconfig`     | a dotfile                                                               |
 | `~/.bunfig.toml`   | a dotfile: bun's global settings                                        |

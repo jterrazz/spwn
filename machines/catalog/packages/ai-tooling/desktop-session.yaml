@@ -5,46 +5,159 @@ description: A virtual screen and its window manager kept running for the user o
 requires: [desktop-session-deps]
 methods:
     # outside: on Ubuntu, pam_systemd gives an ssh session DBUS_SESSION_BUS_ADDRESS once the user's bus socket exists, and nothing gives it DISPLAY: zsh reads ~/.zshenv for every command, bash run by sshd reads ~/.bashrc, whose interactive guard at its top ends the read, so the block goes before it; ~/.config/environment.d reaches the user's units and the bus's activations alone.
+    # outside: the state folder holds `linger`, `yours` when the person had lingering on before the first run, and `made`, the rc files the run created; a linked rc file is rewritten as its target, never replaced, and only when that target is a regular file of the home.
     - family: debian
       machine: [workspace, server]
       needs: [sudo]
       script:
           check: |
-              test -e "/var/lib/systemd/linger/$(/usr/bin/id -un)" && test -L "$HOME/.config/systemd/user/default.target.wants/station-xvfb.service" && test -L "$HOME/.config/systemd/user/default.target.wants/station-matchbox.service" && /usr/bin/grep -qxF '# >>> station:desktop-session >>>' "$HOME/.zshenv"
-          undo: |
-              export XDG_RUNTIME_DIR=/run/user/$(id -u)
-              systemctl --user disable --now station-matchbox.service station-xvfb.service
-              rm -f "$HOME/.config/systemd/user/station-xvfb.service" "$HOME/.config/systemd/user/station-matchbox.service" "$HOME/.config/environment.d/60-station-desktop-session.conf"
-              systemctl --user daemon-reload
+              u=$(/usr/bin/id -un)
+              w=$HOME/.config/systemd/user/default.target.wants
+              test -e "/var/lib/systemd/linger/$u" && test -L "$w/station-xvfb.service" && test -L "$w/station-matchbox.service" && test -f "$HOME/.config/environment.d/60-station-desktop-session.conf" || exit 1
               for rc in .zshenv .bashrc; do
-                [ -f "$HOME/$rc" ] && sed -i '/^# >>> station:desktop-session >>>$/,/^# <<< station:desktop-session <<<$/d' "$HOME/$rc"
+                /usr/bin/grep -qxF '# >>> station:desktop-session >>>' "$HOME/$rc" 2>/dev/null || exit 1
               done
-              sudo -n loginctl disable-linger "$(id -un)"
+              export XDG_RUNTIME_DIR=/run/user/$(/usr/bin/id -u)
+              if test -S "$XDG_RUNTIME_DIR/systemd/private"; then
+                for s in station-xvfb.service station-matchbox.service; do
+                  if ! /usr/bin/systemctl --user is-active --quiet "$s"; then
+                    if test "$s" = station-xvfb.service && /usr/bin/systemctl --user is-failed --quiet "$s"; then
+                      echo "the virtual screen :99 failed to start: another X server may hold :99 (journalctl --user -u station-xvfb)" >&2
+                    fi
+                    exit 1
+                  fi
+                done
+              fi
+          undo: |
+              set -eu
+              u=$(id -un)
+              H='# >>> station:desktop-session >>>'
+              E='# <<< station:desktop-session <<<'
+              st=${XDG_STATE_HOME:-}
+              case $st in /*) ;; *) st=$HOME/.local/state ;; esac
+              st=$st/station/desktop-session
+              home=$(readlink -f -- "$HOME")
+              tmp=
+              trap '[ -z "$tmp" ] || rm -f "$tmp"' EXIT
+              rcfile() {
+                f=$HOME/$1
+                if [ -L "$f" ]; then
+                  t=$(readlink -f -- "$f") || return 1
+                  case $t in "$home"/*) [ -f "$t" ] && printf '%s\n' "$t" ;; *) return 1 ;; esac
+                else
+                  printf '%s\n' "$f"
+                fi
+              }
+              linger=1
+              [ "$(cat "$st/linger" 2>/dev/null)" = yours ] && linger=
+              if [ -n "$linger" ] && ! sudo -n true 2> /dev/null; then
+                echo "sudo asks a password, so lingering cannot be taken back: nothing was removed" >&2
+                exit 1
+              fi
+              export XDG_RUNTIME_DIR=/run/user/$(id -u)
+              units=$HOME/.config/systemd/user
+              if [ -S "$XDG_RUNTIME_DIR/systemd/private" ]; then
+                systemctl --user disable --now station-matchbox.service station-xvfb.service 2>/dev/null || true
+              fi
+              rm -f "$units/default.target.wants/station-xvfb.service" "$units/default.target.wants/station-matchbox.service" "$units/station-xvfb.service" "$units/station-matchbox.service" "$HOME/.config/environment.d/60-station-desktop-session.conf"
+              if [ -S "$XDG_RUNTIME_DIR/systemd/private" ]; then
+                systemctl --user daemon-reload
+              fi
+              for rc in .zshenv .bashrc; do
+                t=$(rcfile "$rc") || continue
+                [ -f "$t" ] || continue
+                if grep -qxF "$H" "$t" && grep -qxF "$E" "$t"; then
+                  tmp=$(mktemp "${t%/*}/.station-desktop-session.XXXXXX")
+                  awk -v h="$H" -v e="$E" '$0==h{s=1;next} s{if($0==e)s=0;next} 1' "$t" > "$tmp"
+                  chmod --reference="$t" "$tmp"
+                  chown --reference="$t" "$tmp"
+                  mv -f "$tmp" "$t"
+                  tmp=
+                fi
+                if [ ! -L "$HOME/$rc" ] && [ ! -s "$t" ] && grep -qxF "$rc" "$st/made" 2>/dev/null; then
+                  rm -f "$t"
+                fi
+              done
+              if [ -n "$linger" ]; then
+                sudo -n loginctl disable-linger "$u"
+              fi
+              rm -f "$st/linger" "$st/made"
+              rmdir "$st" 2>/dev/null || true
           run: |
               set -eu
+              u=$(id -un)
+              H='# >>> station:desktop-session >>>'
+              E='# <<< station:desktop-session <<<'
+              block=$(printf '%s\n' "$H" 'export DISPLAY="${DISPLAY:-:99}"' 'export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/$UID/bus}"' "$E")
+              st=${XDG_STATE_HOME:-}
+              case $st in /*) ;; *) st=$HOME/.local/state ;; esac
+              st=$st/station/desktop-session
+              home=$(readlink -f -- "$HOME")
+              tmp=
+              trap '[ -z "$tmp" ] || rm -f "$tmp"' EXIT
+              rcfile() {
+                f=$HOME/$1
+                if [ -L "$f" ]; then
+                  t=$(readlink -f -- "$f") || return 1
+                  case $t in "$home"/*) [ -f "$t" ] && printf '%s\n' "$t" ;; *) return 1 ;; esac
+                else
+                  printf '%s\n' "$f"
+                fi
+              }
+              for rc in .zshenv .bashrc; do
+                if ! rcfile "$rc" > /dev/null; then
+                  echo "~/$rc is a link to $(readlink -- "$HOME/$rc"), not to a file of your home, and Machines writes no block through it: make ~/$rc a file, or point it at a file of your home." >&2
+                  exit 1
+                fi
+                t=$(rcfile "$rc")
+                if [ -e "$t" ] && grep -qxF "$H" "$t" && ! grep -qxF "$E" "$t"; then
+                  echo "$t holds the start line of the desktop-session block and not its end: remove that line and run again." >&2
+                  exit 1
+                fi
+              done
+              mkdir -p "$st"
+              if [ ! -e "$st/linger" ]; then
+                if [ -e "/var/lib/systemd/linger/$u" ]; then echo yours > "$st/linger"; else echo ours > "$st/linger"; fi
+              fi
+              sudo -n loginctl enable-linger "$u"
               export XDG_RUNTIME_DIR=/run/user/$(id -u)
-              sudo -n loginctl enable-linger "$(id -un)"
               i=0
               until [ -S "$XDG_RUNTIME_DIR/systemd/private" ]; do
                 i=$((i+1))
-                [ "$i" -le 100 ] || { echo "the user manager of $(id -un) did not start" >&2; exit 1; }
+                [ "$i" -le 100 ] || { echo "the user manager of $u did not start" >&2; exit 1; }
                 sleep 0.1
               done
               units=$HOME/.config/systemd/user
               mkdir -p "$units" "$HOME/.config/environment.d"
-              cat > "$units/station-xvfb.service" <<'UNIT'
+              changed=
+              put() {
+                tmp=$(mktemp "${1%/*}/.station-desktop-session.XXXXXX")
+                cat > "$tmp"
+                if cmp -s "$tmp" "$1"; then
+                  rm -f "$tmp"
+                else
+                  chmod 0644 "$tmp"
+                  mv -f "$tmp" "$1"
+                  changed="$changed ${1##*/}"
+                fi
+                tmp=
+              }
+              put "$units/station-xvfb.service" <<'UNIT'
               [Unit]
               Description=Xvfb, the virtual screen :99 of the desktop session
               Wants=station-matchbox.service
+              StartLimitIntervalSec=30
+              StartLimitBurst=3
 
               [Service]
               ExecStart=/usr/bin/Xvfb :99 -screen 0 1280x800x24
               Restart=on-failure
+              RestartSec=1
 
               [Install]
               WantedBy=default.target
               UNIT
-              cat > "$units/station-matchbox.service" <<'UNIT'
+              put "$units/station-matchbox.service" <<'UNIT'
               [Unit]
               Description=matchbox, the window manager of the desktop session
               BindsTo=station-xvfb.service
@@ -59,13 +172,64 @@ methods:
               [Install]
               WantedBy=default.target
               UNIT
-              echo DISPLAY=:99 > "$HOME/.config/environment.d/60-station-desktop-session.conf"
-              systemctl --user daemon-reload
-              systemctl --user enable --now station-xvfb.service station-matchbox.service
+              unitschanged=$changed
+              put "$HOME/.config/environment.d/60-station-desktop-session.conf" <<< DISPLAY=:99
+              [ -z "$changed" ] || systemctl --user daemon-reload
+              systemctl --user enable station-xvfb.service station-matchbox.service
+              verb=start
+              [ -z "$unitschanged" ] || verb=restart
+              systemctl --user reset-failed station-xvfb.service station-matchbox.service 2> /dev/null || true
+              if ! systemctl --user "$verb" station-xvfb.service station-matchbox.service; then
+                echo "the virtual screen :99 did not start: another X server may hold :99 (journalctl --user -u station-xvfb)" >&2
+                exit 1
+              fi
               for rc in .zshenv .bashrc; do
-                f=$HOME/$rc
-                if ! grep -qxF '# >>> station:desktop-session >>>' "$f" 2>/dev/null; then
-                  { printf '%s\n' '# >>> station:desktop-session >>>' 'export DISPLAY=:99' 'export DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-unix:path=/run/user/$UID/bus}"' '# <<< station:desktop-session <<<'; cat "$f" 2>/dev/null || true; } > "$f.station"
-                  mv "$f.station" "$f"
+                t=$(rcfile "$rc")
+                if [ ! -e "$t" ]; then
+                  : > "$t"
+                  grep -qxF "$rc" "$st/made" 2>/dev/null || echo "$rc" >> "$st/made"
                 fi
+                if grep -qxF "$H" "$t"; then
+                  [ "$(sed -n "/^$H\$/,/^$E\$/p" "$t")" != "$block" ] || continue
+                  tmp=$(mktemp "${t%/*}/.station-desktop-session.XXXXXX")
+                  BLOCK=$block awk -v h="$H" -v e="$E" '$0==h{print ENVIRON["BLOCK"];s=1;next} s{if($0==e)s=0;next} 1' "$t" > "$tmp"
+                else
+                  tmp=$(mktemp "${t%/*}/.station-desktop-session.XXXXXX")
+                  { printf '%s\n' "$block"; cat "$t"; } > "$tmp"
+                fi
+                chmod --reference="$t" "$tmp"
+                chown --reference="$t" "$tmp"
+                mv -f "$tmp" "$t"
+                tmp=
               done
+disk:
+    paths:
+        - path: ~/.zshenv
+          level: settings
+          family: linux
+          note: the block station:desktop-session, between its two marker lines, at the top; in a linked file's target when that is a file of the home
+        - path: ~/.bashrc
+          level: settings
+          family: linux
+          note: the block station:desktop-session, between its two marker lines, at the top, before the interactive guard; in a linked file's target when that is a file of the home
+        - path: ~/.config/systemd/user/station-xvfb.service
+          level: settings
+          family: linux
+          note: the virtual screen :99, a unit enabled in default.target.wants
+        - path: ~/.config/systemd/user/station-matchbox.service
+          level: settings
+          family: linux
+          note: the window manager, a unit enabled in default.target.wants
+        - path: ~/.config/environment.d/60-station-desktop-session.conf
+          level: settings
+          family: linux
+          note: DISPLAY=:99 for the user's units and the bus's activations
+        - path: '{state}/station/desktop-session'
+          level: kept
+          family: linux
+          note: "`linger`, whether lingering was the person's before the first run, and `made`, the rc files the run created: undo reads both to take back only what Machines did"
+        - path: /var/lib/systemd/linger/*
+          level: settings
+          family: linux
+          note: lingering, by `loginctl enable-linger`; undo disables it only when it was not on before the first run
+    no-erase: 'nothing to erase: undo takes back what the run wrote'
