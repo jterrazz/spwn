@@ -71,11 +71,15 @@ func linked(root, rel string, err error) error {
 // project, its root and its folders, which platform.WithProject holds for
 // one act; a root with no spwn.yaml yet, the folder Create is about to
 // make, is held with the default folders, and a layout spwn.yaml refuses
-// is refused before act runs.
-func in[T any](root string, act func() (T, error)) (T, error) {
+// is refused before act runs. spwn.yaml is walked as a file before its
+// layout is read, as declared walks it.
+func in[T any](p Projects, root string, act func() (T, error)) (T, error) {
+	var zero T
+	if err := p.walk(root, project.ManifestName, true); err != nil {
+		return zero, err
+	}
 	l, err := spwnproject.LayoutAt(root)
 	if err != nil {
-		var zero T
 		return zero, refusedLayout(err)
 	}
 	return platform.WithProject(root, l.Platform(), act)
@@ -205,7 +209,7 @@ func shown(found *spwnproject.Project) project.Project {
 }
 
 func (p Projects) Show(_ context.Context, root string) (project.Project, error) {
-	return in(root, func() (project.Project, error) {
+	return in(p, root, func() (project.Project, error) {
 		found, err := p.load(root)
 		if err != nil {
 			return project.Project{}, err
@@ -291,7 +295,7 @@ func (p Projects) lay(folder, name string, files map[string][]byte) error {
 
 func (p Projects) Create(_ context.Context, folder, name, harness, example string) (project.Project, error) {
 	root := filepath.Join(folder, name)
-	return in(root, func() (project.Project, error) {
+	return in(p, root, func() (project.Project, error) {
 		files, err := starting(name, harness, example)
 		if err != nil {
 			return project.Project{}, err
@@ -328,7 +332,7 @@ func issueOf(i spwnproject.Issue, src string) project.Issue {
 }
 
 func (p Projects) Plan(_ context.Context, root string) (project.Plan, error) {
-	return in(root, func() (project.Plan, error) {
+	return in(p, root, func() (project.Plan, error) {
 		found, err := p.load(root)
 		if err != nil {
 			return project.Plan{}, err
@@ -346,7 +350,7 @@ func (p Projects) Plan(_ context.Context, root string) (project.Plan, error) {
 }
 
 func (p Projects) Drift(_ context.Context, root string) (project.Drift, error) {
-	return in(root, func() (project.Drift, error) {
+	return in(p, root, func() (project.Drift, error) {
 		found, err := p.load(root)
 		if err != nil {
 			return project.Drift{}, err
@@ -407,7 +411,7 @@ func (p Projects) Render(_ context.Context, root, agent string) ([]project.File,
 	if err := p.declared(root); err != nil {
 		return nil, err
 	}
-	return in(root, func() ([]project.File, error) {
+	return in(p, root, func() ([]project.File, error) {
 		return renders(root, agent)
 	})
 }
