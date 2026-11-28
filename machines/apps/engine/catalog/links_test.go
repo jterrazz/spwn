@@ -43,8 +43,35 @@ func TestAMethodsRequiresHoldWhereThatMethodIsTheOneChosen(t *testing.T) {
 	app, _ := c.App("driver")
 	for kind, want := range map[catalog.MachineKind][]string{catalog.Mac: nil, catalog.MacOS: nil, catalog.Linux: {"session"}} {
 		in, _ := app.InstallOn(kind)
-		if got := requiredOf(c.InstallLinks(app, in, kind)); !slices.Equal(got, want) {
+		if got := requiredOf(c.InstallLinks(app, in, systemOn(kind))); !slices.Equal(got, want) {
 			t.Errorf("driver's install on %s requires %v, want %v", kind, got, want)
+		}
+	}
+}
+
+func systemOn(k catalog.MachineKind) catalog.System {
+	if k == catalog.Linux {
+		return catalog.System{OS: catalog.OSUbuntu}
+	}
+	return catalog.System{OS: catalog.OSMacOS}
+}
+
+func TestAnInstallRequiresWhatThePlansMethodRequiresOnThatSystem(t *testing.T) {
+	c, err := catalogOf(map[string]string{
+		"git/viewer.yaml":  "package: station.package/v1\nkind: app\nname: viewer\ndescription: d\nprovides: [viewer]\nmethods:\n    - os: ubuntu\n      version: '22.04'\n      needs: [sudo]\n      requires: [xserver]\n      apt: {packages: [viewer-x]}\n    - os: ubuntu\n      version: '24.04'\n      needs: [sudo]\n      apt: {packages: [viewer]}\n",
+		"git/xserver.yaml": "package: station.package/v1\nkind: app\nname: xserver\ndescription: d\nmethods:\n    - family: debian\n      needs: [sudo]\n      apt: {packages: [xserver]}\n",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	p, _ := c.Package("viewer")
+	app, _ := c.App("viewer")
+	in, _ := app.InstallOn(catalog.Linux)
+	for version, want := range map[string][]string{"24.04": nil, "22.04": {"xserver"}} {
+		sys := catalog.System{OS: catalog.OSUbuntu, Version: version, Arch: catalog.ArchARM64, Machine: catalog.RoleWorkspace}
+		plan, install := requiredOf(c.Links(p.Package, "apt", sys)), requiredOf(c.InstallLinks(app, in, sys))
+		if !slices.Equal(plan, want) || !slices.Equal(install, want) {
+			t.Errorf("viewer by apt on Ubuntu %s: the plan requires %v and apps install %v, want both %v", version, plan, install, want)
 		}
 	}
 }

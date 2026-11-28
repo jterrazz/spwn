@@ -37,20 +37,19 @@ func (c Catalog) Links(it Package, method string, sys System) []Link {
 	return c.links(it.Name, slices.Concat(it.Requires, m.Requires), it.RequiresOneOf, m.ProvidedBy, method)
 }
 
-func (c Catalog) InstallLinks(t App, in Install, k MachineKind) []Link {
-	// value: Links for an app by the install this kind of machine carries:
-	// its provider is that install's, its manager that of the install's
-	// method, and its method's requires those of the package's method
-	// that install is on that kind.
-	var by string
-	if p, ok := in.(ProvidedByInstall); ok {
-		by = p.Package
-	}
+func (c Catalog) InstallLinks(t App, in Install, sys System) []Link {
+	// invariant: Links for an app by the method key of the install a
+	// machine carries, on that machine's system: the method the plan
+	// chooses there, never another of the same key.
 	var method string
 	if in != nil {
 		method = string(in.Method())
 	}
-	return c.links(t.Name, slices.Concat(t.Requires, c.placedMethod(t.Name, method, k).Requires), nil, by, method)
+	p, ok := c.Package(t.Name)
+	if !ok {
+		return c.links(t.Name, t.Requires, nil, "", method)
+	}
+	return c.Links(p.Package, method, sys)
 }
 
 func (c Catalog) links(name string, requires, oneOf []string, by, method string) []Link {
@@ -116,26 +115,4 @@ func chosen(it Package, method string, sys System) MethodSpec {
 		return MethodSpec{}
 	}
 	return *first
-}
-
-// invariant: the method an install of the app stands for on a kind of
-// machine is the first by its key in the order that kind places the
-// package's methods by, the order its installs there come from.
-func (c Catalog) placedMethod(name, method string, k MachineKind) MethodSpec {
-	p, ok := c.Package(name)
-	if !ok {
-		return MethodSpec{}
-	}
-	var on []MethodSpec
-	for _, m := range p.Package.Methods {
-		if slices.Contains(m.kinds(), k) {
-			on = append(on, m)
-		}
-	}
-	for _, m := range c.Ordered(on, k.os(), nil) {
-		if m.Method() == method {
-			return m
-		}
-	}
-	return MethodSpec{}
 }

@@ -486,7 +486,7 @@ func (s *Shelf) then(ctx context.Context, t catalog.App, interactive bool) []app
 // method's manager while that manager is missing here, its provider, then
 // what it requires (an app requires none of a group: only a setting does).
 func (s *Shelf) requirements(ctx context.Context, t catalog.App) []string {
-	links := s.cat.InstallLinks(t, s.install(t), s.o.ThisMachine)
+	links := s.cat.InstallLinks(t, s.install(t), s.o.System)
 	missing := errors.Is(s.installer(t).Ready(ctx), contract.ErrMissing)
 	var reqs []string
 	for _, kind := range []catalog.LinkKind{catalog.LinkManager, catalog.LinkProvidedBy, catalog.LinkRequires} {

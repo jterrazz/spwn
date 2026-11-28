@@ -31,6 +31,7 @@ import (
 	appscalls "github.com/jterrazz/studio-station/apps/engine/apps/calls"
 	"github.com/jterrazz/studio-station/apps/engine/apps/contract"
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
+	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
 	machinefilecontract "github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
 	"github.com/jterrazz/studio-station/apps/engine/settings"
@@ -74,6 +75,7 @@ func appsOf(env kit.Env, m machine) *appscalls.Shelf {
 	return appscalls.NewShelf(appsMachineOf(m), m.cat, configurer{settings: settingsOf(m), ask: ask}, appscalls.ShelfOptions{
 		Pool:         m.pool,
 		ThisMachine:  m.kind,
+		System:       systemOf(m.profile),
 		Root:         m.systemRoot(),
 		Installers:   registry,
 		Bundler:      bundler,
@@ -82,6 +84,13 @@ func appsOf(env kit.Env, m machine) *appscalls.Shelf {
 		Kept:         mise.Kept(m.sys.Env.Home(), m.vars),
 		HeldByLedger: ledgerOf{m.stores.ledger}.Recorded,
 	})
+}
+
+// value: this machine's system as a Machinefile's plan reads it, so an
+// install brings what the method the plan chooses here requires.
+func systemOf(p coremachine.Profile) catalog.System {
+	s := machineOf(p).System
+	return catalog.System{OS: s.OS, Version: s.Version, Arch: s.Arch, Machine: catalog.MachineRole(p.Kind)}
 }
 
 // value: the ledger as the apps family reads it: whether it holds an

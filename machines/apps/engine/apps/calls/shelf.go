@@ -17,10 +17,13 @@ const commandLane = 16
 type ShelfOptions struct {
 	Pool        *lanes.Pool
 	ThisMachine catalog.MachineKind
-	Root        string
-	Installers  contract.Installers
-	Bundler     contract.Bundler
-	VMs         VMs
+	// value: this machine's system, its version and arch, as the plan reads
+	// it: the method an install's links are read from is the one chosen there.
+	System     catalog.System
+	Root       string
+	Installers contract.Installers
+	Bundler    contract.Bundler
+	VMs        VMs
 	// value: the folder of each app's log, `<app>.log`; empty keeps none.
 	Logs string
 	// value: by method, the folders its manager keeps its own copies and

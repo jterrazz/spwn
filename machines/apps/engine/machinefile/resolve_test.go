@@ -481,6 +481,64 @@ func TestAMethodsRequiresComeInWhereThatMethodIsChosenAlone(t *testing.T) {
 	}
 }
 
+// value: driver, whose Ubuntu method alone requires session, which viewer
+// requires whatever its method; each removable by its line's undo.
+func methodRequires() map[string]string {
+	return map[string]string{
+		"catalog/command-line/driver.yaml":  "package: station.package/v1\nkind: app\nname: driver\ndescription: d\nmethods:\n    - { os: macos, cask: driver }\n    - { os: ubuntu, requires: [session], script: { run: 'true', undo: 'true' } }\n",
+		"catalog/command-line/session.yaml": "package: station.package/v1\nkind: app\nname: session\ndescription: d\nmethods:\n    - { family: debian, script: { run: 'true', undo: 'true' } }\n",
+		"catalog/command-line/viewer.yaml":  "package: station.package/v1\nkind: app\nname: viewer\ndescription: d\nrequires: [session]\nmethods:\n    - { family: debian, script: { run: 'true', undo: 'true' } }\n",
+	}
+}
+
+func TestExplainSaysTheAppWhoseMethodRequiresAPackage(t *testing.T) {
+	lib := library(t, map[string]string{"machinefiles/vm.machine.yaml": machine("vm", "{ os: ubuntu, version: '24.04' }", "[driver]")}, methodRequires())
+	r, err := machinefile.Resolve(lib, "vm", machinefile.Machine{}, machinefile.Lock{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	values, err := machinefile.Explain(r, "apps.session")
+	if err != nil || len(values) == 0 || values[0].Key != "apps.session" || values[0].Text != "required by driver" {
+		t.Errorf("explain apps.session reads %+v, %v; want required by driver", values, err)
+	}
+}
+
+func TestARemovalTakesWhatOnlyTheRemovedAppsMethodRequired(t *testing.T) {
+	lib := library(t, map[string]string{"machinefiles/vm.machine.yaml": machine("vm", "{ os: ubuntu, version: '24.04' }", "[]")}, methodRequires())
+	sys := catalog.System{OS: catalog.OSUbuntu, Version: "24.04", Machine: catalog.RoleWorkspace}
+	both := []machinefile.Installed{{Package: "driver", Method: "script", Machinefile: "vm"}, {Package: "session", Method: "script", Machinefile: "vm"}}
+	present := machinefile.Seen{Condition: machinefile.Present, Method: "script"}
+	listed := []machinefile.Step{{Package: "session", Kind: catalog.KindApp, Method: "script", Phase: catalog.PhaseApply}}
+	for _, c := range []struct {
+		name   string
+		ledger []machinefile.Installed
+		steps  []machinefile.Step
+		seen   map[string]machinefile.Seen
+		taken  map[string]bool
+	}{
+		{"driver removed takes session", both, nil, map[string]machinefile.Seen{"driver": present, "session": present}, map[string]bool{"driver": true, "session": true}},
+		{"session listed stays", both, listed, map[string]machinefile.Seen{"driver": present, "session": present}, map[string]bool{"driver": true}},
+		{"session viewer still needs stays", both, nil, map[string]machinefile.Seen{"driver": present, "session": present, "viewer": present}, map[string]bool{"driver": true, "session": false}},
+		{"driver by hand, its method unknown, holds nothing", both[1:], nil, map[string]machinefile.Seen{"driver": {Condition: machinefile.Present}, "session": present}, map[string]bool{"session": true}},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			r := machinefile.Resolved{Name: "vm", System: sys, Steps: c.steps}
+			got := map[string]bool{}
+			for _, e := range machinefile.Judge(r, lib.Catalog, c.seen, c.ledger, false, "").Extra {
+				got[e.Step.Package] = e.Takes()
+			}
+			if len(got) != len(c.taken) {
+				t.Errorf("extras %v; want %v", got, c.taken)
+			}
+			for pkg, takes := range c.taken {
+				if got[pkg] != takes {
+					t.Errorf("%s taken %v; want %v (extras %v)", pkg, got[pkg], takes, got)
+				}
+			}
+		})
+	}
+}
+
 func TestACycleThroughAMethodsRequiresIsRefused(t *testing.T) {
 	up := "package: station.package/v1\nkind: app\nname: up\ndescription: d\nmethods:\n    - { os: ubuntu, requires: [down], script: { run: 'true' } }\n"
 	down := "package: station.package/v1\nkind: app\nname: down\ndescription: d\nrequires: [up]\nmethods:\n    - { os: any, script: { run: 'true' } }\n"

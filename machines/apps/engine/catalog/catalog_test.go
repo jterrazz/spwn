@@ -157,7 +157,7 @@ func TestARequirementLivesWhereItsAppDoes(t *testing.T) {
 			if !placed {
 				continue
 			}
-			for _, r := range requiredOf(c.InstallLinks(a, in, kind)) {
+			for _, r := range requiredOf(c.InstallLinks(a, in, systemOn(kind))) {
 				if _, carried := byName[r].InstallOn(kind); !carried {
 					t.Errorf("%s lives on %s, where its requirement %s does not", a.Name, kind, r)
 				}

@@ -141,7 +141,7 @@ Every manager type has its own check, upgrade and undo; an override is written o
 | `trusted`  | a brew's or a cask's | a formula or a cask from a third-party tap the owner trusts                        |
 | `shell`    | an app's             | the blocks of `~/.zshrc` this method writes once the app is there                  |
 
-A method's `requires` holds where that method is the one the machine's system, family and kind choose, and nowhere else: an app whose Ubuntu method requires a package and whose macOS method does not plans none of it on a Mac, and on Ubuntu installs it first, `required by` the app in the plan and in `explain`. Each name is an app of the catalog, refused at decode otherwise, and a cycle through it is refused by the plan as one through the package's `requires`; a setting's method requires nothing, its package's `requires` does.
+A method's `requires` holds where that method is the one the machine's system, family and kind choose, and nowhere else: an app whose Ubuntu method requires a package and whose macOS method does not plans none of it on a Mac, and on Ubuntu installs it first, `required by` the app in the plan and in `explain`. `station apps install` reads the same choice, by the machine's version and arch, so two methods of one key that differ by version require what the plan says on each. Each name is an app of the catalog, refused at decode otherwise, and a cycle through it is refused by the plan as one through the package's `requires`; a setting's method requires nothing, its package's `requires` does.
 
 ```yaml
 # what one method alone needs: on Linux, a virtual screen for the release to drive
