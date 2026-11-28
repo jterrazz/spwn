@@ -14,12 +14,16 @@ runs:
     - command: 'settings caveman-telemetry-off'
       exit: 0
       stdout: |
-          ○	caveman-telemetry-off	not applied	station settings apply caveman-telemetry-off
+          ○	caveman-telemetry-off	not applied · kept: ~/.caveman/cloud.json /telemetry/enabled, ~/.caveman/cloud.json /telemetry/decidedAt still yours, not this setting's value, so it does not hold	the value is yours: change it yourself, or leave it
           # Detail
           group	Set by Machines
           does	caveman sends no usage telemetry, its choice recorded off before its first run
           lives on	Macs, Linux VMs, macOS VMs
           where	~/.caveman/cloud.json
+    - command: 'settings apply | /usr/bin/grep -c caveman-telemetry-off'
+      exit: 1
+      stdout: |
+          0
     - command: '--version >/dev/null; /bin/cat .caveman/cloud.json'
       exit: 0
       stdout: |

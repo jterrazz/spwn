@@ -69,6 +69,25 @@ func (c Catalog) App(name string) (App, bool) {
 	return App{}, false
 }
 
+func (c Catalog) HeldBy(p string, but []string) string {
+	// value: the app whose declared disk paths hold p, the path itself or
+	// a folder above it, other than the apps named in but; "" when none
+	// does.
+	p = path.Clean(p)
+	for _, t := range c.Apps {
+		if slices.Contains(but, t.Name) {
+			continue
+		}
+		for _, s := range t.Disk.Paths {
+			at := path.Clean(s.Path)
+			if p == at || strings.HasPrefix(p, at+"/") {
+				return t.Name
+			}
+		}
+	}
+	return ""
+}
+
 func (c Catalog) Setting(name string) (Setting, bool) {
 	for _, it := range c.Settings {
 		if it.Name == name {

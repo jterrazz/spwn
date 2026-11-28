@@ -1,5 +1,5 @@
 description: 'rtk over an owner''s hooks that is no object: its then row says the hook is kept, never applied'
-fixture: ../../settings/__fixtures__/rtk/
+fixture: ../../__fixtures__/rtk/
 env: two-macs
 runs:
     - command: '--version >/dev/null; /bin/mkdir -p .claude; printf ''{\n  "hooks": "x"\n}\n'' > .claude/settings.json'

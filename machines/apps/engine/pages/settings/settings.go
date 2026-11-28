@@ -25,6 +25,10 @@ func columns() []page.Column {
 	return []page.Column{{Key: "name", Kind: page.KindText, Keep: 100}, {Key: "state", Kind: page.KindText, Keep: 60}}
 }
 
+// value: the next step of a value of the owner's kept where the setting
+// sets another: an apply would keep it again, so the step is his.
+const keptHint = "the value is yours: change it yourself, or leave it"
+
 // value: how long ago, in its largest unit alone (`2 d ago`).
 func ago(since, now time.Time) string {
 	d := now.Sub(since)
@@ -57,10 +61,18 @@ func Row(r settings.Row, now time.Time) page.Row {
 	case settings.StateNotApplied:
 		row.Mark, row.Cells = page.Absent, []page.Value{page.Text(settings.StateNotApplied.Word())}
 		row.Hint = page.Cmd("station settings apply " + name)
-		if r.Needs != "" {
+		switch {
+		case r.Needs != "":
+			needs := "needs " + r.Package.NeedsSaid()
+			if r.Why != "" {
+				needs = r.Why
+			}
 			row.Reason = page.Missing
-			row.Cells = []page.Value{page.Texts(settings.StateNotApplied.Word(), "needs "+r.Package.NeedsSaid())}
+			row.Cells = []page.Value{page.Texts(settings.StateNotApplied.Word(), needs)}
 			row.Hint = page.Cmd("station apps install " + r.Needs)
+		case r.Why != "":
+			row.Cells = []page.Value{page.Texts(settings.StateNotApplied.Word(), r.Why)}
+			row.Hint = &page.Hint{Text: keptHint}
 		}
 	case settings.StateOffThisMac:
 		row.Mark, row.Cells = page.OffHere, []page.Value{page.Text(settings.StateOffThisMac.Word())}
@@ -257,7 +269,7 @@ func next(set []settings.Row, all bool) []page.Hint {
 	apply := page.Hint{Command: "station settings apply"}
 	n := 0
 	for _, r := range set {
-		if r.State == settings.StateNotApplied || r.State == settings.StateChangedSince {
+		if (r.State == settings.StateNotApplied && r.Why == "") || r.State == settings.StateChangedSince {
 			n++
 		}
 	}

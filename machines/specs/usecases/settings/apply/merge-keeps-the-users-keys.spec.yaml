@@ -39,4 +39,4 @@ runs:
     - command: 'settings fmt | /usr/bin/sed -n 1p'
       exit: 0
       stdout: |
-          ○	fmt	not applied	station settings apply fmt
+          ○	fmt	not applied · kept: ~/.oxfmtrc.json /tabWidth still yours, not this setting's value, so it does not hold	the value is yours: change it yourself, or leave it

@@ -81,6 +81,9 @@ type Observation struct {
 	// left, or a fragment in a file of the owner's, whose Undo takes back
 	// only what is still station's: off takes it away.
 	Loose bool
+	// value: a value of the owner's the setting sets otherwise, kept as
+	// his: what remains true, in the owner's words; empty when none is.
+	Kept string
 }
 
 func (o Observation) Present() bool { return o.State == catalog.StateOK }
@@ -97,8 +100,9 @@ type Row struct {
 	// value: ChangedSince and Applied: when station applied it.
 	Since time.Time
 	Where string
-	// value: NotForThisMachine: the reason, "Mac only"; NotApplied: what it
-	// waits for, "needs starship".
+	// value: NotForThisMachine: the reason, "Mac only"; NotApplied: a
+	// value of the owner's kept where the setting sets another, what
+	// remains true, which no apply changes.
 	Why string
 	// value: the app it needs that is not installed here.
 	Needs string

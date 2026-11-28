@@ -151,6 +151,7 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 		o.State, o.Detail = catalog.StateDegraded, "differs from Machines': station settings apply "+it.Name
 	case len(kept) > 0:
 		o.State, o.Detail = catalog.StateDegraded, "kept: "+strings.Join(kept, ", ")+" still yours, not this setting's value, so it does not hold"
+		o.Kept = o.Detail
 	case present == len(d.Files):
 		o.State, o.Detail = catalog.StateOK, d.Files[0].To
 	case present == 0:

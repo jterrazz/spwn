@@ -64,6 +64,12 @@ var Apply = call.Call[Deps, ApplyIn, []settings.Change]{
 				changes = append(changes, change)
 				continue
 			}
+			// invariant: a setting held by an app that is not here wrote
+			// nothing: it is neither recorded nor turned back on.
+			if change.Result == catalog.StateAbsent {
+				changes = append(changes, change)
+				continue
+			}
 			change.Result = catalog.StateOK
 			if off[t.it.Name] {
 				delete(off, t.it.Name)
@@ -106,7 +112,9 @@ func targetsOf(ctx context.Context, d Deps, in ApplyIn, off map[string]bool) ([]
 				continue
 			}
 			row, _ := judge(ctx, d, it, off)
-			if (row.State == settings.StateNotApplied && row.Needs == "") || row.State == settings.StateChangedSince {
+			// invariant: a value of the owner's kept (Why) is left out:
+			// an apply would keep it again.
+			if (row.State == settings.StateNotApplied && row.Needs == "" && row.Why == "") || row.State == settings.StateChangedSince {
 				out = append(out, target{it: it, row: row})
 			}
 		}

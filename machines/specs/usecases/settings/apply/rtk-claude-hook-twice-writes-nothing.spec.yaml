@@ -1,5 +1,5 @@
 description: rtk's Claude Code hook applied again writes nothing and adds no second entry
-fixture: ../__fixtures__/rtk/
+fixture: ../../__fixtures__/rtk/
 env: two-macs
 runs:
     - command: 'settings apply rtk-claude-hook'

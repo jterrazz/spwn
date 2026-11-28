@@ -26,6 +26,9 @@ type CatalogueOptions struct {
 	Admin bool
 	// value: the app a setting requires is installed here.
 	Has func(app string) bool
+	// value: the app whose declared disk paths hold a file, other than the
+	// apps named; "" when none does.
+	HeldBy func(file string, but []string) string
 	// value: this Mac reports a battery, so it is a laptop, and no setting
 	// of the Always-on Mac group lives on it.
 	Laptop bool
@@ -73,10 +76,30 @@ func (s *Catalogue) Lives(it catalog.Setting) bool {
 
 func (s *Catalogue) Needs(it catalog.Setting) string {
 	if s.applies(it) {
-		return ""
+		app, _ := s.held(it)
+		return app
 	}
 	return it.Requires
 }
+
+// invariant: a file a setting writes that another app's disk declares (a
+// hook in Claude Code's settings) is written only where that app is
+// installed: never a folder of an app that is not here.
+func (s *Catalogue) held(it catalog.Setting) (app, file string) {
+	d, ok := it.Effect.(catalog.Dotfiles)
+	if !ok || s.o.HeldBy == nil {
+		return "", ""
+	}
+	for _, c := range d.Files {
+		if app := s.o.HeldBy(c.To, it.Needs()); app != "" && (s.o.Has == nil || !s.o.Has(app)) {
+			return app, c.To
+		}
+	}
+	return "", ""
+}
+
+// value: the words of a setting held by an app that is not here.
+func notHere(app string) string { return app + " is not here: nothing written" }
 
 func (s *Catalogue) Admit(name string, interactive bool) error {
 	found, err := s.Find([]string{name})
@@ -237,6 +260,9 @@ func (s *Catalogue) Install(ctx context.Context, name string, values map[string]
 				Message: it.Name + " is written only where " + it.NeedsSaid() + " is installed, and here it is not: nothing written; station apps install " + it.Requires,
 			}
 		}
+		if app, file := s.held(it); app != "" {
+			return settings.Change{Result: catalog.StateAbsent, Steps: []settings.ChangeStep{{Label: file, State: catalog.StateAbsent, Detail: notHere(app)}}}, nil
+		}
 		merged := clone(s.o.Defaults[it.Name])
 		for k, v := range values {
 			merged[k] = v
@@ -277,7 +303,9 @@ func (s *Catalogue) apply(name, verb string, interactive bool, run func(handler,
 		change.Steps = append(change.Steps, settings.ChangeStep{Label: "failed", State: catalog.StateBroken, Detail: firstLine(err.Error())})
 		return change, err
 	}
-	change.Result = catalog.StateOK
+	if change.Result != catalog.StateAbsent {
+		change.Result = catalog.StateOK
+	}
 	return change, nil
 }
 

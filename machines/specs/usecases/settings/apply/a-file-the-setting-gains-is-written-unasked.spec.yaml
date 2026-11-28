@@ -29,7 +29,7 @@ runs:
                         - from: starship/starship.toml
                           to: ~/.config/starship.toml
                         - from: tmux/tmux.conf
-                          to: ~/.tmux.conf
+                          to: ~/.config/prompt.conf
       exit: 0
     - command: 'settings prompt | /usr/bin/sed -n 1p'
       exit: 0
@@ -37,15 +37,15 @@ runs:
           ○	prompt	not applied	station settings apply prompt
     - command: 'settings apply prompt </dev/null >/dev/null'
       exit: 0
-    - command: '--version >/dev/null; /bin/ls .tmux.conf'
+    - command: '--version >/dev/null; /bin/ls .config/prompt.conf'
       exit: 0
       stdout: |
-          .tmux.conf
+          .config/prompt.conf
     - command: 'settings prompt | /usr/bin/sed -n 1p'
       exit: 0
       stdout: |
           ●	prompt	applied · ~/.config/starship.toml
-    - command: '--version >/dev/null; /bin/rm .tmux.conf'
+    - command: '--version >/dev/null; /bin/rm .config/prompt.conf'
       exit: 0
     - command: 'settings prompt | /usr/bin/sed -n 1p'
       exit: 0

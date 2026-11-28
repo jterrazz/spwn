@@ -1,0 +1,24 @@
+description: rtk's hook is not written where Claude Code is not installed, and lands once it is
+fixture: ../../__fixtures__/rtk-alone/
+env: two-macs
+runs:
+    - command: 'settings apply rtk-claude-hook'
+      exit: 0
+      stdout: |
+          ○	rtk-claude-hook	~/.claude/settings.json: claude is not here: nothing written
+      files:
+          .claude: absent
+    - command: 'settings rtk-claude-hook | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ○	rtk-claude-hook	not applied · claude is not here: nothing written	station apps install claude
+    - command: '--version >/dev/null; /bin/cp bin/rtk bin/claude'
+      exit: 0
+    - command: 'settings apply rtk-claude-hook'
+      exit: 0
+      stdout: |
+          ●	rtk-claude-hook	~/.claude/settings.json: merged
+    - command: 'settings rtk-claude-hook | /usr/bin/sed -n 1p'
+      exit: 0
+      stdout: |
+          ●	rtk-claude-hook	applied · ~/.claude/settings.json

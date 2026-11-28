@@ -2,6 +2,7 @@ package calls
 
 import (
 	"context"
+	"slices"
 	"strconv"
 	"time"
 
@@ -153,6 +154,12 @@ func judge(ctx context.Context, d Deps, it catalog.Setting, off map[string]bool)
 	row.Origin = originOf(d, it.Name)
 	if row.State == settings.StateNotApplied {
 		row.Needs = d.Settings.Needs(it)
+		switch {
+		case row.Needs == "":
+			row.Why = now.Kept
+		case !slices.Contains(it.Needs(), row.Needs):
+			row.Why = notHere(row.Needs)
+		}
 	}
 	return row, now
 }

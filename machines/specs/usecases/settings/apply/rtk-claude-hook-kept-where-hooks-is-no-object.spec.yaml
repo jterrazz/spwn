@@ -1,5 +1,5 @@
 description: rtk's hook is not installed where the owner's hooks is no object, and never reads as applied
-fixture: ../__fixtures__/rtk/
+fixture: ../../__fixtures__/rtk/
 env: two-macs
 runs:
     - command: '--version >/dev/null; /bin/mkdir -p .claude; printf ''{\n  "hooks": "x"\n}\n'' > .claude/settings.json'
@@ -13,7 +13,7 @@ runs:
     - command: 'settings rtk-claude-hook'
       exit: 0
       stdout: |
-          ○	rtk-claude-hook	not applied	station settings apply rtk-claude-hook
+          ○	rtk-claude-hook	not applied · kept: ~/.claude/settings.json /hooks still yours, not this setting's value, so it does not hold	the value is yours: change it yourself, or leave it
           # Detail
           group	Set by Machines
           does	Claude Code's Bash commands go through rtk, by the hook rtk's own init writes

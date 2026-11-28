@@ -1,5 +1,5 @@
 description: rtk's Claude Code hook is appended beside the owner's keys and hooks, in his order
-fixture: ../__fixtures__/rtk/
+fixture: ../../__fixtures__/rtk/
 env: two-macs
 runs:
     - command: '--version >/dev/null; /bin/mkdir -p .claude; printf ''{\n  "theme": "dark",\n  "hooks": {\n    "Stop": [\n      {\n        "hooks": [\n          {\n            "type": "command",\n            "command": "say done"\n          }\n        ]\n      }\n    ],\n    "PreToolUse": [\n      {\n        "matcher": "Edit",\n        "hooks": [\n          {\n            "type": "command",\n            "command": "lint"\n          }\n        ]\n      }\n    ]\n  }\n}\n'' > .claude/settings.json'

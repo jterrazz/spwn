@@ -1,0 +1,11 @@
+description: 'rtk without Claude Code: its then row says nothing was written, and no ~/.claude is made'
+fixture: ../../__fixtures__/rtk-alone/
+env: two-macs
+runs:
+    - command: 'apps install rtk'
+      exit: 0
+      stdout: |
+          ●	rtk	1.0.0	brew
+          ○	rtk-claude-hook			~/.claude/settings.json: claude is not here: nothing written
+      files:
+          .claude: absent
