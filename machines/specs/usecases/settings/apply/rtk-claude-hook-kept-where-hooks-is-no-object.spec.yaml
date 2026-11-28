@@ -1,4 +1,4 @@
-description: rtk's hook is not installed where the owner's hooks is no object, and the setting says so, never applied
+description: rtk's hook is not installed where the owner's hooks is no object, and never reads as applied
 fixture: ../__fixtures__/rtk/
 env: two-macs
 runs:
