@@ -271,7 +271,7 @@ func TestATamperedRecordIsNeitherReadNorObeyed(t *testing.T) {
 
 func TestASkillMadeAsItsTemplatePlansValidAndListingSkillsWritesNoHome(t *testing.T) {
 	d, _, root := applying(t)
-	skillsOf := skillfiles.New(local.New(nil, nil, nil, nil).FS)
+	skillsOf := skillfiles.New(local.New(nil, nil, nil, nil).FS, manifest.New())
 	if _, err := skillsOf.Create(t.Context(), root, "reading"); err != nil {
 		t.Fatal(err)
 	}

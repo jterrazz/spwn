@@ -57,11 +57,23 @@ const (
 func coded(err error, subject string) error {
 	// invariant: a refusal of the Projects travels as its code, worded by
 	// the binary that prints it.
+	switch {
+	case errors.Is(err, project.ErrNotFound):
+		return fail.New(fail.NotFound, NotFound, subject, nil)
+	case errors.Is(err, project.ErrExists):
+		return fail.New(fail.Refused, Exists, subject, nil)
+	}
+	return Refusal(err)
+}
+
+// invariant: a refusal of the project's layout or of a name of its
+// declaration travels as its code, whichever family's call met it; any
+// other err comes back as it is.
+
+func Refusal(err error) error {
 	var at *project.Unwritten
 	var layout *project.LayoutRefused
 	switch {
-	case err == nil:
-		return nil
 	case errors.As(err, &layout) && layout.Old:
 		return fail.New(fail.Refused, OldLayout, "spwn", map[string]string{"said": layout.Said})
 	case errors.As(err, &layout):
@@ -78,10 +90,6 @@ func coded(err error, subject string) error {
 		return fail.New(fail.Refused, NotWritten, at.Path, map[string]string{"record": "not-written"})
 	case errors.As(err, &at):
 		return fail.New(fail.Refused, NotWritten, at.Path, nil)
-	case errors.Is(err, project.ErrNotFound):
-		return fail.New(fail.NotFound, NotFound, subject, nil)
-	case errors.Is(err, project.ErrExists):
-		return fail.New(fail.Refused, Exists, subject, nil)
 	}
 	return err
 }

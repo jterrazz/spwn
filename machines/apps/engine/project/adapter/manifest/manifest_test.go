@@ -32,6 +32,43 @@ func TestProjects(t *testing.T) {
 	contracttest.Projects(t, func(t *testing.T) (contract.Projects, string) { return open(t), t.TempDir() })
 }
 
+func TestLayouts(t *testing.T) {
+	contracttest.Layouts(t, func(t *testing.T) (contract.Layouts, contract.Projects, string) {
+		t.Setenv("SPWN_HOME", t.TempDir())
+		return manifest.New(), manifest.New(), t.TempDir()
+	})
+}
+
+func TestALayoutThatDoesNotReadIsRefusedAsTheProjectWordsItAndActNeverRuns(t *testing.T) {
+	for name, lay := range map[string]struct {
+		lay  func(root string) error
+		want project.LayoutRefused
+	}{
+		"the old layout": {func(root string) error {
+			if err := os.MkdirAll(filepath.Join(root, "spwn", "tools", "greet"), 0o750); err != nil {
+				return err
+			}
+			return os.WriteFile(filepath.Join(root, "spwn", "tools", "greet", "tool.yaml"), []byte("name: greet\n"), 0o600)
+		}, project.LayoutRefused{Old: true}},
+		"a folders: key": {func(root string) error {
+			return os.WriteFile(filepath.Join(root, project.ManifestName), []byte("name: site\nfolders:\n  agents: spwn/agents\n"), 0o600)
+		}, project.LayoutRefused{Key: "agents"}},
+	} {
+		t.Run(name, func(t *testing.T) {
+			_, m := made(t)
+			if err := lay.lay(m.Root); err != nil {
+				t.Fatal(err)
+			}
+			ran := false
+			err := manifest.New().Within(m.Root, func() error { ran = true; return nil })
+			var refused *project.LayoutRefused
+			if ran || !errors.As(err, &refused) || refused.Old != lay.want.Old || refused.Key != lay.want.Key || refused.Said == "" {
+				t.Fatalf("Within ran %v, = %v; want %+v refused, said, and act not run", ran, err, lay.want)
+			}
+		})
+	}
+}
+
 func TestANameIsTheManifestsRule(t *testing.T) {
 	for _, name := range []string{"site", "2fast", "my-site", "", "Site", "-site", "a/b", "..", "site.md"} {
 		if project.ValidName(name) != spwnproject.IsValidProjectName(name) {

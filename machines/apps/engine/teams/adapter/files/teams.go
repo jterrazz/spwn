@@ -7,13 +7,29 @@ import (
 
 	"spwn.sh/packages/project"
 
+	projectcontract "github.com/jterrazz/studio-station/apps/engine/project/contract"
 	"github.com/jterrazz/studio-station/apps/engine/teams"
 	"github.com/jterrazz/studio-station/apps/engine/teams/contract"
 )
 
-type Teams struct{}
+type Teams struct {
+	// value: the layout of the project a team is read in.
+	Layouts projectcontract.Layouts
+}
 
 var _ contract.Teams = Teams{}
+
+// value: what act returns, run within the layout of the project at root
+// as l holds it.
+func within[T any](l projectcontract.Layouts, root string, act func() (T, error)) (T, error) {
+	var out T
+	err := l.Within(root, func() error {
+		var err error
+		out, err = act()
+		return err
+	})
+	return out, err
+}
 
 func read(t project.Team) (teams.Team, error) {
 	members, err := project.TeamMembers(t.Slug)
@@ -24,8 +40,8 @@ func read(t project.Team) (teams.Team, error) {
 	return teams.Team{Slug: t.Slug, Name: t.Name, Description: t.Description, Color: t.Color, Members: members}, nil
 }
 
-func (Teams) List(_ context.Context, root string) ([]teams.Team, error) {
-	return project.Within(root, func() ([]teams.Team, error) {
+func (f Teams) List(_ context.Context, root string) ([]teams.Team, error) {
+	return within(f.Layouts, root, func() ([]teams.Team, error) {
 		declared, err := project.ListTeams()
 		if err != nil {
 			return nil, err
@@ -43,8 +59,8 @@ func (Teams) List(_ context.Context, root string) ([]teams.Team, error) {
 	})
 }
 
-func (Teams) Team(_ context.Context, root, slug string) (teams.Team, error) {
-	return project.Within(root, func() (teams.Team, error) {
+func (f Teams) Team(_ context.Context, root, slug string) (teams.Team, error) {
+	return within(f.Layouts, root, func() (teams.Team, error) {
 		// invariant: a team is one of the files ListTeams reads, so a slug
 		// that names no such file, or a path, is not found.
 		declared, err := project.ListTeams()

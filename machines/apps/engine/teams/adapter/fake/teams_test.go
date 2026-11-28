@@ -30,6 +30,13 @@ func TestTeams(t *testing.T) {
 		if err := json.Unmarshal(raw, w); err != nil {
 			t.Fatal(err)
 		}
-		return fake.Of(w, "this-mac"), project
+		return fake.Of(w, "this-mac", unkept{}), project
 	})
 }
+
+// value: the layout of a root the world keeps no project at, as the
+// project family's fake reads it: act runs. An adapter's test imports no
+// other adapter.
+type unkept struct{}
+
+func (unkept) Within(_ string, act func() error) error { return act() }

@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 
+	projectcontract "github.com/jterrazz/studio-station/apps/engine/project/contract"
 	"github.com/jterrazz/studio-station/apps/engine/teams"
 	"github.com/jterrazz/studio-station/apps/engine/teams/contract"
 	"github.com/jterrazz/studio-station/apps/engine/world"
@@ -12,15 +13,21 @@ import (
 
 type Teams struct {
 	// invariant: the Teams one machine of the world keeps; its members are
-	// read from the Minds of the same machine, never stored.
+	// read from the Minds of the same machine, never stored; each call is
+	// refused first as its project's layout refuses it.
 	w       *world.World
 	machine string
+	layouts projectcontract.Layouts
 }
 
 var _ contract.Teams = (*Teams)(nil)
 
-func Of(w *world.World, machine string) *Teams {
-	return &Teams{w: w, machine: machine}
+func Of(w *world.World, machine string, layouts projectcontract.Layouts) *Teams {
+	return &Teams{w: w, machine: machine, layouts: layouts}
+}
+
+func (t *Teams) laid(project string) error {
+	return t.layouts.Within(project, func() error { return nil })
 }
 
 func (t *Teams) store() *world.Stores { return t.w.Mac(t.machine).Store() }
@@ -42,6 +49,9 @@ func (t *Teams) read(declared teams.Team, project string) teams.Team {
 }
 
 func (t *Teams) List(_ context.Context, project string) ([]teams.Team, error) {
+	if err := t.laid(project); err != nil {
+		return nil, err
+	}
 	t.w.Lock()
 	defer t.w.Unlock()
 	out := make([]teams.Team, 0, len(t.store().Teams))
@@ -53,6 +63,9 @@ func (t *Teams) List(_ context.Context, project string) ([]teams.Team, error) {
 }
 
 func (t *Teams) Team(_ context.Context, project, slug string) (teams.Team, error) {
+	if err := t.laid(project); err != nil {
+		return teams.Team{}, err
+	}
 	t.w.Lock()
 	defer t.w.Unlock()
 	for _, declared := range t.store().Teams {

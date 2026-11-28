@@ -7,10 +7,10 @@ import (
 	"strings"
 
 	"spwn.sh/packages/agent"
-	spwnproject "spwn.sh/packages/project"
 
 	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/agents/contract"
+	projectcontract "github.com/jterrazz/studio-station/apps/engine/project/contract"
 )
 
 // value: the prefix agent.yaml writes before a harness's name.
@@ -23,9 +23,23 @@ type Minds struct {
 	// value: the folder removal of this machine's disk, which takes back
 	// what an archive that did not read left.
 	RemoveAll func(path string) error
+	// value: the layout of the project a Mind is read and written in.
+	Layouts projectcontract.Layouts
 }
 
 var _ contract.Minds = Minds{}
+
+// value: what act returns, run within the layout of the project at root
+// as l holds it.
+func within[T any](l projectcontract.Layouts, root string, act func() (T, error)) (T, error) {
+	var out T
+	err := l.Within(root, func() error {
+		var err error
+		out, err = act()
+		return err
+	})
+	return out, err
+}
 
 func exists(name string) bool {
 	_, err := agent.InspectAgent(name)
@@ -95,8 +109,8 @@ func mindOf(name string) (agents.Mind, error) {
 	return out, nil
 }
 
-func (Minds) List(_ context.Context, project string) ([]agents.Agent, error) {
-	return spwnproject.Within(project, func() ([]agents.Agent, error) {
+func (m Minds) List(_ context.Context, project string) ([]agents.Agent, error) {
+	return within(m.Layouts, project, func() ([]agents.Agent, error) {
 		infos, err := agent.ListAgents()
 		if err != nil {
 			return nil, err
@@ -114,8 +128,8 @@ func (Minds) List(_ context.Context, project string) ([]agents.Agent, error) {
 	})
 }
 
-func (Minds) Mind(_ context.Context, project, name string) (agents.Mind, error) {
-	return spwnproject.Within(project, func() (agents.Mind, error) {
+func (m Minds) Mind(_ context.Context, project, name string) (agents.Mind, error) {
+	return within(m.Layouts, project, func() (agents.Mind, error) {
 		if err := found(name); err != nil {
 			return agents.Mind{}, err
 		}
@@ -123,8 +137,8 @@ func (Minds) Mind(_ context.Context, project, name string) (agents.Mind, error) 
 	})
 }
 
-func (Minds) Create(_ context.Context, project, name string, e agents.Edit) (agents.Mind, error) {
-	return spwnproject.Within(project, func() (agents.Mind, error) {
+func (m Minds) Create(_ context.Context, project, name string, e agents.Edit) (agents.Mind, error) {
+	return within(m.Layouts, project, func() (agents.Mind, error) {
 		if exists(name) {
 			return agents.Mind{}, agents.ErrExists
 		}
@@ -140,8 +154,8 @@ func (Minds) Create(_ context.Context, project, name string, e agents.Edit) (age
 	})
 }
 
-func (Minds) Edit(_ context.Context, project, name string, e agents.Edit) (agents.Agent, error) {
-	return spwnproject.Within(project, func() (agents.Agent, error) {
+func (m Minds) Edit(_ context.Context, project, name string, e agents.Edit) (agents.Agent, error) {
+	return within(m.Layouts, project, func() (agents.Agent, error) {
 		if err := found(name); err != nil {
 			return agents.Agent{}, err
 		}
@@ -149,8 +163,8 @@ func (Minds) Edit(_ context.Context, project, name string, e agents.Edit) (agent
 	})
 }
 
-func (Minds) Delete(_ context.Context, project, name string) error {
-	_, err := spwnproject.Within(project, func() (struct{}, error) {
+func (m Minds) Delete(_ context.Context, project, name string) error {
+	_, err := within(m.Layouts, project, func() (struct{}, error) {
 		if err := found(name); err != nil {
 			return struct{}{}, err
 		}
@@ -159,8 +173,8 @@ func (Minds) Delete(_ context.Context, project, name string) error {
 	return err
 }
 
-func (Minds) Fork(_ context.Context, project, from, to string) (agents.Forked, error) {
-	return spwnproject.Within(project, func() (agents.Forked, error) {
+func (m Minds) Fork(_ context.Context, project, from, to string) (agents.Forked, error) {
+	return within(m.Layouts, project, func() (agents.Forked, error) {
 		if err := found(from); err != nil {
 			return agents.Forked{}, err
 		}
@@ -175,8 +189,8 @@ func (Minds) Fork(_ context.Context, project, from, to string) (agents.Forked, e
 	})
 }
 
-func (Minds) Export(_ context.Context, project, name, folder string) (agents.Exported, error) {
-	return spwnproject.Within(project, func() (agents.Exported, error) {
+func (m Minds) Export(_ context.Context, project, name, folder string) (agents.Exported, error) {
+	return within(m.Layouts, project, func() (agents.Exported, error) {
 		if err := found(name); err != nil {
 			return agents.Exported{}, err
 		}
@@ -192,7 +206,7 @@ func (m Minds) Import(_ context.Context, project, archive, as string) (agents.Mi
 	if as == "" {
 		as = agents.ArchiveName(archive)
 	}
-	return spwnproject.Within(project, func() (agents.Mind, error) {
+	return within(m.Layouts, project, func() (agents.Mind, error) {
 		if exists(as) {
 			return agents.Mind{}, agents.ErrExists
 		}
@@ -207,8 +221,8 @@ func (m Minds) Import(_ context.Context, project, archive, as string) (agents.Mi
 	})
 }
 
-func (Minds) Dream(_ context.Context, project, name string) (agents.Dreamed, error) {
-	return spwnproject.Within(project, func() (agents.Dreamed, error) {
+func (m Minds) Dream(_ context.Context, project, name string) (agents.Dreamed, error) {
+	return within(m.Layouts, project, func() (agents.Dreamed, error) {
 		if err := found(name); err != nil {
 			return agents.Dreamed{}, err
 		}
@@ -224,8 +238,8 @@ func (Minds) Dream(_ context.Context, project, name string) (agents.Dreamed, err
 	})
 }
 
-func (Minds) Sleep(_ context.Context, project, name string) (agents.Slept, error) {
-	return spwnproject.Within(project, func() (agents.Slept, error) {
+func (m Minds) Sleep(_ context.Context, project, name string) (agents.Slept, error) {
+	return within(m.Layouts, project, func() (agents.Slept, error) {
 		if err := found(name); err != nil {
 			return agents.Slept{}, err
 		}

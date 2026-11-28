@@ -9,21 +9,26 @@ import (
 
 	"github.com/jterrazz/studio-station/apps/engine/agents"
 	"github.com/jterrazz/studio-station/apps/engine/agents/contract"
+	projectcontract "github.com/jterrazz/studio-station/apps/engine/project/contract"
 	"github.com/jterrazz/studio-station/apps/engine/world"
 )
 
 type Minds struct {
-	// invariant: the Minds one machine of the world keeps.
+	// invariant: the Minds one machine of the world keeps, each call refused
+	// first as its project's layout refuses it.
 	w       *world.World
 	machine string
+	layouts projectcontract.Layouts
 }
 
 var _ contract.Minds = (*Minds)(nil)
 
-func New() *Minds { return Of(&world.World{}, "this-mac") }
+func Of(w *world.World, machine string, layouts projectcontract.Layouts) *Minds {
+	return &Minds{w: w, machine: machine, layouts: layouts}
+}
 
-func Of(w *world.World, machine string) *Minds {
-	return &Minds{w: w, machine: machine}
+func (m *Minds) laid(project string) error {
+	return m.layouts.Within(project, func() error { return nil })
 }
 
 func (m *Minds) store() *world.Stores { return m.w.Mac(m.machine).Store() }
@@ -69,6 +74,9 @@ func clone(mind agents.Mind) agents.Mind {
 }
 
 func (m *Minds) List(_ context.Context, project string) ([]agents.Agent, error) {
+	if err := m.laid(project); err != nil {
+		return nil, err
+	}
 	m.w.Lock()
 	defer m.w.Unlock()
 	all := m.store().Agents[project]
@@ -80,6 +88,9 @@ func (m *Minds) List(_ context.Context, project string) ([]agents.Agent, error) 
 }
 
 func (m *Minds) Mind(_ context.Context, project, name string) (agents.Mind, error) {
+	if err := m.laid(project); err != nil {
+		return agents.Mind{}, err
+	}
 	m.w.Lock()
 	defer m.w.Unlock()
 	mind, err := m.find(project, name)
@@ -90,6 +101,9 @@ func (m *Minds) Mind(_ context.Context, project, name string) (agents.Mind, erro
 }
 
 func (m *Minds) Create(_ context.Context, project, name string, e agents.Edit) (agents.Mind, error) {
+	if err := m.laid(project); err != nil {
+		return agents.Mind{}, err
+	}
 	m.w.Lock()
 	defer m.w.Unlock()
 	if _, err := m.find(project, name); err == nil {
@@ -101,6 +115,9 @@ func (m *Minds) Create(_ context.Context, project, name string, e agents.Edit) (
 }
 
 func (m *Minds) Edit(_ context.Context, project, name string, e agents.Edit) (agents.Agent, error) {
+	if err := m.laid(project); err != nil {
+		return agents.Agent{}, err
+	}
 	m.w.Lock()
 	defer m.w.Unlock()
 	mind, err := m.find(project, name)
@@ -112,6 +129,9 @@ func (m *Minds) Edit(_ context.Context, project, name string, e agents.Edit) (ag
 }
 
 func (m *Minds) Delete(_ context.Context, project, name string) error {
+	if err := m.laid(project); err != nil {
+		return err
+	}
 	m.w.Lock()
 	defer m.w.Unlock()
 	if _, err := m.find(project, name); err != nil {
@@ -123,6 +143,9 @@ func (m *Minds) Delete(_ context.Context, project, name string) error {
 }
 
 func (m *Minds) Fork(_ context.Context, project, from, to string) (agents.Forked, error) {
+	if err := m.laid(project); err != nil {
+		return agents.Forked{}, err
+	}
 	m.w.Lock()
 	defer m.w.Unlock()
 	src, err := m.find(project, from)
@@ -139,6 +162,9 @@ func (m *Minds) Fork(_ context.Context, project, from, to string) (agents.Forked
 }
 
 func (m *Minds) Export(_ context.Context, project, name, folder string) (agents.Exported, error) {
+	if err := m.laid(project); err != nil {
+		return agents.Exported{}, err
+	}
 	m.w.Lock()
 	defer m.w.Unlock()
 	mind, err := m.find(project, name)
@@ -155,6 +181,9 @@ func (m *Minds) Export(_ context.Context, project, name, folder string) (agents.
 }
 
 func (m *Minds) Import(_ context.Context, project, archive, as string) (agents.Mind, error) {
+	if err := m.laid(project); err != nil {
+		return agents.Mind{}, err
+	}
 	m.w.Lock()
 	defer m.w.Unlock()
 	if as == "" {
@@ -174,6 +203,9 @@ func (m *Minds) Import(_ context.Context, project, archive, as string) (agents.M
 }
 
 func (m *Minds) Dream(_ context.Context, project, name string) (agents.Dreamed, error) {
+	if err := m.laid(project); err != nil {
+		return agents.Dreamed{}, err
+	}
 	m.w.Lock()
 	defer m.w.Unlock()
 	mind, err := m.find(project, name)
@@ -202,6 +234,9 @@ func (m *Minds) Dream(_ context.Context, project, name string) (agents.Dreamed, 
 }
 
 func (m *Minds) Sleep(_ context.Context, project, name string) (agents.Slept, error) {
+	if err := m.laid(project); err != nil {
+		return agents.Slept{}, err
+	}
 	m.w.Lock()
 	defer m.w.Unlock()
 	mind, err := m.find(project, name)

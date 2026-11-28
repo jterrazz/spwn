@@ -3,6 +3,7 @@ package wire
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/jterrazz/studio-station/apps/engine/project/adapter/manifest"
 	"github.com/jterrazz/studio-station/apps/engine/skills/adapter/files"
 	"github.com/jterrazz/studio-station/apps/engine/skills/contract"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
@@ -15,7 +16,7 @@ func (m machine) skillFiles() contract.Files {
 	if m.world != nil {
 		return m.world.skillFiles()
 	}
-	return files.New(m.sys.FS)
+	return files.New(m.sys.FS, manifest.New())
 }
 
 func skillsCommand(env kit.Env, m machine) *cobra.Command {

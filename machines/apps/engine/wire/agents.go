@@ -13,6 +13,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/core/fail"
 	coremachine "github.com/jterrazz/studio-station/apps/engine/core/machine"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/project/adapter/manifest"
 	agentscmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/agents"
 	agentscreate "github.com/jterrazz/studio-station/apps/engine/surface/cli/agents/create"
 	agentsdelete "github.com/jterrazz/studio-station/apps/engine/surface/cli/agents/delete"
@@ -32,7 +33,7 @@ func (m machine) minds() contract.Minds {
 	if m.world != nil {
 		return m.world.minds()
 	}
-	return mind.Minds{RemoveAll: m.sys.FS.RemoveAll}
+	return mind.Minds{RemoveAll: m.sys.FS.RemoveAll, Layouts: manifest.New()}
 }
 
 func agentsCommand(env kit.Env, m machine) *cobra.Command {

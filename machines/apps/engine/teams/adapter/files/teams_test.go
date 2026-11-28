@@ -6,10 +6,22 @@ import (
 	"strconv"
 	"testing"
 
+	spwnproject "spwn.sh/packages/project"
+
 	"github.com/jterrazz/studio-station/apps/engine/teams/adapter/files"
 	"github.com/jterrazz/studio-station/apps/engine/teams/contract"
 	"github.com/jterrazz/studio-station/apps/engine/teams/contract/contracttest"
 )
+
+// value: the layout of a project as the root module holds it, which the
+// project family's adapter words: an adapter's test imports no other
+// adapter.
+type rootModule struct{}
+
+func (rootModule) Within(root string, act func() error) error {
+	_, err := spwnproject.Within(root, func() (struct{}, error) { return struct{}{}, act() })
+	return err
+}
 
 func write(t *testing.T, path, body string) {
 	t.Helper()
@@ -47,7 +59,7 @@ func open(inProject bool) contracttest.Opener {
 			}
 			write(t, filepath.Join(agents, name, "agent.yaml"), body)
 		}
-		return files.Teams{}, project
+		return files.Teams{Layouts: rootModule{}}, project
 	}
 }
 

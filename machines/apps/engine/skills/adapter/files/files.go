@@ -12,6 +12,7 @@ import (
 	spwnproject "spwn.sh/packages/project"
 
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	projectcontract "github.com/jterrazz/studio-station/apps/engine/project/contract"
 	"github.com/jterrazz/studio-station/apps/engine/skills"
 	"github.com/jterrazz/studio-station/apps/engine/skills/contract"
 )
@@ -27,27 +28,34 @@ type Files struct {
 	// value: the skills' folder and each file in it, reached from the
 	// project's root one name at a time, never through a link.
 	under local.Beneath
+	// value: the layout of the project a skill is read and written in.
+	layouts projectcontract.Layouts
 }
 
 var _ contract.Files = Files{}
 
-func New(fsys disk) Files { return Files{fs: fsys} }
+func New(fsys disk, layouts projectcontract.Layouts) Files { return Files{fs: fsys, layouts: layouts} }
 
 // invariant: Agents' packages resolve every path from one process-global
-// project, which spwnproject.Within holds for one act at the folders its
-// spwn.yaml lays out, so the folder is read inside it. A project's folder
-// is reached from its root, the user's own from the folder that holds it,
-// each the caller's to trust.
-func in[T any](project string, act func(base, rel, dir string) (T, error)) (T, error) {
-	return spwnproject.Within(project, func() (T, error) {
+// project, which the Layouts hold for one act at the folders its spwn.yaml
+// lays out, so the folder is read inside it. A project's folder is reached
+// from its root, the user's own from the folder that holds it, each the
+// caller's to trust.
+func in[T any](l projectcontract.Layouts, project string, act func(base, rel, dir string) (T, error)) (T, error) {
+	var out T
+	err := l.Within(project, func() error {
+		var err error
 		dir := platform.SkillsDir()
 		if project != "" {
-			if rel, err := filepath.Rel(project, dir); err == nil && filepath.IsLocal(rel) {
-				return act(project, filepath.ToSlash(rel), dir)
+			if rel, relErr := filepath.Rel(project, dir); relErr == nil && filepath.IsLocal(rel) {
+				out, err = act(project, filepath.ToSlash(rel), dir)
+				return err
 			}
 		}
-		return act(filepath.Dir(dir), filepath.Base(dir), dir)
+		out, err = act(filepath.Dir(dir), filepath.Base(dir), dir)
+		return err
 	})
+	return out, err
 }
 
 func fileOf(name string) (string, error) {
@@ -58,7 +66,7 @@ func fileOf(name string) (string, error) {
 }
 
 func (f Files) List(_ context.Context, project string) ([]skills.Skill, error) {
-	return in(project, func(base, rel, dir string) ([]skills.Skill, error) {
+	return in(f.layouts, project, func(base, rel, dir string) ([]skills.Skill, error) {
 		folder, err := f.under.Open(base, rel)
 		if errors.Is(err, fs.ErrNotExist) {
 			return []skills.Skill{}, nil
@@ -98,7 +106,7 @@ func (f Files) List(_ context.Context, project string) ([]skills.Skill, error) {
 }
 
 func (f Files) Show(_ context.Context, project, name string) (skills.Skill, error) {
-	return in(project, func(base, rel, dir string) (skills.Skill, error) {
+	return in(f.layouts, project, func(base, rel, dir string) (skills.Skill, error) {
 		file, err := fileOf(name)
 		if err != nil {
 			return skills.Skill{}, err
@@ -123,7 +131,7 @@ func (f Files) Show(_ context.Context, project, name string) (skills.Skill, erro
 }
 
 func (f Files) Create(_ context.Context, project, name string) (skills.Skill, error) {
-	return in(project, func(base, rel, dir string) (skills.Skill, error) {
+	return in(f.layouts, project, func(base, rel, dir string) (skills.Skill, error) {
 		file, unnamed := fileOf(name)
 		if unnamed != nil {
 			return skills.Skill{}, skills.ErrBadName
@@ -154,7 +162,7 @@ func (f Files) Create(_ context.Context, project, name string) (skills.Skill, er
 }
 
 func (f Files) Delete(_ context.Context, project, name string) error {
-	_, err := in(project, func(base, rel, _ string) (struct{}, error) {
+	_, err := in(f.layouts, project, func(base, rel, _ string) (struct{}, error) {
 		file, err := fileOf(name)
 		if err != nil {
 			return struct{}{}, err

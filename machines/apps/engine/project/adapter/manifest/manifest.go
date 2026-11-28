@@ -35,7 +35,10 @@ type Projects struct {
 	under local.Beneath
 }
 
-var _ contract.Projects = Projects{}
+var (
+	_ contract.Projects = Projects{}
+	_ contract.Layouts  = Projects{}
+)
 
 func New() Projects { return Projects{} }
 
@@ -130,6 +133,22 @@ func Folders(spwnYAML []byte, paths []string) (map[string]string, error) {
 		out[string(k)] = l.Folder(k)
 	}
 	return out, nil
+}
+
+// invariant: the families that read a project through the root module's
+// process-global folders hold its layout here, so a refusal is worded as
+// the project words it, by one translation.
+
+func (Projects) Within(root string, act func() error) error {
+	ran := false
+	_, err := spwnproject.Within(root, func() (struct{}, error) {
+		ran = true
+		return struct{}{}, act()
+	})
+	if !ran {
+		return refusedLayout(err)
+	}
+	return err
 }
 
 // value: err as the project names a layout spwn.yaml refuses: the old

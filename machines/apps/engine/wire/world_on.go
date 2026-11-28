@@ -505,12 +505,15 @@ func (m *worldMac) waker() contract.Waker       { return machinesfake.WakerOf(m.
 func (m *worldMac) processes(kernel contract.Processes) contract.Processes {
 	return machinesfake.ProcessesOf(m.run.w, m.name, kernel)
 }
-func (m *worldMac) minds() agentscontract.Minds      { return agentsfake.Of(m.run.w, m.name) }
-func (m *worldMac) skillFiles() skillscontract.Files { return skillsfake.Of(m.run.w, m.name) }
-func (m *worldMac) projects() projectcontract.Projects {
+func (m *worldMac) minds() agentscontract.Minds { return agentsfake.Of(m.run.w, m.name, m.layouts()) }
+func (m *worldMac) skillFiles() skillscontract.Files {
+	return skillsfake.Of(m.run.w, m.name, m.layouts())
+}
+func (m *worldMac) projects() projectcontract.Projects { return m.layouts() }
+func (m *worldMac) layouts() *projectfake.Projects {
 	return projectfake.Of(m.run.w, m.name, manifest.Folders)
 }
-func (m *worldMac) teams() teamscontract.Teams { return teamsfake.Of(m.run.w, m.name) }
+func (m *worldMac) teams() teamscontract.Teams { return teamsfake.Of(m.run.w, m.name, m.layouts()) }
 func (m *worldMac) automations() automationscontract.Automations {
 	return automationsfake.Of(m.run.w, m.name)
 }

@@ -6,23 +6,28 @@ import (
 	"slices"
 	"strings"
 
+	projectcontract "github.com/jterrazz/studio-station/apps/engine/project/contract"
 	"github.com/jterrazz/studio-station/apps/engine/skills"
 	"github.com/jterrazz/studio-station/apps/engine/skills/contract"
 	"github.com/jterrazz/studio-station/apps/engine/world"
 )
 
 type Files struct {
-	// invariant: the Files one machine of the world keeps.
+	// invariant: the Files one machine of the world keeps, each call refused
+	// first as its project's layout refuses it.
 	w       *world.World
 	machine string
+	layouts projectcontract.Layouts
 }
 
 var _ contract.Files = (*Files)(nil)
 
-func New() *Files { return Of(&world.World{}, "this-mac") }
+func Of(w *world.World, machine string, layouts projectcontract.Layouts) *Files {
+	return &Files{w: w, machine: machine, layouts: layouts}
+}
 
-func Of(w *world.World, machine string) *Files {
-	return &Files{w: w, machine: machine}
+func (f *Files) laid(project string) error {
+	return f.layouts.Within(project, func() error { return nil })
 }
 
 func (f *Files) store() *world.Stores { return f.w.Mac(f.machine).Store() }
@@ -44,6 +49,9 @@ func (f *Files) find(project, name string) (int, error) {
 }
 
 func (f *Files) List(_ context.Context, project string) ([]skills.Skill, error) {
+	if err := f.laid(project); err != nil {
+		return nil, err
+	}
 	f.w.Lock()
 	defer f.w.Unlock()
 	all := f.store().Skills[project]
@@ -56,6 +64,9 @@ func (f *Files) List(_ context.Context, project string) ([]skills.Skill, error) 
 }
 
 func (f *Files) Show(_ context.Context, project, name string) (skills.Skill, error) {
+	if err := f.laid(project); err != nil {
+		return skills.Skill{}, err
+	}
 	f.w.Lock()
 	defer f.w.Unlock()
 	i, err := f.find(project, name)
@@ -66,6 +77,9 @@ func (f *Files) Show(_ context.Context, project, name string) (skills.Skill, err
 }
 
 func (f *Files) Create(_ context.Context, project, name string) (skills.Skill, error) {
+	if err := f.laid(project); err != nil {
+		return skills.Skill{}, err
+	}
 	f.w.Lock()
 	defer f.w.Unlock()
 	if _, err := f.find(project, name); err == nil {
@@ -82,6 +96,9 @@ func (f *Files) Create(_ context.Context, project, name string) (skills.Skill, e
 }
 
 func (f *Files) Delete(_ context.Context, project, name string) error {
+	if err := f.laid(project); err != nil {
+		return err
+	}
 	f.w.Lock()
 	defer f.w.Unlock()
 	i, err := f.find(project, name)

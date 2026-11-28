@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	spwnproject "spwn.sh/packages/project"
+
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/skills"
 	"github.com/jterrazz/studio-station/apps/engine/skills/adapter/files"
@@ -13,9 +15,19 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/skills/contract/contracttest"
 )
 
+// value: the layout of a project as the root module holds it, which the
+// project family's adapter words: an adapter's test imports no other
+// adapter.
+type rootModule struct{}
+
+func (rootModule) Within(root string, act func() error) error {
+	_, err := spwnproject.Within(root, func() (struct{}, error) { return struct{}{}, act() })
+	return err
+}
+
 func open(t *testing.T) contract.Files {
 	t.Setenv("SPWN_HOME", t.TempDir())
-	return files.New(local.New(nil, nil, nil, nil).FS)
+	return files.New(local.New(nil, nil, nil, nil).FS, rootModule{})
 }
 
 func TestANameThatClimbsOutOfTheSkillsNamesNoSkill(t *testing.T) {

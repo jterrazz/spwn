@@ -23,7 +23,10 @@ type Projects struct {
 	folders Folders
 }
 
-var _ contract.Projects = (*Projects)(nil)
+var (
+	_ contract.Projects = (*Projects)(nil)
+	_ contract.Layouts  = (*Projects)(nil)
+)
 
 func Starter() project.File {
 	// value: what a new project's starter agent renders in the fake world:
@@ -136,6 +139,22 @@ func (p *Projects) layoutOf(s project.State) (map[string]string, error) {
 		manifest = f.Data
 	}
 	return p.folders(manifest, slices.Sorted(maps.Keys(s.Disk)))
+}
+
+func (p *Projects) Within(root string, act func() error) error {
+	// invariant: the world is held for the layout's read alone, so act may
+	// read another family of the same world.
+	p.w.Lock()
+	s, kept := p.kept()[root]
+	var err error
+	if kept {
+		_, err = p.layoutOf(s)
+	}
+	p.w.Unlock()
+	if err != nil {
+		return err
+	}
+	return act()
 }
 
 func (p *Projects) Find(_ context.Context, folder string) (string, error) {
