@@ -465,6 +465,14 @@ func (a *Applier) land(r *record, w *written, at string, data []byte, seen local
 		return err
 	}
 	if err := a.files.Swap(at, seen, data, 0o600); err != nil {
+		// invariant: a swap that fails once the file has landed (its
+		// folder's sync) leaves it written: it is recorded, so off takes it
+		// back.
+		if !errors.Is(err, local.ErrChanged) && a.holds(at, data) {
+			*w = next
+			r.put(next)
+			return fmt.Errorf("%s is written, and recorded so off takes it back, but its write did not end: %w", at, err)
+		}
 		// invariant: a try that does not land takes back the folders it
 		// made, deepest first, while they are empty, so the next try makes
 		// and records them again.
@@ -475,6 +483,12 @@ func (a *Applier) land(r *record, w *written, at string, data []byte, seen local
 	}
 	*w = next
 	return nil
+}
+
+// value: whether the file at holds exactly data.
+func (a *Applier) holds(at string, data []byte) bool {
+	now, err := atMost(a.files.Open, at, maxTarget)
+	return err == nil && bytes.Equal(now, data)
 }
 
 // value: whether the file a setting names is itself no link, so the record
