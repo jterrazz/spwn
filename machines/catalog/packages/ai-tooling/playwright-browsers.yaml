@@ -7,7 +7,6 @@ version-read:
     path: ~/Library/Caches/ms-playwright/chromium*
 methods:
     - os: macos
-      machine: [workspace, server]
       script:
           run: npx playwright install chromium
     - family: linux

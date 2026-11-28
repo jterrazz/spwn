@@ -2866,6 +2866,11 @@ func builtinCatalog() (Catalog, error) {
 				Installs: []LivesOn{
 					{
 						Kinds: []MachineKind{
+							"mac"},
+						Install: BunInstall{
+							Package: "agent-browser"}},
+					{
+						Kinds: []MachineKind{
 							"linux"},
 						Install: BunInstall{
 							Package: "agent-browser"}},
@@ -2889,6 +2894,11 @@ func builtinCatalog() (Catalog, error) {
 				Description: "AI agent library for browser automation",
 				Category:    "AI Tooling",
 				Installs: []LivesOn{
+					{
+						Kinds: []MachineKind{
+							"mac"},
+						Install: UvInstall{
+							Package: "browser-use"}},
 					{
 						Kinds: []MachineKind{
 							"linux"},
@@ -3107,6 +3117,11 @@ func builtinCatalog() (Catalog, error) {
 				Installs: []LivesOn{
 					{
 						Kinds: []MachineKind{
+							"mac"},
+						Install: ShellInstall{
+							Line: "npx playwright install chromium"}},
+					{
+						Kinds: []MachineKind{
 							"linux"},
 						Install: ShellInstall{
 							Line: "npx playwright install chromium"}},
@@ -3176,6 +3191,11 @@ func builtinCatalog() (Catalog, error) {
 				Description: "Browser automation for AI agents via MCP",
 				Category:    "AI Tooling",
 				Installs: []LivesOn{
+					{
+						Kinds: []MachineKind{
+							"mac"},
+						Install: NpmInstall{
+							Package: "@playwright/mcp"}},
 					{
 						Kinds: []MachineKind{
 							"linux"},
@@ -7547,10 +7567,7 @@ func builtinCatalog() (Catalog, error) {
 					Methods: []MethodSpec{
 						{
 							Selector: Selector{
-								OS: "macos",
-								Machine: Roles{
-									"workspace",
-									"server"}},
+								OS: "macos"},
 							Bun: "agent-browser"},
 						{
 							Selector: Selector{
@@ -7578,10 +7595,7 @@ func builtinCatalog() (Catalog, error) {
 					Methods: []MethodSpec{
 						{
 							Selector: Selector{
-								OS: "macos",
-								Machine: Roles{
-									"workspace",
-									"server"}},
+								OS: "macos"},
 							Uv: "browser-use"},
 						{
 							Selector: Selector{
@@ -7807,10 +7821,7 @@ func builtinCatalog() (Catalog, error) {
 					Methods: []MethodSpec{
 						{
 							Selector: Selector{
-								OS: "macos",
-								Machine: Roles{
-									"workspace",
-									"server"}},
+								OS: "macos"},
 							Script: &ScriptMethod{
 								Run: "npx playwright install chromium"}},
 						{
@@ -7888,10 +7899,7 @@ func builtinCatalog() (Catalog, error) {
 					Methods: []MethodSpec{
 						{
 							Selector: Selector{
-								OS: "macos",
-								Machine: Roles{
-									"workspace",
-									"server"}},
+								OS: "macos"},
 							Npm: "@playwright/mcp"},
 						{
 							Selector: Selector{

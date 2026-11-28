@@ -5,7 +5,6 @@ description: Browser automation for AI agents via MCP
 requires: [node]
 methods:
     - os: macos
-      machine: [workspace, server]
       npm: '@playwright/mcp'
     - family: linux
       bun: '@playwright/mcp'

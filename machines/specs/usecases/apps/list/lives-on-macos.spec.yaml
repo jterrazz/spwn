@@ -8,4 +8,4 @@ runs:
       stdout: |
           node every-machine
           xcode mac-only
-          browser-use vms-only
+          browser-use every-machine

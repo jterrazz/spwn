@@ -7,7 +7,7 @@ runs:
       exit: 0
       stdout: |
           node every-machine
-          browser-use vms-only
+          browser-use every-machine
     - command: 'apps --json | /usr/bin/jq -r ''[.apps[] | select(.method == "cask")] | length'''
       exit: 0
       stdout: |

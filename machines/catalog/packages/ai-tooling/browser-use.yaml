@@ -8,7 +8,6 @@ version-read:
     pattern: browser-use (\d+\.\d+\.\d+)
 methods:
     - os: macos
-      machine: [workspace, server]
       uv: browser-use
     - family: linux
       script:

@@ -6,9 +6,10 @@ runs:
       stdout: |
           node every-machine
           xcode mac-only
+          browser-use every-machine
           ollama mac-only
           dia mac-only
     - command: 'apps --json | /usr/bin/jq -r ''[.apps[] | select(.name | IN("xcode", "cocoapods", "xcodegen", "android-studio", "lens", "orbstack", "multipass", "utm", "browser-use"))] | length'''
       exit: 0
       stdout: |
-          6
+          7
