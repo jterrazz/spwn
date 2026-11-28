@@ -122,7 +122,7 @@ func TestStateTreeRefusesALinkedStateFolderOut(t *testing.T) {
 	if err := os.Symlink(outside, filepath.Join(site, ".spwn")); err != nil {
 		t.Fatal(err)
 	}
-	_, err := WithProjectRoot(site, func() (struct{}, error) {
+	_, err := WithProject(site, Folders{}, func() (struct{}, error) {
 		tree := StateTree()
 		defer tree.Close()
 		return struct{}{}, tree.MkdirAll(filepath.Join(LocalStateDir(), "world-states", "w1"), 0o755)

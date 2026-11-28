@@ -251,7 +251,7 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 
 	if projectRoot := platform.ProjectRoot(); projectRoot != "" {
-		hydrated, hErr := builtin.HydrateLocals(reg, projectRoot, toolList)
+		hydrated, hErr := builtin.HydrateLocals(reg, projectRoot, platform.ProjectFolders(), toolList)
 		if hErr != nil {
 			return nil, fmt.Errorf("load local tools: %w", hErr)
 		}
@@ -499,10 +499,11 @@ func (a *Architect) Spawn(ctx context.Context, opts SpawnOpts) (*SpawnResult, er
 	}
 	minds := platform.Within(cmp.Or(platform.ProjectRoot(), platform.UserDir()))
 	defer minds.Close()
-	runtimeSkills := collectRuntimeSkills(project, resolvedTools)
+	folders := platform.ProjectFolders()
+	runtimeSkills := collectRuntimeSkills(project, folders.Skills, resolvedTools)
 	warnings = append(warnings, refusedToolSkills(resolvedTools)...)
-	hookPool := loadRuntimeHooks(project)
-	commandPool := loadRuntimeCommands(project)
+	hookPool := loadRuntimeHooks(project, folders.Hooks)
+	commandPool := loadRuntimeCommands(project, folders.Commands)
 	compileInput := transpile.Input{
 		Deps:                  opts.Manifest.Deps,
 		VerifiedTools:         facultiesForRuntime(verifiedTools, opts.Manifest.Deps),

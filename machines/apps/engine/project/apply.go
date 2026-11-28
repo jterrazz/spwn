@@ -91,21 +91,34 @@ var (
 	ErrNotAFolder = errors.New("is a file where apply makes a folder")
 )
 
-func Declaration() []string {
-	// value: the files and the folder a project is declared in, from its
-	// root; everything else at the root is the owner's.
-	return []string{ManifestName, "spwn.lock", "spwn"}
+func Declaration(folders []string) []string {
+	// value: the files and the folders a project is declared in, from its
+	// root: its manifest, its lock, then the folders its layout names;
+	// everything else at the root is the owner's.
+	return append([]string{ManifestName, LockName}, folders...)
 }
 
-func Declared(p string) bool {
+func Declared(folders []string, p string) bool {
 	// value: p, a slash path from the root, is the declaration or under it.
-	for _, d := range Declaration() {
+	for _, d := range Declaration(folders) {
 		if p == d || strings.HasPrefix(p, d+"/") {
 			return true
 		}
 	}
 	return false
 }
+
+// value: a project the root module refuses to read by its layout: Old,
+// its root holds the old layout's spwn/ folder; else Key, the folders:
+// entry of its spwn.yaml that names no folder. Said is the root module's
+// own sentence.
+type LayoutRefused struct {
+	Old  bool
+	Key  string
+	Said string
+}
+
+func (e *LayoutRefused) Error() string { return e.Said }
 
 type Unwritten struct {
 	// value: the path from the project's root a call cannot reach, read or

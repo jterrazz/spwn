@@ -8,8 +8,8 @@ The foundation layer: every other package asks `platform` for "where does this t
 
 ## Key types
 
-- `BaseDir()`, `AgentsDir()`, `WorldsDir()`, `CredentialsDir()`, `SkillsDir()` and the like: host-side directory resolvers. Respect `SPWN_HOME`, default to `~/.spwn`.
-- `ProjectRoot()`, `SetProjectRoot(path)`: optional project mode; set by the CLI at startup when a `spwn.yaml` is discovered.
+- `BaseDir()`, `AgentsDir()`, `WorldsDir()`, `CredentialsDir()`, `SkillsDir()` and the like: host-side directory resolvers. Respect `SPWN_HOME`, default to `~/.spwn`; `AgentsDir()` and `SkillsDir()` resolve to the project's folders when a project is set, `WorldsDir()` is always the user's.
+- `ProjectRoot()`, `SetProject(root, folders)`, `WithProject(root, folders, act)`: optional project mode; set by the CLI at startup when a `spwn.yaml` is discovered. `Folders` carries where each kind's folder sits, as `packages/project`'s `Layout` says it.
 - `GenerateWorldID(name)` gives `world-<slug>-<5-hex>`, `GenerateAgentID(name)` gives `agent-<name>-<5-hex>`.
 - `RandomPlanetName()`, `RandomAgentName()`: bundled name lists for scaffolds.
 - `MindLayers`: canonical ordered list of the two mind-layer directories (playbooks, journal). Identity was collapsed into a single SOUL.md at the agent root; knowledge is world-scoped, not agent-scoped; skills moved to build-time dependencies at `/world/skills/`.

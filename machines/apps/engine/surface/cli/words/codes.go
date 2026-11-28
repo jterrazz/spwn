@@ -632,10 +632,16 @@ func Codes() map[fail.Code]Wording {
 			return "the project at " + e.Subject + " has " + n + noun, "fix each one above, then station project plan"
 		},
 		projectcalls.LinkInTheWay: func(e *fail.Error) (string, string) {
-			if project.Declared(e.Subject) {
+			if !strings.HasPrefix(e.Subject, project.StateFolder+"/") {
 				return e.Subject + " is a link: a project's declaration is never read through one", "put the file it points to there instead, then station project plan"
 			}
 			return e.Subject + " is a link: apply never follows one", "remove the link, then station project apply"
+		},
+		projectcalls.OldLayout: func(e *fail.Error) (string, string) {
+			return e.Detail["said"], "then station project plan"
+		},
+		projectcalls.FoldersInvalid: func(e *fail.Error) (string, string) {
+			return e.Detail["said"], "fix folders: in spwn.yaml, then station project plan"
 		},
 		projectcalls.NotAFile: func(e *fail.Error) (string, string) {
 			return e.Subject + " is neither a file nor a folder: a project's declaration holds only those", "move it away, then station project plan"

@@ -31,7 +31,7 @@ func pathOf(project, name string) string {
 	if project == "" {
 		return "~/.spwn/skills/" + name + skills.Suffix
 	}
-	return filepath.Join(project, "spwn", "skills", name+skills.Suffix)
+	return filepath.Join(project, "skills", name+skills.Suffix)
 }
 
 func (f *Files) find(project, name string) (int, error) {

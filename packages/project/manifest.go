@@ -6,16 +6,15 @@
 //
 //	my-project/
 //	├── spwn.yaml           - the manifest (committed)
-//	├── spwn/               - committed project assets
-//	│   ├── agents/<name>/
-//	│   ├── tools/<name>/
-//	│   └── skills/<name>.md
+//	├── agents/<name>/      - committed project assets, each kind's
+//	├── tools/<name>/         folder at the root, as Layout names it
+//	├── skills/<name>/SKILL.md
 //	└── .spwn/              - gitignored local state
 //	    └── state.json
 //
 // Worlds are no longer separate yaml files: they live as inline map
 // entries under spwn.yaml#worlds. Agents are the source of truth for
-// the project roster: every directory under spwn/agents/ that the
+// the project roster: every directory of the agents folder that the
 // manifest's worlds reference is "deployable", everything else is
 // considered an orphan agent.
 package project
@@ -65,9 +64,12 @@ type Project struct {
 	// Manifest is the parsed content.
 	Manifest *Manifest
 
+	// Layout is where each kind's folder sits from Root.
+	Layout Layout
+
 	// Agents is one entry per *deployable* agent (referenced by at
 	// least one world in the manifest). Orphan agents (directories
-	// under spwn/agents/ not listed in any world) are surfaced via
+	// of the agents folder not listed in any world) are surfaced via
 	// OrphanAgents.
 	Agents []AgentRef
 
@@ -77,7 +79,7 @@ type Project struct {
 	OrphanAgents []AgentRef
 }
 
-// AgentRef points at one agent directory under spwn/agents/.
+// AgentRef points at one agent directory of the agents folder.
 type AgentRef struct {
 	Name   string
 	Path   string
@@ -288,6 +290,7 @@ func inputOf(t *platform.Tree, p *Project, o ValidateOpts) validate.Input {
 		Root:                p.Root,
 		Tree:                t,
 		Manifest:            p.Manifest,
+		Layout:              p.Layout,
 		BuiltinTools:        o.BuiltinTools,
 		SupportedRuntimes:   o.SupportedRuntimes,
 		HookEventsByRuntime: o.HookEventsByRuntime,
@@ -318,15 +321,23 @@ func HasErrors(issues []Issue) bool {
 func loadAt(manifestPath, root string) (*Project, error) {
 	t := platform.Within(root)
 	defer t.Close()
+	if err := oldLayout(t, root); err != nil {
+		return nil, err
+	}
 	m, err := intmanifest.Read(t, manifestPath)
 	if err != nil {
 		return nil, err
 	}
-	agents, orphans := resolveRefs(t, root, m)
+	l, err := NewLayout(m.Folders)
+	if err != nil {
+		return nil, err
+	}
+	agents, orphans := resolveRefs(t, l.Dir(root, KindAgents), m)
 	return &Project{
 		Root:         root,
 		ManifestPath: manifestPath,
 		Manifest:     m,
+		Layout:       l,
 		Agents:       agents,
 		OrphanAgents: orphans,
 	}, nil

@@ -13,8 +13,6 @@ import (
 	"spwn.sh/packages/platform"
 )
 
-const localToolDir = "tools"
-
 type wrappedLocalTool struct {
 	inner tool.Tool
 	name  string
@@ -47,19 +45,21 @@ func (t *wrappedLocalTool) Dependencies() []string {
 	return out
 }
 
-// LoadTool parses spwn/tools/<name>/tool.yaml via the
-// shared packyaml parser and wraps the result so Name() returns
-// "local:<name>". Missing manifest is a crisp authoring error: an
+// LoadTool parses <toolsFolder>/<name>/tool.yaml via the shared
+// packyaml parser and wraps the result so Name() returns
+// "local:<name>"; toolsFolder is the slash path of the project's tools
+// folder from its root. Missing manifest is a crisp authoring error: an
 // empty local dependency would render to nothing and the user would
 // spend an afternoon debugging a no-op. Every read goes through a root
 // opened at the tool's folder through the project's root: the tool's
-// folder, spwn/ and spwn/tools/ are refused when one is a link, a
-// `files:` source that leaves the tool's folder is refused by its name
-// before anything is read, and a link inside the tool's folder to
-// elsewhere, in the project or outside it, is refused by the root.
-func LoadTool(projectRoot, name string) (tool.Tool, error) {
-	pkgDir := path.Join("spwn", localToolDir, name)
-	if err := noLinkOnTheWay(projectRoot, pkgDir); err != nil {
+// folder and each folder on its way from the root are refused when one
+// is a link, a `files:` source that leaves the tool's folder is refused
+// by its name before anything is read, and a link inside the tool's
+// folder to elsewhere, in the project or outside it, is refused by the
+// root.
+func LoadTool(projectRoot, toolsFolder, name string) (tool.Tool, error) {
+	pkgDir := path.Join(toolsFolder, name)
+	if err := noLinkOnTheWay(projectRoot, toolsFolder, pkgDir); err != nil {
 		return nil, fmt.Errorf("local dependency %q: %w", name, err)
 	}
 	project := platform.FS(projectRoot)
@@ -86,7 +86,7 @@ func LoadTool(projectRoot, name string) (tool.Tool, error) {
 	return &wrappedLocalTool{inner: manifest.ToolFromParsed(parsed), name: "local:" + name}, nil
 }
 
-func noLinkOnTheWay(projectRoot, pkgDir string) error {
+func noLinkOnTheWay(projectRoot, toolsFolder, pkgDir string) error {
 	tree := platform.Within(projectRoot)
 	defer tree.Close()
 	parts := strings.Split(pkgDir, "/")
@@ -97,7 +97,7 @@ func noLinkOnTheWay(projectRoot, pkgDir string) error {
 			return nil
 		}
 		if info.Mode()&fs.ModeSymlink != 0 {
-			return fmt.Errorf("%s is a link, refused: a tool's folder is a folder of spwn/tools/, never a link to one", folder)
+			return fmt.Errorf("%s is a link, refused: a tool's folder is a folder of %s/, never a link to one", folder, toolsFolder)
 		}
 	}
 	return nil
@@ -123,7 +123,7 @@ func noLinkOnTheWay(projectRoot, pkgDir string) error {
 // Order is preserved so users see their ref list echoed back in the
 // same shape they declared it. Duplicates are tolerated: the
 // registry's Register is called once per unique name.
-func Hydrate(reg tool.Registry, projectRoot string, depRefs []string) ([]string, error) {
+func Hydrate(reg tool.Registry, projectRoot, toolsFolder string, depRefs []string) ([]string, error) {
 	loaded := map[string]bool{}
 
 	var hydrateOne func(name string) (string, error)
@@ -131,7 +131,7 @@ func Hydrate(reg tool.Registry, projectRoot string, depRefs []string) ([]string,
 		if loaded[name] {
 			return "local:" + name, nil
 		}
-		t, err := LoadTool(projectRoot, name)
+		t, err := LoadTool(projectRoot, toolsFolder, name)
 		if err != nil {
 			return "", err
 		}

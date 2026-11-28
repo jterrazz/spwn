@@ -53,6 +53,26 @@ func TestAgentsDir(t *testing.T) {
 	}
 }
 
+func TestAProjectsAgentsAndSkillsAreTheFoldersItsLayoutNames(t *testing.T) {
+	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
+	got, _ := WithProject("/p", Folders{Agents: "crew", Skills: "lib/skills"}, func() ([2]string, error) {
+		return [2]string{AgentsDir(), SkillsDir()}, nil
+	})
+	if got != [2]string{"/p/crew", "/p/lib/skills"} {
+		t.Errorf("agents and skills in a project = %q, want /p/crew and /p/lib/skills", got)
+	}
+}
+
+func TestWorldsDirIsTheUsersEvenInAProject(t *testing.T) {
+	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
+	got, _ := WithProject("/p", Folders{Agents: "agents", Skills: "skills"}, func() (string, error) {
+		return WorldsDir(), nil
+	})
+	if got != "/tmp/test-spwn/worlds" {
+		t.Errorf("WorldsDir() in a project = %q, want the user's /tmp/test-spwn/worlds, never a folder of the project's root", got)
+	}
+}
+
 
 func TestOrgPath(t *testing.T) {
 	t.Setenv("SPWN_HOME", "/tmp/test-spwn")
@@ -74,7 +94,7 @@ func TestSkillsDir(t *testing.T) {
 	}
 }
 
-func TestWithProjectRoot_TwoGoroutinesNeverSeeEachOthersRoot(t *testing.T) {
+func TestWithProject_TwoGoroutinesNeverSeeEachOthersRoot(t *testing.T) {
 	roots := []string{filepath.Join(t.TempDir(), "a"), filepath.Join(t.TempDir(), "b")}
 	var wg sync.WaitGroup
 	for _, root := range roots {
@@ -82,7 +102,7 @@ func TestWithProjectRoot_TwoGoroutinesNeverSeeEachOthersRoot(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			for range 200 {
-				seen, err := WithProjectRoot(root, func() (string, error) {
+				seen, err := WithProject(root, Folders{}, func() (string, error) {
 					runtime.Gosched()
 					return ProjectRoot(), nil
 				})
@@ -99,19 +119,22 @@ func TestWithProjectRoot_TwoGoroutinesNeverSeeEachOthersRoot(t *testing.T) {
 	}
 }
 
-func TestWithProjectRoot_RestoresTheRootItFound(t *testing.T) {
+func TestWithProject_RestoresTheProjectItFound(t *testing.T) {
 	outer := filepath.Join(t.TempDir(), "outer")
-	SetProjectRoot(outer)
-	t.Cleanup(func() { SetProjectRoot("") })
-	_, _ = WithProjectRoot("/p", func() (int, error) { return 0, nil })
+	SetProject(outer, Folders{Agents: "crew"})
+	t.Cleanup(func() { SetProject("", Folders{}) })
+	_, _ = WithProject("/p", Folders{Agents: "agents"}, func() (int, error) { return 0, nil })
 	if got := ProjectRoot(); got != outer {
 		t.Errorf("root after the act = %q, want %q", got, outer)
 	}
+	if got, want := AgentsDir(), filepath.Join(outer, "crew"); got != want {
+		t.Errorf("agents after the act = %q, want %q", got, want)
+	}
 }
 
-func TestWithProjectRoot_ReturnsTheActsError(t *testing.T) {
+func TestWithProject_ReturnsTheActsError(t *testing.T) {
 	want := errors.New("boom")
-	_, err := WithProjectRoot("/p", func() (int, error) { return 0, want })
+	_, err := WithProject("/p", Folders{}, func() (int, error) { return 0, want })
 	if !errors.Is(err, want) {
 		t.Errorf("err = %v, want %v", err, want)
 	}

@@ -43,15 +43,26 @@ const (
 	// value: a change apply could not make, a folder in a rendered file's
 	// way say: it stops there, recording what it wrote before.
 	NotWritten fail.Code = "project.not-written"
+	// value: a project whose root holds the old layout's spwn/ folder:
+	// refused before any of it is read, with the root module's sentence.
+	OldLayout fail.Code = "project.old-layout"
+	// value: a folders: entry of spwn.yaml that names no folder of the
+	// project: refused before any of it is walked or read.
+	FoldersInvalid fail.Code = "project.folders-invalid"
 )
 
 func coded(err error, subject string) error {
 	// invariant: a refusal of the Projects travels as its code, worded by
 	// the binary that prints it.
 	var at *project.Unwritten
+	var layout *project.LayoutRefused
 	switch {
 	case err == nil:
 		return nil
+	case errors.As(err, &layout) && layout.Old:
+		return fail.New(fail.Refused, OldLayout, "spwn", map[string]string{"said": layout.Said})
+	case errors.As(err, &layout):
+		return fail.New(fail.Refused, FoldersInvalid, project.ManifestName+"#folders."+layout.Key, map[string]string{"said": layout.Said})
 	case errors.As(err, &at) && errors.Is(at.Err, project.ErrLink):
 		return fail.New(fail.Refused, LinkInTheWay, at.Path, nil)
 	case errors.As(err, &at) && errors.Is(at.Err, project.ErrNotAFile):

@@ -58,15 +58,14 @@ func importProject(t *testing.T) (agents, outside string) {
 	t.Setenv("SPWN_HOME", filepath.Join(dir, "spwn-home"))
 	t.Setenv("HOME", filepath.Join(dir, "home"))
 	root, outside := filepath.Join(dir, "site"), filepath.Join(dir, "outside")
-	agents = filepath.Join(root, "spwn", "agents")
+	agents = filepath.Join(root, "agents")
 	for _, d := range []string{agents, outside} {
 		if err := os.MkdirAll(d, 0o755); err != nil {
 			t.Fatal(err)
 		}
 	}
-	was := platform.ProjectRoot()
-	platform.SetProjectRoot(root)
-	t.Cleanup(func() { platform.SetProjectRoot(was) })
+	platform.SetProject(root, platform.Folders{Agents: "agents"})
+	t.Cleanup(func() { platform.SetProject("", platform.Folders{}) })
 	return agents, outside
 }
 

@@ -5,7 +5,6 @@ import (
 	"slices"
 	"strings"
 
-	"spwn.sh/packages/platform"
 	"spwn.sh/packages/project"
 
 	"github.com/jterrazz/studio-station/apps/engine/teams"
@@ -26,7 +25,7 @@ func read(t project.Team) (teams.Team, error) {
 }
 
 func (Teams) List(_ context.Context, root string) ([]teams.Team, error) {
-	return platform.WithProjectRoot(root, func() ([]teams.Team, error) {
+	return project.Within(root, func() ([]teams.Team, error) {
 		declared, err := project.ListTeams()
 		if err != nil {
 			return nil, err
@@ -45,7 +44,7 @@ func (Teams) List(_ context.Context, root string) ([]teams.Team, error) {
 }
 
 func (Teams) Team(_ context.Context, root, slug string) (teams.Team, error) {
-	return platform.WithProjectRoot(root, func() (teams.Team, error) {
+	return project.Within(root, func() (teams.Team, error) {
 		// invariant: a team is one of the files ListTeams reads, so a slug
 		// that names no such file, or a path, is not found.
 		declared, err := project.ListTeams()

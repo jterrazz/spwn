@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-// Files is what reads and writes the files under DataDir: the agents'
+// Files is what reads and writes the files under AgentsDir: the agents'
 // agent.yaml, journal and sessions.
 type Files interface {
 	ReadDir(p string) ([]fs.DirEntry, error)
@@ -16,7 +16,7 @@ type Files interface {
 	Close() error
 }
 
-// DataFiles is the Files of DataDir: in a project, a Tree at the
+// DataFiles is the Files of AgentsDir: in a project, a Tree at the
 // project's root, so no link the project carries is followed out of it,
 // a FIFO is never waited on, and a path outside the project is refused;
 // outside a project, the user's own home, read and written plainly.

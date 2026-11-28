@@ -4,6 +4,7 @@ import (
 	"spwn.sh/packages/dependency/internal/adapters/local"
 	"spwn.sh/packages/dependency/internal/adapters/spwn"
 	"spwn.sh/packages/dependency/tool"
+	"spwn.sh/packages/platform"
 )
 
 // BuiltinTools returns every builtin tool shipped in the compiled binary
@@ -39,7 +40,8 @@ func CopyGateTools(refName, gateToolsRoot string) ([]string, error) {
 }
 
 // HydrateLocals filters a dep ref list for `tool/<name>` entries,
-// loads each from <projectRoot>/spwn/tools/<name>/, registers it
+// loads each from the tools folder folders names under projectRoot,
+// <projectRoot>/tools/<name>/ by default, registers it
 // into target, and returns the rewritten list where each `tool/`
 // ref is replaced by its registered `local:<name>` key. `skill/`
 // and `hook/` refs are stripped (consumed elsewhere: the image
@@ -48,6 +50,6 @@ func CopyGateTools(refName, gateToolsRoot string) ([]string, error) {
 //
 // Order is preserved so callers see their ref list echoed back in
 // the same shape they declared it.
-func HydrateLocals(target tool.Registry, projectRoot string, refs []string) ([]string, error) {
-	return local.Hydrate(target, projectRoot, refs)
+func HydrateLocals(target tool.Registry, projectRoot string, folders platform.Folders, refs []string) ([]string, error) {
+	return local.Hydrate(target, projectRoot, folders.Tools, refs)
 }

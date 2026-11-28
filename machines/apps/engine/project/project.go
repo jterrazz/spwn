@@ -11,7 +11,7 @@ type Project struct {
 	Root string
 	// value: its spwn.yaml, as a path on its machine.
 	Manifest string
-	// value: the agents its spwn/agents/ holds, by name.
+	// value: the agents its agents folder holds, by name.
 	Agents []string
 }
 
@@ -98,6 +98,8 @@ var (
 const (
 	// value: the file a folder is a project by.
 	ManifestName = "spwn.yaml"
+	// value: the file that pins what the project's dependencies resolved to.
+	LockName = "spwn.lock"
 	// value: the agent a new project is made with.
 	Starter = "neo"
 )

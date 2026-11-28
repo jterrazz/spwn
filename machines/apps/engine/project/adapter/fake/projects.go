@@ -10,6 +10,9 @@ import (
 	"slices"
 	"strings"
 
+	"gopkg.in/yaml.v3"
+	spwnproject "spwn.sh/packages/project"
+
 	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/project"
 	"github.com/jterrazz/studio-station/apps/engine/project/contract"
@@ -58,17 +61,62 @@ func (p *Projects) read(root string) (project.State, error) {
 }
 
 func declared(s project.State) error {
+	folders, err := layoutOf(s)
+	if err != nil {
+		return err
+	}
 	for _, at := range slices.Sorted(maps.Keys(s.Disk)) {
-		if project.Declared(at) && s.Disk[at].Link {
+		if project.Declared(folders, at) && s.Disk[at].Link {
 			return &project.Unwritten{Path: at, Err: project.ErrLink}
 		}
 	}
 	for _, at := range s.Irregular {
-		if project.Declared(at) {
+		if project.Declared(folders, at) {
 			return &project.Unwritten{Path: at, Err: project.ErrNotAFile}
 		}
 	}
 	return nil
+}
+
+// value: the folders the project's spwn.yaml lays out, as the root
+// module reads them from what the world keeps of it; refused as the real
+// disk refuses the old layout's spwn/ folder or a folders: entry naming no
+// folder.
+func layoutOf(s project.State) ([]string, error) {
+	old := &spwnproject.OldLayoutError{}
+	held := false
+	for at := range s.Disk {
+		for _, k := range spwnproject.Kinds {
+			if strings.HasPrefix(at, "spwn/"+string(k)+"/") {
+				held = true
+			}
+		}
+	}
+	if held {
+		for _, k := range spwnproject.Kinds {
+			for at := range s.Disk {
+				if strings.HasPrefix(at, string(k)+"/") && !slices.Contains(old.AtRoot, string(k)) {
+					old.AtRoot = append(old.AtRoot, string(k))
+				}
+			}
+		}
+		return nil, &project.LayoutRefused{Old: true, Said: old.Message()}
+	}
+	l := spwnproject.DefaultLayout()
+	if f, ok := s.Disk[project.ManifestName]; ok {
+		var m struct {
+			Folders map[string]string `yaml:"folders"`
+		}
+		if yaml.Unmarshal(f.Data, &m) == nil {
+			declared, err := spwnproject.NewLayout(m.Folders)
+			var refused *spwnproject.LayoutError
+			if errors.As(err, &refused) {
+				return nil, &project.LayoutRefused{Key: refused.Key, Said: refused.Message()}
+			}
+			l = declared
+		}
+	}
+	return l.Folders(), nil
 }
 
 func (p *Projects) Find(_ context.Context, folder string) (string, error) {
@@ -101,7 +149,7 @@ func agentsOf(example string) []string {
 	if !ok {
 		return []string{project.Starter}
 	}
-	entries, _ := fs.ReadDir(files, "spwn/agents")
+	entries, _ := fs.ReadDir(files, spwnproject.DefaultLayout().Folder(spwnproject.KindAgents))
 	var names []string
 	for _, e := range entries {
 		if e.IsDir() {

@@ -19,6 +19,7 @@ import (
 	"spwn.sh/packages/dependency/refs"
 	"spwn.sh/packages/platform"
 	intmanifest "spwn.sh/packages/project/internal/manifest"
+	"spwn.sh/packages/project/internal/layout"
 	"spwn.sh/packages/project/internal/resolve"
 
 	"gopkg.in/yaml.v3"
@@ -75,6 +76,9 @@ type AgentRef struct {
 type Input struct {
 	Root     string
 	Manifest *intmanifest.Manifest
+
+	// Layout is where each kind's folder sits from Root.
+	Layout layout.Layout
 
 	// Tree is Root, read through a root no path of the declaration can
 	// leave; every rule reads the project through it. Nil: Run and
@@ -189,7 +193,7 @@ func ruleAgentNames(in Input) []Issue {
 			}
 			out = append(out, Issue{
 				Level: LevelError, Path: fmt.Sprintf("spwn.yaml#worlds.%s.agents[%d]", world, i),
-				Message: fmt.Sprintf("agent %q leaves the project: an agent is one folder of spwn/agents/", name),
+				Message: fmt.Sprintf("agent %q leaves the project: an agent is one folder of %s/", name, in.Layout.Folder(layout.Agents)),
 				Hint:    "name the agent by its folder, e.g. `agents: [neo]`",
 			})
 		}
@@ -778,7 +782,7 @@ func rulePacksExist(in Input) []Issue {
 		checked[key] = true
 		ref := refs.ParseRef(depRef)
 
-		switch refs.ResolveTool(in.Root, ref, builtin, haveCatalog) {
+		switch refs.ResolveTool(in.Root, in.Layout.Platform(), ref, builtin, haveCatalog) {
 		case refs.ResolveOK:
 			return nil
 		case refs.ResolveRegistryUnsupported:
@@ -793,7 +797,7 @@ func rulePacksExist(in Input) []Issue {
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("dependency %q is invalid", raw),
-				Hint:    invalidRefHint(tree, in.Root, raw),
+				Hint:    invalidRefHint(tree, in.Layout, in.Root, raw),
 			}}
 		}
 
@@ -802,31 +806,31 @@ func rulePacksExist(in Input) []Issue {
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("dependency %q does not exist", raw),
-				Hint:    "author ./spwn/skills/" + ref.Name + ".md (e.g. `station skills create " + ref.Name + "`)",
+				Hint:    "author ./" + in.Layout.Folder(layout.Skills) + "/" + ref.Name + ".md (e.g. `station skills create " + ref.Name + "`)",
 			}}
 		case refs.KindLocalTool:
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("dependency %q does not exist", raw),
-				Hint:    "create ./spwn/tools/" + ref.Name + "/tool.yaml for a full local tool",
+				Hint:    "create ./" + in.Layout.Folder(layout.Tools) + "/" + ref.Name + "/tool.yaml for a full local tool",
 			}}
 		case refs.KindLocalHook:
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("dependency %q does not exist", raw),
-				Hint:    "create ./spwn/hooks/" + ref.Name + ".yaml for a runtime hook",
+				Hint:    "create ./" + in.Layout.Folder(layout.Hooks) + "/" + ref.Name + ".yaml for a runtime hook",
 			}}
 		case refs.KindLocalCommand:
 			return []Issue{{
 				Level: LevelError, Path: location,
 				Message: fmt.Sprintf("dependency %q does not exist", raw),
-				Hint:    "create ./spwn/commands/" + ref.Name + ".md for a slash-invoked command",
+				Hint:    "create ./" + in.Layout.Folder(layout.Commands) + "/" + ref.Name + ".md for a slash-invoked command",
 			}}
 		}
 		return []Issue{{
 			Level: LevelError, Path: location,
 			Message: fmt.Sprintf("dependency %q does not exist", raw),
-			Hint:    suggestPackage(depRef, in.BuiltinTools),
+			Hint:    suggestPackage(depRef, in.BuiltinTools, in.Layout.Folder(layout.Tools)),
 		}}
 	}
 
@@ -999,7 +1003,7 @@ func ruleSkillFrontmatter(in Input) []Issue {
 	tree, done := in.tree()
 	defer done()
 	var out []Issue
-	for _, path := range collectSkillFiles(tree, in.Root) {
+	for _, path := range collectSkillFiles(tree, in.Layout, in.Root) {
 		rel := relPath(in.Root, path)
 		fm, err := ParseMarkdownFrontmatter(tree, path)
 		if err != nil {
@@ -1036,9 +1040,9 @@ func ruleSkillFrontmatter(in Input) []Issue {
 	return out
 }
 
-func collectSkillFiles(t *platform.Tree, root string) []string {
+func collectSkillFiles(t *platform.Tree, l layout.Layout, root string) []string {
 	var out []string
-	for _, rel := range skillSearchRoots(t, root) {
+	for _, rel := range skillSearchRoots(t, l, root) {
 		_ = t.WalkDir(rel, func(path string, d os.DirEntry, err error) error {
 			if err != nil || d.IsDir() {
 				return nil
@@ -1053,15 +1057,16 @@ func collectSkillFiles(t *platform.Tree, root string) []string {
 	return out
 }
 
-func skillSearchRoots(t *platform.Tree, root string) []string {
+func skillSearchRoots(t *platform.Tree, l layout.Layout, root string) []string {
 	var roots []string
 
-	roots = append(roots, filepath.Join(root, "spwn", "skills"))
+	roots = append(roots, l.Dir(root, layout.Skills))
 
-	if entries, err := t.ReadDir(filepath.Join(root, "spwn", "tools")); err == nil {
+	tools := l.Dir(root, layout.Tools)
+	if entries, err := t.ReadDir(tools); err == nil {
 		for _, e := range entries {
 			if e.IsDir() {
-				roots = append(roots, filepath.Join(root, "spwn", "tools", e.Name(), "skills"))
+				roots = append(roots, filepath.Join(tools, e.Name(), "skills"))
 			}
 		}
 	}
@@ -1131,7 +1136,7 @@ func ruleHookEventsSupported(in Input) []Issue {
 	if len(in.HookEventsByRuntime) == 0 || in.Manifest == nil {
 		return nil
 	}
-	hooksDir := filepath.Join(in.Root, "spwn", "hooks")
+	hooksDir := in.Layout.Dir(in.Root, layout.Hooks)
 	entries, err := tree.ReadDir(hooksDir)
 	if err != nil {
 		return nil
@@ -1285,7 +1290,7 @@ func relPath(root, path string) string {
 	return rel
 }
 
-func invalidRefHint(t *platform.Tree, root, raw string) string {
+func invalidRefHint(t *platform.Tree, l layout.Layout, root, raw string) string {
 	name := strings.TrimSpace(raw)
 	name = strings.TrimPrefix(name, "@")
 	for _, retired := range []string{"local:", "skill:", "tool:", "hook:"} {
@@ -1297,16 +1302,16 @@ func invalidRefHint(t *platform.Tree, root, raw string) string {
 
 	if IsOneName(name) && !strings.Contains(name, ":") {
 		var matches []string
-		if t.IsFile(filepath.Join(root, "spwn", "skills", name+".md")) {
+		if t.IsFile(filepath.Join(l.Dir(root, layout.Skills), name+".md")) {
 			matches = append(matches, "skill/"+name)
 		}
-		if t.IsDir(filepath.Join(root, "spwn", "tools", name)) {
+		if t.IsDir(filepath.Join(l.Dir(root, layout.Tools), name)) {
 			matches = append(matches, "tool/"+name)
 		}
-		if t.IsFile(filepath.Join(root, "spwn", "hooks", name+".yaml")) {
+		if t.IsFile(filepath.Join(l.Dir(root, layout.Hooks), name+".yaml")) {
 			matches = append(matches, "hook/"+name)
 		}
-		if t.IsFile(filepath.Join(root, "spwn", "commands", name+".md")) {
+		if t.IsFile(filepath.Join(l.Dir(root, layout.Commands), name+".md")) {
 			matches = append(matches, "command/"+name)
 		}
 		if len(matches) == 1 {
@@ -1317,14 +1322,14 @@ func invalidRefHint(t *platform.Tree, root, raw string) string {
 		}
 	}
 
-	return "use skill/<name> (for spwn/skills/<name>.md), tool/<name> (for spwn/tools/<name>/), " +
-		"hook/<name> (for spwn/hooks/<name>.yaml), or command/<name> (for spwn/commands/<name>.md); " +
+	return "use skill/<name> (for " + l.Folder(layout.Skills) + "/<name>.md), tool/<name> (for " + l.Folder(layout.Tools) + "/<name>/), " +
+		"hook/<name> (for " + l.Folder(layout.Hooks) + "/<name>.yaml), or command/<name> (for " + l.Folder(layout.Commands) + "/<name>.md); " +
 		"spwn:<name> and github:<owner>/<repo> remain the two source-prefixed schemes"
 }
 
-func suggestPackage(tool string, catalog []string) string {
+func suggestPackage(tool string, catalog []string, toolsFolder string) string {
 	if len(catalog) == 0 {
-		return "check the dependency name, or add it as a local tool under ./spwn/tools/"
+		return "check the dependency name, or add it as a local tool under ./" + toolsFolder + "/"
 	}
 	display := make([]string, len(catalog))
 	for i, c := range catalog {

@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -20,6 +21,7 @@ import (
 
 	"spwn.sh/packages/dependency"
 	"spwn.sh/packages/platform"
+	"spwn.sh/packages/project/internal/layout"
 	intmanifest "spwn.sh/packages/project/internal/manifest"
 )
 
@@ -239,15 +241,17 @@ type templateData struct {
 // non-empty, is the starter agent's runtime.backend.
 func Files(name, backend string) (map[string][]byte, error) {
 	data := templateData{Name: name, Backend: backend}
+	l := layout.Default()
+	neo := path.Join(l.Folder(layout.Agents), "neo")
 	templates := []fileSpec{
 		{"templates/spwn.yaml.tmpl", "spwn.yaml"},
-		{"templates/agent.yaml.tmpl", "spwn/agents/neo/agent.yaml"},
-		{"templates/AGENTS.md.tmpl", "spwn/agents/neo/AGENTS.md"},
-		{"templates/SOUL.md.tmpl", "spwn/agents/neo/SOUL.md"},
-		{"templates/skill.focus.md.tmpl", "spwn/skills/focus.md"},
-		{"templates/tool.greet.yaml.tmpl", "spwn/tools/greet/tool.yaml"},
-		{"templates/hook.session-banner.yaml.tmpl", "spwn/hooks/session-banner.yaml"},
-		{"templates/command.refactor.md.tmpl", "spwn/commands/refactor.md"},
+		{"templates/agent.yaml.tmpl", path.Join(neo, "agent.yaml")},
+		{"templates/AGENTS.md.tmpl", path.Join(neo, "AGENTS.md")},
+		{"templates/SOUL.md.tmpl", path.Join(neo, "SOUL.md")},
+		{"templates/skill.focus.md.tmpl", path.Join(l.Folder(layout.Skills), "focus.md")},
+		{"templates/tool.greet.yaml.tmpl", path.Join(l.Folder(layout.Tools), "greet", "tool.yaml")},
+		{"templates/hook.session-banner.yaml.tmpl", path.Join(l.Folder(layout.Hooks), "session-banner.yaml")},
+		{"templates/command.refactor.md.tmpl", path.Join(l.Folder(layout.Commands), "refactor.md")},
 	}
 	out := map[string][]byte{}
 	for _, f := range templates {
@@ -257,7 +261,7 @@ func Files(name, backend string) (map[string][]byte, error) {
 		}
 		out[f.dst] = b
 	}
-	for _, rel := range []string{"spwn/agents/neo/playbooks", "spwn/agents/neo/journal", "spwn/knowledge"} {
+	for _, rel := range []string{path.Join(neo, "playbooks"), path.Join(neo, "journal"), "knowledge"} {
 		out[rel+"/.gitkeep"] = []byte{}
 	}
 	lock := dependency.EmptyLockfile()

@@ -84,8 +84,8 @@ type AgentSource struct {
 	// playbooks/, journal/. Keys are file paths relative to the layer
 	// root (e.g. "foo.md", "category/bar.md"). Skills live at the
 	// world scope (see LayerFiles doc) and knowledge lives on the
-	// world (spwn/worlds/<name>/knowledge/, bind-mounted at
-	// /world/knowledge/).
+	// world (the folder its spwn.yaml `knowledge:` key names,
+	// bind-mounted at /world/knowledge/).
 	Layers LayerFiles
 }
 
@@ -111,8 +111,8 @@ type RuntimeConfig struct {
 
 // LayerFiles are the content-bearing per-agent layer directories
 // (identity is loaded separately via the entry file pipeline).
-// Knowledge is NOT a per-agent layer: it's world-scoped at
-// spwn/worlds/<name>/knowledge/ and bind-mounted into /world/knowledge/.
+// Knowledge is NOT a per-agent layer: it's world-scoped, the folder
+// spwn.yaml's `knowledge:` key names, bind-mounted into /world/knowledge/.
 // Skills are NOT a per-agent layer either: they're build-time
 // dependencies resolved via the `skill:` scheme or shipped by tools,
 // injected into /world/skills/ at image time.
@@ -234,31 +234,31 @@ func Load(projectRoot string) (*ProjectSource, error) {
 		RootDir:  abs,
 	}
 
-	agents, err := loadAgents(t, abs, p)
+	agents, err := loadAgents(t, p.Layout.Dir(abs, project.KindAgents), p)
 	if err != nil {
 		return nil, err
 	}
 	src.Agents = agents
 
-	skills, err := loadSkills(t, abs)
+	skills, err := loadSkills(t, p.Layout.Dir(abs, project.KindSkills))
 	if err != nil {
 		return nil, err
 	}
 	src.Skills = skills
 
-	hooks, err := loadHooks(t, abs)
+	hooks, err := loadHooks(t, p.Layout.Dir(abs, project.KindHooks))
 	if err != nil {
 		return nil, err
 	}
 	src.Hooks = hooks
 
-	commands, err := loadCommands(t, abs)
+	commands, err := loadCommands(t, p.Layout.Dir(abs, project.KindCommands))
 	if err != nil {
 		return nil, err
 	}
 	src.Commands = commands
 
-	profiles, err := loadProfiles(t, abs)
+	profiles, err := loadProfiles(t, p.Layout.Dir(abs, project.KindProfiles))
 	if err != nil {
 		return nil, err
 	}
@@ -267,7 +267,7 @@ func Load(projectRoot string) (*ProjectSource, error) {
 	return src, nil
 }
 
-func loadAgents(t *platform.Tree, root string, p *project.Project) ([]AgentSource, error) {
+func loadAgents(t *platform.Tree, agentsDir string, p *project.Project) ([]AgentSource, error) {
 	seen := map[string]string{}
 	for _, a := range p.Agents {
 		if !a.Exists {
@@ -300,7 +300,6 @@ func loadAgents(t *platform.Tree, root string, p *project.Project) ([]AgentSourc
 		out = append(out, src)
 	}
 
-	agentsDir := filepath.Join(root, "spwn", "agents")
 	entries, err := t.ReadDir(agentsDir)
 	if err != nil && !os.IsNotExist(err) {
 		return nil, fmt.Errorf("read %s: %w", agentsDir, err)
@@ -408,8 +407,7 @@ func readTree(t *platform.Tree, dir string) (map[string][]byte, error) {
 	return out, nil
 }
 
-func loadSkills(t *platform.Tree, root string) ([]SkillSource, error) {
-	dir := filepath.Join(root, "spwn", "skills")
+func loadSkills(t *platform.Tree, dir string) ([]SkillSource, error) {
 	entries, err := t.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -491,17 +489,7 @@ func ensureSkillFrontmatter(body []byte, name string) []byte {
 	return append([]byte(header), body...)
 }
 
-func loadHooks(t *platform.Tree, root string) ([]HookSource, error) {
-	if legacy := filepath.Join(root, "spwn", "hooks.yaml"); fileExists(t, legacy) {
-		return nil, fmt.Errorf(
-			"%s: legacy hooks.yaml is no longer supported; "+
-				"migrate each entry to its own file at spwn/hooks/<name>.yaml "+
-				"(filename = hook name, body = event/matcher/command)",
-			legacy,
-		)
-	}
-
-	dir := filepath.Join(root, "spwn", "hooks")
+func loadHooks(t *platform.Tree, dir string) ([]HookSource, error) {
 	entries, err := t.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -546,13 +534,7 @@ func loadHooks(t *platform.Tree, root string) ([]HookSource, error) {
 	return out, nil
 }
 
-func fileExists(t *platform.Tree, path string) bool {
-	info, err := t.Stat(path)
-	return err == nil && !info.IsDir()
-}
-
-func loadCommands(t *platform.Tree, root string) ([]CommandSource, error) {
-	dir := filepath.Join(root, "spwn", "commands")
+func loadCommands(t *platform.Tree, dir string) ([]CommandSource, error) {
 	entries, err := t.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -583,8 +565,7 @@ func loadCommands(t *platform.Tree, root string) ([]CommandSource, error) {
 	return out, nil
 }
 
-func loadProfiles(t *platform.Tree, root string) ([]ProfileSource, error) {
-	dir := filepath.Join(root, "spwn", "profiles")
+func loadProfiles(t *platform.Tree, dir string) ([]ProfileSource, error) {
 	if _, err := t.Stat(dir); err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil

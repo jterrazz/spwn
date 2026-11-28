@@ -16,11 +16,11 @@ import (
 	"spwn.sh/packages/transpile"
 )
 
-func loadRuntimeHooks(project *platform.Tree) []transpile.HookEntry {
+func loadRuntimeHooks(project *platform.Tree, hooksFolder string) []transpile.HookEntry {
 	if project == nil {
 		return nil
 	}
-	dir := filepath.Join("spwn", "hooks")
+	dir := filepath.FromSlash(hooksFolder)
 	entries, err := project.ReadDir(dir)
 	if err != nil {
 		return nil
@@ -95,11 +95,11 @@ func agentHookSelection(agentName string, pool []transpile.HookEntry) []transpil
 	return out
 }
 
-func loadRuntimeCommands(project *platform.Tree) []transpile.CommandEntry {
+func loadRuntimeCommands(project *platform.Tree, commandsFolder string) []transpile.CommandEntry {
 	if project == nil {
 		return nil
 	}
-	dir := filepath.Join("spwn", "commands")
+	dir := filepath.FromSlash(commandsFolder)
 	entries, err := project.ReadDir(dir)
 	if err != nil {
 		return nil
@@ -164,9 +164,9 @@ func agentCommandSelection(agentName string, pool []transpile.CommandEntry) []tr
 	return out
 }
 
-func collectRuntimeSkills(project *platform.Tree, tools []tool.Tool) []transpile.SkillEntry {
+func collectRuntimeSkills(project *platform.Tree, skillsFolder string, tools []tool.Tool) []transpile.SkillEntry {
 	out := make([]transpile.SkillEntry, 0)
-	out = append(out, loadUserSkills(project)...)
+	out = append(out, loadUserSkills(project, skillsFolder)...)
 	out = append(out, toolSkillEntries(tools)...)
 	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out
@@ -203,11 +203,11 @@ func facultiesForRuntime(verifiedTools, deps []string) []string {
 	return out
 }
 
-func loadUserSkills(project *platform.Tree) []transpile.SkillEntry {
+func loadUserSkills(project *platform.Tree, skillsFolder string) []transpile.SkillEntry {
 	if project == nil {
 		return nil
 	}
-	base := filepath.Join("spwn", "skills")
+	base := filepath.FromSlash(skillsFolder)
 	entries, err := project.ReadDir(base)
 	if err != nil {
 		return nil

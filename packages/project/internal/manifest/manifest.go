@@ -47,6 +47,12 @@ type Manifest struct {
 	// every world inherits these. Agent-level agent.yaml can add
 	// more but cannot remove project-level dependency.
 	Deps []string `yaml:"dependencies,omitempty"`
+
+	// Folders renames the folder of a kind of what the project declares
+	// (agents, skills, tools, hooks, commands, profiles), each key a kind
+	// and each value its folder's slash path from the root. A kind it
+	// does not name keeps the folder of its own name.
+	Folders map[string]string `yaml:"folders,omitempty"`
 }
 
 // Runtime is the project-wide runtime block. Exactly one field today

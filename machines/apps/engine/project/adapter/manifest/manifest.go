@@ -68,22 +68,57 @@ func linked(root, rel string, err error) error {
 }
 
 // invariant: Agents' packages resolve paths from one process-global
-// project root, which platform.WithProjectRoot holds for one act.
+// project, its root and its folders, which platform.WithProject holds for
+// one act; a root whose spwn.yaml does not read yet, the folder Create is
+// about to make, is held with the default folders, and its walk refuses
+// what its layout refuses before any of it is read.
 func in[T any](root string, act func() (T, error)) (T, error) {
-	return platform.WithProjectRoot(root, act)
+	l, err := spwnproject.LayoutAt(root)
+	if err != nil {
+		l = spwnproject.DefaultLayout()
+	}
+	return platform.WithProject(root, l.Platform(), act)
 }
 
 // invariant: the declaration is walked, one name at a time and no link
 // followed, before any of it is read: the root module's loaders read by
 // path, so a link there would bring an outside file into what a harness
-// renders, and a FIFO would hold the read. root itself may be a link.
+// renders, and a FIFO would hold the read. spwn.yaml and spwn.lock are
+// walked first as files, then spwn.yaml's layout is read through a root at
+// the project, then only the folders it names: nothing else at the root is
+// walked or listed. root itself may be a link.
 func (p Projects) declared(root string) error {
-	for _, rel := range project.Declaration() {
-		if err := p.walk(root, rel, rel != "spwn"); err != nil {
+	files := []string{project.ManifestName, project.LockName}
+	for _, rel := range files {
+		if err := p.walk(root, rel, true); err != nil {
+			return err
+		}
+	}
+	l, err := spwnproject.LayoutAt(root)
+	if err != nil {
+		return refusedLayout(err)
+	}
+	for _, rel := range project.Declaration(l.Folders())[len(files):] {
+		if err := p.walk(root, rel, false); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// value: err as the project names a layout spwn.yaml refuses: the old
+// layout's spwn/ folder, or a folders: entry naming no folder; any other
+// failure to read spwn.yaml as it is.
+func refusedLayout(err error) error {
+	var old *spwnproject.OldLayoutError
+	var folders *spwnproject.LayoutError
+	switch {
+	case errors.As(err, &old):
+		return &project.LayoutRefused{Old: true, Said: old.Message()}
+	case errors.As(err, &folders):
+		return &project.LayoutRefused{Key: folders.Key, Said: folders.Message()}
+	}
+	return err
 }
 
 // value: nil when rel and every name under it is a file or a folder, a

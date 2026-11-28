@@ -16,5 +16,5 @@ func discoverProject() {
 	if err != nil || p == nil {
 		return
 	}
-	platform.SetProjectRoot(p.Root)
+	platform.SetProject(p.Root, p.Layout.Platform())
 }

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"spwn.sh/packages/platform"
+	spwnproject "spwn.sh/packages/project"
 
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 	"github.com/jterrazz/studio-station/apps/engine/skills"
@@ -33,12 +34,12 @@ var _ contract.Files = Files{}
 func New(fsys disk) Files { return Files{fs: fsys} }
 
 // invariant: Agents' packages resolve every path from one process-global
-// project root, which platform.WithProjectRoot holds for one act, so the
-// folder is read inside it. A project's folder is reached from its root,
-// the user's own from the folder that holds it, each the caller's to
-// trust.
+// project, which spwnproject.Within holds for one act at the folders its
+// spwn.yaml lays out, so the folder is read inside it. A project's folder
+// is reached from its root, the user's own from the folder that holds it,
+// each the caller's to trust.
 func in[T any](project string, act func(base, rel, dir string) (T, error)) (T, error) {
-	return platform.WithProjectRoot(project, func() (T, error) {
+	return spwnproject.Within(project, func() (T, error) {
 		dir := platform.SkillsDir()
 		if project != "" {
 			if rel, err := filepath.Rel(project, dir); err == nil && filepath.IsLocal(rel) {

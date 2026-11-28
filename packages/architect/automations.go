@@ -179,18 +179,21 @@ func automationEnv() []string {
 }
 
 // CommandFileResolver implements automation.CommandResolver by reading
-// `command/<name>` refs from <project-root>/spwn/commands/<name>.md.
-// One file = one prompt template. Project-root is fixed at
-// construction; multi-project setups instantiate one resolver per
-// project.
+// `command/<name>` refs from <project-root>/<commands folder>/<name>.md,
+// commands/<name>.md by default. One file = one prompt template.
+// Project-root is fixed at construction; multi-project setups
+// instantiate one resolver per project.
 type CommandFileResolver struct {
 	ProjectRoot string
+	// CommandsFolder is the slash path of the project's commands
+	// folder from ProjectRoot, as its Layout names it.
+	CommandsFolder string
 }
 
 // NewCommandFileResolver constructs a resolver rooted at the project
-// directory containing spwn/commands/.
-func NewCommandFileResolver(projectRoot string) *CommandFileResolver {
-	return &CommandFileResolver{ProjectRoot: projectRoot}
+// directory, reading commands from its folder commandsFolder.
+func NewCommandFileResolver(projectRoot, commandsFolder string) *CommandFileResolver {
+	return &CommandFileResolver{ProjectRoot: projectRoot, CommandsFolder: commandsFolder}
 }
 
 // Resolve loads the markdown body of a command ref. Returns a
@@ -210,7 +213,7 @@ func (r *CommandFileResolver) Resolve(ref string) (string, error) {
 	if !commandSlugRe.MatchString(name) {
 		return "", fmt.Errorf("command name %q must be a kebab-case slug (^[a-z][a-z0-9-]*$)", name)
 	}
-	path := filepath.Join(r.ProjectRoot, "spwn", "commands", name+".md")
+	path := filepath.Join(r.ProjectRoot, filepath.FromSlash(r.CommandsFolder), name+".md")
 	project := platform.Within(r.ProjectRoot)
 	defer project.Close()
 	data, err := project.ReadFile(path)
@@ -226,10 +229,14 @@ func (r *CommandFileResolver) Resolve(ref string) (string, error) {
 // a CommandResolver rooted at the project; both are derived here so
 // callers don't have to wire them by hand.
 type AutomationEngineConfig struct {
-	// ProjectRoot is the directory containing spwn.yaml + spwn/.
-	// Used to resolve command/<name> refs and to anchor the
-	// receipts + state files.
+	// ProjectRoot is the directory containing spwn.yaml. Used to
+	// resolve command/<name> refs and to anchor the receipts + state
+	// files.
 	ProjectRoot string
+
+	// Layout is where the project's folders sit from ProjectRoot; its
+	// commands folder holds what a command/<name> ref names.
+	Layout project.Layout
 
 	// Manifest is the parsed spwn.yaml. The factory reads
 	// Manifest.Worlds[*].Automations.
@@ -275,7 +282,7 @@ func (a *Architect) NewAutomationEngine(cfg AutomationEngineConfig) (*automation
 		Receipts:   automation.NewFileReceiptWriter(cfg.ProjectRoot, receiptsPath),
 		State:      automation.NewFileStateStore(cfg.ProjectRoot, statePath),
 		FS:         cfg.FS,
-		Commands:   NewCommandFileResolver(cfg.ProjectRoot),
+		Commands:   NewCommandFileResolver(cfg.ProjectRoot, cfg.Layout.Folder(project.KindCommands)),
 	})
 	if err != nil {
 		return nil, fmt.Errorf("automation engine: %w", err)

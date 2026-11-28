@@ -95,6 +95,7 @@ resumes at the next scheduled time.`,
 
 		eng, err := arc.NewAutomationEngine(architect.AutomationEngineConfig{
 			ProjectRoot: p.Root,
+			Layout:      p.Layout,
 			Manifest:    p.Manifest,
 			FS:          fsWatcher,
 		})

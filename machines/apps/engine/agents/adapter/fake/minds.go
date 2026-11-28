@@ -51,7 +51,7 @@ func pathOf(project, name string) string {
 	if project == "" {
 		return "~/.spwn/agents/" + name
 	}
-	return filepath.Join(project, "spwn", "agents", name)
+	return filepath.Join(project, "agents", name)
 }
 
 func empty() []agents.Layer {

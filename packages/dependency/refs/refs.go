@@ -15,10 +15,12 @@
 //
 //	spwn:<name>                  built-in catalog entry
 //	github:<owner>/<repo>        remote dependency (planned)
-//	tool/<name>                  local, resolves to ./spwn/tools/<name>/
-//	skill/<name>                 local, resolves to ./spwn/skills/<name>.md
-//	hook/<name>                  local, resolves to ./spwn/hooks/<name>.yaml
-//	command/<name>               local, resolves to ./spwn/commands/<name>.md
+//	tool/<name>                  local, resolves to ./tools/<name>/
+//	skill/<name>                 local, resolves to ./skills/<name>.md
+//	hook/<name>                  local, resolves to ./hooks/<name>.yaml
+//	command/<name>               local, resolves to ./commands/<name>.md
+//
+// each under the folder the project's layout names for its kind.
 //
 // Anything else (bare names, the retired `skill:` / `tool:` / `hook:`
 // schemes, the retired `local:<name>` alias, legacy `@owner/name`)
@@ -53,13 +55,13 @@ const (
 	// KindRegistry is github:<owner>/<repo>, reserved for a future
 	// remote resolver, not yet implemented.
 	KindRegistry
-	// KindLocalSkill is skill/<name>, resolving to spwn/skills/<name>.md.
+	// KindLocalSkill is skill/<name>, resolving to skills/<name>.md.
 	KindLocalSkill
-	// KindLocalTool is tool/<name>, resolving to spwn/tools/<name>/.
+	// KindLocalTool is tool/<name>, resolving to tools/<name>/.
 	KindLocalTool
-	// KindLocalHook is hook/<name>, resolving to spwn/hooks/<name>.yaml.
+	// KindLocalHook is hook/<name>, resolving to hooks/<name>.yaml.
 	KindLocalHook
-	// KindLocalCommand is command/<name>, resolving to spwn/commands/<name>.md.
+	// KindLocalCommand is command/<name>, resolving to commands/<name>.md.
 	// Commands are slash-invoked prompt shortcuts the runtime exposes
 	// to the user (`/<name>` in Claude Code / Codex). The body is the
 	// prompt that gets injected when the user types the slash.
@@ -233,16 +235,16 @@ const (
 
 // ResolveTool answers whether a Ref resolves to a real dependency.
 //
-//   - KindLocalTool: checks that <root>/spwn/tools/<name>/ is a directory.
-//   - KindLocalSkill: checks that <root>/spwn/skills/<name>.md is a file.
-//   - KindLocalHook: checks that <root>/spwn/hooks/<name>.yaml is a file.
-//   - KindLocalCommand: checks that <root>/spwn/commands/<name>.md is a file.
+//   - KindLocalTool: checks that <root>/<folders.Tools>/<name>/ is a directory.
+//   - KindLocalSkill: checks that <root>/<folders.Skills>/<name>.md is a file.
+//   - KindLocalHook: checks that <root>/<folders.Hooks>/<name>.yaml is a file.
+//   - KindLocalCommand: checks that <root>/<folders.Commands>/<name>.md is a file.
 //   - KindSpwnBuiltin: checks that spwn:<name> is in `builtin` when
 //     `haveCatalog` is true, else accepts any well-formed ref.
 //   - KindRegistry: always returns ResolveRegistryUnsupported.
 //   - KindInvalid: returns ResolveInvalid so the caller can surface a
 //     helpful error pointing at the valid forms.
-func ResolveTool(root string, ref Ref, builtin map[string]struct{}, haveCatalog bool) ResolveResult {
+func ResolveTool(root string, folders platform.Folders, ref Ref, builtin map[string]struct{}, haveCatalog bool) ResolveResult {
 	t := platform.Within(root)
 	defer t.Close()
 	switch ref.Kind {
@@ -250,7 +252,7 @@ func ResolveTool(root string, ref Ref, builtin map[string]struct{}, haveCatalog 
 		if ref.Name == "" {
 			return ResolveNotFound
 		}
-		localPath := filepath.Join(root, "spwn", "tools", ref.Name)
+		localPath := filepath.Join(root, filepath.FromSlash(folders.Tools), ref.Name)
 		if t.IsDir(localPath) {
 			return ResolveOK
 		}
@@ -260,7 +262,7 @@ func ResolveTool(root string, ref Ref, builtin map[string]struct{}, haveCatalog 
 		if ref.Name == "" {
 			return ResolveNotFound
 		}
-		filePath := filepath.Join(root, "spwn", "skills", ref.Name+".md")
+		filePath := filepath.Join(root, filepath.FromSlash(folders.Skills), ref.Name+".md")
 		if t.IsFile(filePath) {
 			return ResolveOK
 		}
@@ -270,7 +272,7 @@ func ResolveTool(root string, ref Ref, builtin map[string]struct{}, haveCatalog 
 		if ref.Name == "" {
 			return ResolveNotFound
 		}
-		filePath := filepath.Join(root, "spwn", "hooks", ref.Name+".yaml")
+		filePath := filepath.Join(root, filepath.FromSlash(folders.Hooks), ref.Name+".yaml")
 		if t.IsFile(filePath) {
 			return ResolveOK
 		}
@@ -280,7 +282,7 @@ func ResolveTool(root string, ref Ref, builtin map[string]struct{}, haveCatalog 
 		if ref.Name == "" {
 			return ResolveNotFound
 		}
-		filePath := filepath.Join(root, "spwn", "commands", ref.Name+".md")
+		filePath := filepath.Join(root, filepath.FromSlash(folders.Commands), ref.Name+".md")
 		if t.IsFile(filePath) {
 			return ResolveOK
 		}
@@ -311,9 +313,9 @@ func ResolveTool(root string, ref Ref, builtin map[string]struct{}, haveCatalog 
 }
 
 // ResolveSkill answers whether a Ref resolves to a real skill. Only
-// skill/<name> resolves against spwn/skills/<name>.md; tool/ and hook/
+// skill/<name> resolves against <folders.Skills>/<name>.md; tool/ and hook/
 // are not skills. spwn:/github: keep their catalog/remote semantics.
-func ResolveSkill(root string, ref Ref, builtin map[string]struct{}, haveCatalog bool) ResolveResult {
+func ResolveSkill(root string, folders platform.Folders, ref Ref, builtin map[string]struct{}, haveCatalog bool) ResolveResult {
 	t := platform.Within(root)
 	defer t.Close()
 	switch ref.Kind {
@@ -321,7 +323,7 @@ func ResolveSkill(root string, ref Ref, builtin map[string]struct{}, haveCatalog
 		if ref.Name == "" {
 			return ResolveNotFound
 		}
-		filePath := filepath.Join(root, "spwn", "skills", ref.Name+".md")
+		filePath := filepath.Join(root, filepath.FromSlash(folders.Skills), ref.Name+".md")
 		if t.IsFile(filePath) {
 			return ResolveOK
 		}
@@ -331,7 +333,7 @@ func ResolveSkill(root string, ref Ref, builtin map[string]struct{}, haveCatalog
 		if ref.Name == "" {
 			return ResolveNotFound
 		}
-		dirPath := filepath.Join(root, "spwn", "tools", ref.Name)
+		dirPath := filepath.Join(root, filepath.FromSlash(folders.Tools), ref.Name)
 		if t.IsDir(dirPath) {
 			return ResolveOK
 		}
@@ -341,7 +343,7 @@ func ResolveSkill(root string, ref Ref, builtin map[string]struct{}, haveCatalog
 		if ref.Name == "" {
 			return ResolveNotFound
 		}
-		filePath := filepath.Join(root, "spwn", "hooks", ref.Name+".yaml")
+		filePath := filepath.Join(root, filepath.FromSlash(folders.Hooks), ref.Name+".yaml")
 		if t.IsFile(filePath) {
 			return ResolveOK
 		}
@@ -351,7 +353,7 @@ func ResolveSkill(root string, ref Ref, builtin map[string]struct{}, haveCatalog
 		if ref.Name == "" {
 			return ResolveNotFound
 		}
-		filePath := filepath.Join(root, "spwn", "commands", ref.Name+".md")
+		filePath := filepath.Join(root, filepath.FromSlash(folders.Commands), ref.Name+".md")
 		if t.IsFile(filePath) {
 			return ResolveOK
 		}

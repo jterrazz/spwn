@@ -10,6 +10,7 @@ import (
 	"github.com/robfig/cron/v3"
 
 	"spwn.sh/packages/platform"
+	"spwn.sh/packages/project/internal/layout"
 	intmanifest "spwn.sh/packages/project/internal/manifest"
 )
 
@@ -99,7 +100,7 @@ func ruleAutomations(in Input) []Issue {
 					Level:   LevelError,
 					Path:    pathPrefix,
 					Message: "exactly one body required, got both `prompt` and `command`",
-					Hint:    "drop one: `prompt:` is for inline bodies, `command:` references spwn/commands/<name>.md",
+					Hint:    "drop one: `prompt:` is for inline bodies, `command:` references " + in.Layout.Folder(layout.Commands) + "/<name>.md",
 				})
 			case !hasPrompt && !hasCommand:
 				out = append(out, Issue{
@@ -111,7 +112,7 @@ func ruleAutomations(in Input) []Issue {
 			}
 
 			if hasCommand {
-				out = append(out, validateAutomationCommandRef(tree, in.Root, pathPrefix+".command", a.Command)...)
+				out = append(out, validateAutomationCommandRef(tree, in.Layout.Dir(in.Root, layout.Commands), in.Layout.Folder(layout.Commands), pathPrefix+".command", a.Command)...)
 			}
 
 			switch a.Catchup {
@@ -276,7 +277,7 @@ func validateFS(t *platform.Tree, root, pathPrefix string, fs *intmanifest.FSTri
 	return out
 }
 
-func validateAutomationCommandRef(t *platform.Tree, root, pathPrefix, ref string) []Issue {
+func validateAutomationCommandRef(t *platform.Tree, commandsDir, commandsFolder, pathPrefix, ref string) []Issue {
 	var out []Issue
 	const prefix = "command/"
 	if !strings.HasPrefix(ref, prefix) {
@@ -284,7 +285,7 @@ func validateAutomationCommandRef(t *platform.Tree, root, pathPrefix, ref string
 			Level:   LevelError,
 			Path:    pathPrefix,
 			Message: fmt.Sprintf("command ref %q must use the `command/<name>` form", ref),
-			Hint:    "match the slash-command scheme, e.g. `command/morning-brief` for spwn/commands/morning-brief.md",
+			Hint:    "match the slash-command scheme, e.g. `command/morning-brief` for " + commandsFolder + "/morning-brief.md",
 		})
 		return out
 	}
@@ -298,12 +299,12 @@ func validateAutomationCommandRef(t *platform.Tree, root, pathPrefix, ref string
 		})
 		return out
 	}
-	target := filepath.Join(root, "spwn", "commands", name+".md")
+	target := filepath.Join(commandsDir, name+".md")
 	if _, err := t.Stat(target); err != nil {
 		out = append(out, Issue{
 			Level:   LevelError,
 			Path:    pathPrefix,
-			Message: fmt.Sprintf("command file not found at spwn/commands/%s.md", name),
+			Message: fmt.Sprintf("command file not found at %s/%s.md", commandsFolder, name),
 			Hint:    fmt.Sprintf("create the file or fix the ref: `spwn install command/%s --agent <name>` scaffolds one", name),
 		})
 	}

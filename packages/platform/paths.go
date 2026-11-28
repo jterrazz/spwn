@@ -25,21 +25,49 @@ func PrettyHome(p string) string {
 	return p
 }
 
+// Folders is where, from a project's root, the folder of each kind of what
+// it declares sits, as a slash path: what packages/project's Layout says,
+// handed to the packages below it, which never read a manifest.
+type Folders struct {
+	Agents   string
+	Skills   string
+	Tools    string
+	Hooks    string
+	Commands string
+	Profiles string
+}
+
 var (
-	projectRootMu sync.RWMutex
-	projectRoot   string
+	projectRootMu  sync.RWMutex
+	projectRoot    string
+	projectFolders Folders
 )
 
-// SetProjectRoot tells the base package where this process's spwn
-// project lives. Path helpers that are project-aware (AgentsDir, WorldsDir,
-// SkillsDir, LocalStateDir) then resolve inside <projectRoot>.
+// SetProject tells the base package where this process's spwn project
+// lives and where its folders sit. Path helpers that are project-aware
+// (AgentsDir, SkillsDir, LocalStateDir) then resolve inside root.
 //
 // Pass "" to clear. Callers typically call this once from a cobra
-// PersistentPreRun after discovering the project with manifest.Find.
-func SetProjectRoot(path string) {
+// PersistentPreRun after discovering the project with project.Find.
+func SetProject(root string, folders Folders) {
 	projectRootMu.Lock()
 	defer projectRootMu.Unlock()
-	projectRoot = path
+	projectRoot = root
+	projectFolders = folders
+}
+
+// ProjectFolders returns the folders of the active project, as SetProject
+// was given them.
+func ProjectFolders() Folders {
+	projectRootMu.RLock()
+	defer projectRootMu.RUnlock()
+	return projectFolders
+}
+
+func projectFolder(pick func(Folders) string) (root, folder string) {
+	projectRootMu.RLock()
+	defer projectRootMu.RUnlock()
+	return projectRoot, pick(projectFolders)
 }
 
 // ProjectRoot returns the currently active project root, or "" if no
@@ -68,18 +96,9 @@ func UserDir() string {
 }
 
 // BaseDir is a historical alias for UserDir. New code should prefer
-// UserDir (user-level, always) or DataDir (project-aware).
+// UserDir (user-level, always) or a project-aware helper (AgentsDir,
+// SkillsDir).
 func BaseDir() string {
-	return UserDir()
-}
-
-// DataDir is the project-aware root for project assets - agents,
-// worlds, skills, custom tool dependencies. Returns <projectRoot>/spwn/ when
-// a project is active, or UserDir() otherwise (legacy global mode).
-func DataDir() string {
-	if root := ProjectRoot(); root != "" {
-		return filepath.Join(root, "spwn")
-	}
 	return UserDir()
 }
 
@@ -94,7 +113,7 @@ func LocalStateDir() string {
 	return UserDir()
 }
 
-// StateTree is the folder LocalStateDir and DataDir are under, as a Tree:
+// StateTree is the folder LocalStateDir, AgentsDir and SkillsDir are under, as a Tree:
 // the project's root when a project is active, so a write there cannot
 // leave the project by a link it carries, else the user's own home,
 // made when missing.
@@ -106,19 +125,29 @@ func StateTree() *Tree {
 	return Within(UserDir())
 }
 
-// WorldsDir returns the worlds config directory.
+// WorldsDir returns the user-level directory of the named world configs,
+// ~/.spwn/worlds/: a project declares its worlds in spwn.yaml, never in a
+// folder of its root.
 func WorldsDir() string {
-	return filepath.Join(DataDir(), WorldsSubDir)
+	return filepath.Join(UserDir(), WorldsSubDir)
 }
 
-// AgentsDir returns the agents directory.
+// AgentsDir returns the agents directory: the project's agents folder
+// when a project is active, else ~/.spwn/agents/.
 func AgentsDir() string {
-	return filepath.Join(DataDir(), AgentsSubDir)
+	if root, folder := projectFolder(func(f Folders) string { return f.Agents }); root != "" {
+		return filepath.Join(root, filepath.FromSlash(folder))
+	}
+	return filepath.Join(UserDir(), AgentsSubDir)
 }
 
-// SkillsDir returns the skills directory.
+// SkillsDir returns the skills directory: the project's skills folder
+// when a project is active, else ~/.spwn/skills/.
 func SkillsDir() string {
-	return filepath.Join(DataDir(), SkillsSubDir)
+	if root, folder := projectFolder(func(f Folders) string { return f.Skills }); root != "" {
+		return filepath.Join(root, filepath.FromSlash(folder))
+	}
+	return filepath.Join(UserDir(), SkillsSubDir)
 }
 
 // CredentialsDir always returns the user-level credentials directory.
@@ -174,15 +203,17 @@ func OrgPath() string {
 // last read, so two acts in one process never see each other's root.
 var actMu sync.Mutex
 
-// WithProjectRoot runs act with root as the process's project root, under a
-// lock every caller of it shares, and restores the root it found when act
-// returns.
-func WithProjectRoot[T any](root string, act func() (T, error)) (T, error) {
-	// invariant: an act never calls WithProjectRoot, which is not re-entrant.
+// WithProject runs act with root and folders as the process's project,
+// under a lock every caller of it shares, and restores the project it found
+// when act returns.
+func WithProject[T any](root string, folders Folders, act func() (T, error)) (T, error) {
+	// invariant: an act never calls WithProject, which is not re-entrant.
 	actMu.Lock()
 	defer actMu.Unlock()
-	previous := ProjectRoot()
-	SetProjectRoot(root)
-	defer SetProjectRoot(previous)
+	projectRootMu.RLock()
+	previousRoot, previousFolders := projectRoot, projectFolders
+	projectRootMu.RUnlock()
+	SetProject(root, folders)
+	defer SetProject(previousRoot, previousFolders)
 	return act()
 }

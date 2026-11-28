@@ -7,10 +7,10 @@
 //
 //   - spwn:<name>                built-in catalog (compiled into the binary)
 //   - github:<owner>/<repo>      third-party (planned, git tags as versions)
-//   - skill/<name>               local skill (./spwn/skills/<name>.md)
-//   - tool/<name>                local tool (./spwn/tools/<name>/)
-//   - hook/<name>                local hook (./spwn/hooks/<name>.yaml)
-//   - command/<name>             local command (./spwn/commands/<name>.md)
+//   - skill/<name>               local skill (./skills/<name>.md)
+//   - tool/<name>                local tool (./tools/<name>/)
+//   - hook/<name>                local hook (./hooks/<name>.yaml)
+//   - command/<name>             local command (./commands/<name>.md)
 //
 // Local refs (skill/, tool/, hook/, command/) attach the in-repo
 // block to the named agent; they require --agent because bolting a
@@ -83,32 +83,33 @@ func RunInstall(cmd *cobra.Command, raw, agentFilter string) error {
 
 	ref, version := refs.SplitVersion(resolved)
 	parsed := refs.ParseRef(ref)
+	f := p.Layout.Platform()
 	switch parsed.Kind {
 	case refs.KindLocalSkill, refs.KindLocalTool, refs.KindLocalHook, refs.KindLocalCommand:
 		if agentFilter == "" {
-			return fmt.Errorf("%q is a local ref: pass --agent <name> to attach it to one agent, or author a new one with `station skills create %s` / `spwn/tools/%s/` / `spwn/hooks/%s.yaml` / `spwn/commands/%s.md`",
-				ref, parsed.Name, parsed.Name, parsed.Name, parsed.Name)
+			return fmt.Errorf("%q is a local ref: pass --agent <name> to attach it to one agent, or author a new one with `station skills create %s` / `%s/%s/` / `%s/%s.yaml` / `%s/%s.md`",
+				ref, parsed.Name, f.Tools, parsed.Name, f.Hooks, parsed.Name, f.Commands, parsed.Name)
 		}
-		if res := refs.ResolveSkill(p.Root, parsed, nil, false); res == refs.ResolveNotFound {
+		if res := refs.ResolveSkill(p.Root, f, parsed, nil, false); res == refs.ResolveNotFound {
 			switch parsed.Kind {
 			case refs.KindLocalSkill:
-				return fmt.Errorf("skill/%s not found at spwn/skills/%s.md; create it first with `station skills create %s`",
-					parsed.Name, parsed.Name, parsed.Name)
+				return fmt.Errorf("skill/%s not found at %s/%s.md; create it first with `station skills create %s`",
+					parsed.Name, f.Skills, parsed.Name, parsed.Name)
 			case refs.KindLocalTool:
-				return fmt.Errorf("tool/%s not found at spwn/tools/%s/; scaffold a tool.yaml there first",
-					parsed.Name, parsed.Name)
+				return fmt.Errorf("tool/%s not found at %s/%s/; scaffold a tool.yaml there first",
+					parsed.Name, f.Tools, parsed.Name)
 			case refs.KindLocalHook:
-				return fmt.Errorf("hook/%s not found at spwn/hooks/%s.yaml; create the hook script first",
-					parsed.Name, parsed.Name)
+				return fmt.Errorf("hook/%s not found at %s/%s.yaml; create the hook script first",
+					parsed.Name, f.Hooks, parsed.Name)
 			case refs.KindLocalCommand:
-				return fmt.Errorf("command/%s not found at spwn/commands/%s.md; create the prompt file first",
-					parsed.Name, parsed.Name)
+				return fmt.Errorf("command/%s not found at %s/%s.md; create the prompt file first",
+					parsed.Name, f.Commands, parsed.Name)
 			}
 		}
 	case refs.KindRegistry:
 		return fmt.Errorf("%q targets github:%s/%s but remote registries are not yet supported. "+
-			"Use spwn:<name> for built-in dependencies, or author a local one under ./spwn/tools/",
-			raw, parsed.Owner, parsed.Name)
+			"Use spwn:<name> for built-in dependencies, or author a local one under ./%s/",
+			raw, parsed.Owner, parsed.Name, f.Tools)
 	case refs.KindInvalid:
 		return fmt.Errorf("%q is not a valid dependency ref: use spwn:<name> (for built-ins), "+
 			"github:<owner>/<repo> (for remote deps), skill/<name>, tool/<name>, hook/<name>, or command/<name>",

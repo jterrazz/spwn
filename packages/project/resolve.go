@@ -12,7 +12,7 @@ import (
 // invariant: a declared name that is not one folder name (a separator,
 // "..", a NUL) names no folder: it is never joined to a path, and
 // Validate says why.
-func resolveRefs(t *platform.Tree, root string, m *intmanifest.Manifest) (deployable, orphans []AgentRef) {
+func resolveRefs(t *platform.Tree, agentsDir string, m *intmanifest.Manifest) (deployable, orphans []AgentRef) {
 	declared := map[string]struct{}{}
 	for _, w := range m.Worlds {
 		for _, name := range w.Agents {
@@ -30,7 +30,7 @@ func resolveRefs(t *platform.Tree, root string, m *intmanifest.Manifest) (deploy
 			deployable = append(deployable, AgentRef{Name: name})
 			continue
 		}
-		path := filepath.Join(root, "spwn", "agents", name)
+		path := filepath.Join(agentsDir, name)
 		deployable = append(deployable, AgentRef{
 			Name:   name,
 			Path:   path,
@@ -38,7 +38,6 @@ func resolveRefs(t *platform.Tree, root string, m *intmanifest.Manifest) (deploy
 		})
 	}
 
-	agentsDir := filepath.Join(root, "spwn", "agents")
 	entries, err := t.ReadDir(agentsDir)
 	if err == nil {
 		for _, e := range entries {
