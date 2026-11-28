@@ -436,7 +436,7 @@ func atMost(open func(string) (fs.File, error), name string, bound int) ([]byte,
 // invariant: a file a fragment makes is the owner's from then on: made
 // 0600 with the folders it lacks, which are recorded with it, so off takes
 // them back only once they are empty.
-func (a *Applier) land(w *written, at string, data []byte, seen local.Seen) error {
+func (a *Applier) land(r *record, w *written, at string, data []byte, seen local.Seen) error {
 	home, err := a.real(a.o.Home)
 	if err != nil {
 		return err
@@ -447,6 +447,19 @@ func (a *Applier) land(w *written, at string, data []byte, seen local.Seen) erro
 			break
 		}
 		made = append(made, dir)
+	}
+	next := *w
+	next.Made = w.Made || !seen.There
+	next.Folders = slices.Clone(w.Folders)
+	for _, dir := range made {
+		if !slices.Contains(next.Folders, dir) {
+			next.Folders = append(next.Folders, dir)
+		}
+	}
+	// invariant: the record is measured with all the landing adds to it,
+	// the file and the folders made, before anything is made.
+	if err := a.fits(r, next); err != nil {
+		return err
 	}
 	if err := a.files.MkdirAll(path.Dir(at), 0o750); err != nil {
 		return err
@@ -460,12 +473,7 @@ func (a *Applier) land(w *written, at string, data []byte, seen local.Seen) erro
 		}
 		return err
 	}
-	w.Made = w.Made || !seen.There
-	for _, dir := range made {
-		if !slices.Contains(w.Folders, dir) {
-			w.Folders = append(w.Folders, dir)
-		}
-	}
+	*w = next
 	return nil
 }
 

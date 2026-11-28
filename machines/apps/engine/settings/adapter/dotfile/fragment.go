@@ -168,7 +168,7 @@ func (a *Applier) applyMerge(r *record, setting string, c catalog.Copy) ([]setti
 		return nil, err
 	}
 	if !there || !bytes.Equal(out, data) {
-		if err := a.land(&w, at, out, seenAs(data, there)); err != nil {
+		if err := a.land(r, &w, at, out, seenAs(data, there)); err != nil {
 			return nil, err
 		}
 		step.Detail = "merged"
@@ -329,7 +329,7 @@ func (a *Applier) applyBlock(r *record, setting string, c catalog.Copy) ([]setti
 		return nil, err
 	}
 	if changed {
-		if err := a.land(&w, at, []byte(after), seenAs(data, there)); err != nil {
+		if err := a.land(r, &w, at, []byte(after), seenAs(data, there)); err != nil {
 			return nil, err
 		}
 		step.Detail = "written"
