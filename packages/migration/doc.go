@@ -11,7 +11,7 @@
 // any migration runs; failed migrations roll back from the backup.
 //
 // Scopes. Spwn state lives in four places: ~/.spwn/ (user),
-// ./spwn.yaml + ./spwn/ (project), per-agent directories, per-world
+// ./spwn.yaml and the folders it lays out (project), per-agent directories, per-world
 // directories under world-states/. Each scope deserves its own
 // migration category because the triggers (CLI boot, project load,
 // agent load, world spawn) differ. The Runner + Migration types here

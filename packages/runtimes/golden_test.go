@@ -5,7 +5,7 @@
 // runtime the case exercises:
 //
 //	__tests__/__fixtures__/<name>/
-//	  input/                        -- spwn.yaml + spwn/**
+//	  input/                        -- spwn.yaml + the folders it lays out
 //	  output_<runtime>/             -- expected rendered Tree
 //	  output_<runtime>_error.txt    -- expected error substring
 //	                                   with the fixtures root written as {{fixtures}}

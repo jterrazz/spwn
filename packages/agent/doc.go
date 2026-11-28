@@ -2,7 +2,7 @@
 // (agent.yaml), mind layers (playbooks, journal), per-world sessions,
 // and evolution operations (dream, sleep, fork). Knowledge is NOT a
 // Mind layer: it's world-scoped and lives at
-// spwn/worlds/<name>/knowledge/ on the host (bind-mounted into
+// the world's knowledge: path on the host (bind-mounted into
 // /world/knowledge/ inside the container). Skills aren't a Mind
 // layer either: they're build-time dependencies resolved via the
 // `skill:` scheme or shipped by tools, and injected into

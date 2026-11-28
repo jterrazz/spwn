@@ -15,7 +15,7 @@ package platform
 //
 // Knowledge moved out of the Mind in the same window: it's
 // environmental (about the domain), not about the agent's personality,
-// so it now lives on the world at spwn/worlds/<name>/knowledge/ and
+// so it now lives on the world, at its knowledge: path, and
 // is bind-mounted into the container at /world/knowledge/.
 var MindLayers = []string{"playbooks", "journal"}
 

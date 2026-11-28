@@ -122,7 +122,7 @@ func ChownAgentHomes(ctx context.Context, be backend.Backend, containerID string
 // and is discarded with it.
 //
 // Knowledge is NOT in the list: it lives at /world/knowledge/ (world-
-// scoped, bind-mounted from spwn/worlds/<name>/knowledge/), so
+// scoped, bind-mounted from the world's knowledge: path), so
 // in-container edits hit the project dir directly, no sync needed.
 // Skills aren't synced either: they're build-time dependencies
 // injected into /world/skills/, not a runtime-writable memory layer.

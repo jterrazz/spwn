@@ -194,7 +194,7 @@ func TestAnHonestProjectReadsAsAPlainReadDoes(t *testing.T) {
 		"agents/neo/SOUL.md":           "I am neo.\n",
 	})
 	linkAll(t, project, map[string]string{
-		"skills/review/style.md": filepath.Join("..", "..", "..", "shared", "style.md"),
+		"skills/review/style.md": filepath.Join("..", "..", "shared", "style.md"),
 	})
 	tree := platform.Within(project)
 	defer tree.Close()

@@ -191,10 +191,7 @@ func TestReleaseReadiness(t *testing.T) {
 	t.Run("04_init_writes_world_knowledge", func(t *testing.T) {
 		// A04: fresh init seeds a ./knowledge/.gitkeep AND
 		// records the path explicitly in spwn.yaml. Also asserts that
-		// the retired spwn/worlds/ nested tree is not created. The
-		// knowledge dir moved from the project root (./knowledge/)
-		// to live under spwn/ so the whole project tree is
-		// self-contained in one directory.
+		// the retired spwn/worlds/ nested tree is not created.
 		t.Parallel()
 		env, _ := freshEnv(t)
 		wd := t.TempDir()

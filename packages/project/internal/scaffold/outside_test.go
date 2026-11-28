@@ -68,13 +68,13 @@ func TestInitNeverReadsNorAppendsToAGitignoreThatLinksOut(t *testing.T) {
 	}
 }
 
-func TestInitNeverWritesThroughASpwnFolderThatLinksOut(t *testing.T) {
+func TestInitNeverWritesThroughAnAgentsFolderThatLinksOut(t *testing.T) {
 	project, outside := folderBesideOutside(t)
-	if err := os.Symlink(outside, filepath.Join(project, "spwn")); err != nil {
+	if err := os.Symlink(outside, filepath.Join(project, "agents")); err != nil {
 		t.Fatal(err)
 	}
 	if err := Init(project, Opts{Name: "linked", NoGitignore: true}); err == nil {
-		t.Fatal("Init through a spwn/ linking out = nil; want it refused")
+		t.Fatal("Init through an agents/ linking out = nil; want it refused")
 	}
 	outsideUntouched(t, outside)
 }

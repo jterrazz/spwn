@@ -40,7 +40,7 @@ func TestATreeRefusesEveryPathThatLeavesItByItsNameAlone(t *testing.T) {
 	for _, p := range []string{
 		"..",
 		"../outside.md",
-		"spwn/../../outside.md",
+		"agents/../../outside.md",
 		filepath.Join(dir, "outside.md"),
 		"spwn\x00.yaml",
 	} {
@@ -57,7 +57,7 @@ func TestATreeRefusesEveryPathThatLeavesItByItsNameAlone(t *testing.T) {
 			t.Errorf("ReadDir(%q) = %v; want ErrOutside", p, err)
 		}
 	}
-	for _, p := range []string{"spwn.yaml", "agents/../../spwn.yaml", filepath.Join(tree.Dir(), "spwn.yaml")} {
+	for _, p := range []string{"spwn.yaml", "agents/neo/../../spwn.yaml", filepath.Join(tree.Dir(), "spwn.yaml")} {
 		if data, err := tree.ReadFile(p); err != nil || string(data) != "version: 1\n" {
 			t.Errorf("ReadFile(%q) = %q, %v; want the project's file", p, data, err)
 		}
@@ -66,7 +66,7 @@ func TestATreeRefusesEveryPathThatLeavesItByItsNameAlone(t *testing.T) {
 
 func TestATreeNeverFollowsALinkOutOfIt(t *testing.T) {
 	tree, dir := treeBeside(t)
-	at := filepath.Join(tree.Dir(), "spwn", "away.md")
+	at := filepath.Join(tree.Dir(), "agents", "away.md")
 	if err := os.Symlink(filepath.Join(dir, "outside.md"), at); err != nil {
 		t.Fatal(err)
 	}
@@ -104,7 +104,7 @@ func TestATreeNeverWaitsOnAFIFO(t *testing.T) {
 func TestATreeWalksAsWalkDirDoes(t *testing.T) {
 	tree, _ := treeBeside(t)
 	var got []string
-	err := tree.WalkDir(filepath.Join(tree.Dir(), "spwn"), func(p string, d fs.DirEntry, err error) error {
+	err := tree.WalkDir(filepath.Join(tree.Dir(), "agents"), func(p string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -112,8 +112,8 @@ func TestATreeWalksAsWalkDirDoes(t *testing.T) {
 		got = append(got, rel)
 		return nil
 	})
-	want := []string{"spwn", filepath.Join("agents"), filepath.Join("agents", "neo")}
-	if err != nil || len(got) != len(want) || got[0] != want[0] || got[1] != want[1] || got[2] != want[2] {
+	want := []string{"agents", filepath.Join("agents", "neo")}
+	if err != nil || len(got) != len(want) || got[0] != want[0] || got[1] != want[1] {
 		t.Errorf("WalkDir = %v, %v; want %v", got, err, want)
 	}
 }
@@ -131,7 +131,7 @@ func TestAFileNamedAsAFolderIsNotRead(t *testing.T) {
 			t.Errorf("IsFile(%q) = true; want false", p)
 		}
 	}
-	for _, p := range []string{"spwn/", "spwn/.", "agents/./"} {
+	for _, p := range []string{"agents/", "agents/.", "agents/neo/./"} {
 		if !tree.IsDir(p) {
 			t.Errorf("IsDir(%q) = false; want the folder", p)
 		}
@@ -164,14 +164,14 @@ func TestATreeWhoseRootIsALinkHoldsTheFolderItResolvesTo(t *testing.T) {
 
 func TestATreesFSRefusesWhatTheTreeRefuses(t *testing.T) {
 	tree, dir := treeBeside(t)
-	if err := os.Symlink(filepath.Join(dir, "outside.md"), filepath.Join(tree.Dir(), "spwn", "away.md")); err != nil {
+	if err := os.Symlink(filepath.Join(dir, "outside.md"), filepath.Join(tree.Dir(), "away.md")); err != nil {
 		t.Fatal(err)
 	}
 	fsys := FS(tree.Dir())
 	if data, err := fs.ReadFile(fsys, "spwn.yaml"); err != nil || string(data) != "version: 1\n" {
 		t.Errorf("ReadFile(spwn.yaml) = %q, %v; want the project's file", data, err)
 	}
-	for _, name := range []string{"../outside.md", "/" + filepath.ToSlash(filepath.Join(dir, "outside.md")), "spwn/away.md"} {
+	for _, name := range []string{"../outside.md", "/" + filepath.ToSlash(filepath.Join(dir, "outside.md")), "away.md"} {
 		if data, err := fs.ReadFile(fsys, name); err == nil {
 			t.Errorf("ReadFile(%q) = %q; want it refused", name, data)
 		}
@@ -189,8 +189,8 @@ func TestATreesFSRefusesWhatTheTreeRefuses(t *testing.T) {
 	if entries, err := fs.ReadDir(fsys, "agents"); err != nil || len(entries) != 1 || entries[0].Name() != "neo" {
 		t.Errorf("ReadDir(agents) = %v, %v; want [neo]", entries, err)
 	}
-	if info, err := fs.Stat(fsys, "spwn"); err != nil || !info.IsDir() {
-		t.Errorf("Stat(spwn) = %v, %v; want a folder", info, err)
+	if info, err := fs.Stat(fsys, "agents"); err != nil || !info.IsDir() {
+		t.Errorf("Stat(agents) = %v, %v; want a folder", info, err)
 	}
 }
 

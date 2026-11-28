@@ -120,7 +120,7 @@ func refusedOrBare(err error, code fail.Code, why error, rel string) bool {
 
 func TestALinkInTheDeclarationIsRefusedAndNothingItPointsToIsRead(t *testing.T) {
 	for _, rel := range []string{
-		"spwn.yaml", "spwn.lock", "spwn", "commands/refactor.md", "skills", "skills/focus.md",
+		"spwn.yaml", "spwn.lock", "agents", "commands/refactor.md", "skills", "skills/focus.md",
 		"agents/" + project.Starter, "agents/" + project.Starter + "/agent.yaml", "agents/" + project.Starter + "/AGENTS.md",
 	} {
 		t.Run(strings.ReplaceAll(rel, "/", "_"), func(t *testing.T) {
