@@ -84,7 +84,7 @@ A setting's [`file`](catalog.md#methods) method writes a whole file by default; 
 
 Each fragment apply writes is recorded in `~/.local/state/station/merged.json`, per setting and file: each value's JSON pointer and the digest of its canonical form (an element's under its array's pointer), a block's digest, and the file and folders Machines made. Apply judges against that record: a value it wrote that the fragment now holds otherwise is written anew, and one the fragment dropped is taken back while it is unchanged.
 
-`station settings off` removes a value only while its digest is still the recorded one, so a value you changed by hand is left and said (`yours, kept`); an object or array Machines made goes only once empty, and a file and the folders Machines made go only when nothing is left in them. With nothing edited, off gives back your file byte for byte. An element you edited cannot be told from one you deleted, so it is left without a word. With no record (`merged.json` deleted), off takes back nothing.
+`station settings off` removes a value only while its digest is still the recorded one, so a value you changed by hand is left and said (`yours, kept`); an object or array Machines made goes only once empty and still an object or an array as it made it (a value of yours put where it stood, `false` or `{}` where it made an array, is left and said, by off and by apply alike), and a file and the folders Machines made go only when nothing is left in them. With nothing edited, off gives back your file byte for byte. An element you edited cannot be told from one you deleted, so it is left without a word. With no record (`merged.json` deleted), off takes back nothing.
 
 ## Removing the block
 

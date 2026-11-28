@@ -23,7 +23,7 @@ The tree is held in the file's own order with each key's and scalar's raw bytes,
 
 ### The record is the adapter's own
 
-What a merge wrote (per setting and file: each JSON pointer and the digest of its canonical value, a block's digest, the file and folders Machines made) is kept in `~/.local/state/station/merged.json`, beside the ledger and not in it. The ledger is the Machinefile family's store, and one store has one owner; the authorized-keys record set that precedent. Off removes a value only while its digest is the recorded one, and a container only when it is empty and Machines made it.
+What a merge wrote (per setting and file: each JSON pointer and the digest of its canonical value, a block's digest, the file and folders Machines made) is kept in `~/.local/state/station/merged.json`, beside the ledger and not in it. The ledger is the Machinefile family's store, and one store has one owner; the authorized-keys record set that precedent. Off removes a value only while its digest is the recorded one, and a container only when it is empty, of the very shape it made (an object, an array) and Machines made it: anything else at that pointer is the owner's.
 
 ### The guard is `requires`
 

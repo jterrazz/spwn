@@ -184,9 +184,14 @@ func (a *Applier) undoMerge(r *record, setting string, c catalog.Copy) ([]settin
 	return append([]settings.ChangeStep{step}, keptSteps(c.To, kept)...), nil
 }
 
+// value: one step per pointer kept, said once however many of Machines'
+// entries met it.
 func keptSteps(to string, pointers []string) []settings.ChangeStep {
 	out := make([]settings.ChangeStep, 0, len(pointers))
-	for _, p := range pointers {
+	for i, p := range pointers {
+		if slices.Contains(pointers[:i], p) {
+			continue
+		}
 		out = append(out, settings.ChangeStep{Label: to + " " + p, State: catalog.StateDegraded, Detail: "yours, kept"})
 	}
 	return out

@@ -5,12 +5,15 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
+	"maps"
 	"math/rand/v2"
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -229,6 +232,40 @@ func TestOffLeavesAValueChangedByHandAndSaysIt(t *testing.T) {
 	}
 }
 
+func TestAValueTheOwnerPutWhereMachinesMadeAContainerIsHisAfterOffAndApply(t *testing.T) {
+	for _, made := range []string{`["a"]`, `{"a": 1}`, `[]`, `{}`} {
+		for _, mine := range []string{"false", "null", "0", `"off"`, "[]", "{}", "[\n    \"mine\"\n  ]", "{\n    \"mine\": 1\n  }"} {
+			if mine[0] == made[0] {
+				continue
+			}
+			t.Run(made+" then "+strings.Join(strings.Fields(mine), ""), func(t *testing.T) {
+				edited := "{\n  \"keep\": 1,\n  \"x\": " + mine + "\n}\n"
+				for _, then := range []string{"off", "apply"} {
+					b := newBench(t, catalog.WriteMerge, `{"x": `+made+`}`, ".x.json")
+					b.write("{\n  \"keep\": 1\n}\n", 0o600)
+					b.apply()
+					b.write(edited, 0o600)
+					want := []string{"~/.x.json: nothing of Machines' left", "~/.x.json /x: yours, kept"}
+					got := b.off
+					if then == "apply" {
+						want[0], got = "~/.x.json: as Machines wrote it: nothing written", b.apply
+					}
+					if said := got(); !reflect.DeepEqual(said, want) {
+						t.Errorf("%s said %q, want %q", then, said, want)
+					}
+					if b.read() != edited {
+						t.Errorf("%s left %q, not the owner's %q", then, b.read(), edited)
+					}
+					b.off()
+					if b.read() != edited {
+						t.Errorf("off after %s left %q, not the owner's %q", then, b.read(), edited)
+					}
+				}
+			})
+		}
+	}
+}
+
 func TestAValueMachinesWroteFollowsTheFragmentAndOneOfTheOwnersStays(t *testing.T) {
 	b := newBench(t, catalog.WriteMerge, `{"a": 1, "b": 1}`, ".x.json")
 	b.write("{\n  \"b\": 0\n}\n", 0o600)
@@ -435,16 +472,170 @@ func keeps(merged, mine any) bool {
 	return reflect.DeepEqual(merged, mine)
 }
 
-func TestAnyMergeKeepsTheOwnersTreeIsWrittenOnceAndOffGivesBackHisBytes(t *testing.T) {
+// value: the owner's file in a layout a hand or a tool writes: JSON.stringify's
+// under an indent, which a merge keeps byte for byte, or compact, with CRLF
+// line ends, or a space before each colon, which it lays out again.
+func laidOut(v map[string]any, layout int) (text string, stringify bool) {
+	switch layout {
+	case 0, 1, 2:
+		out, _ := json.MarshalIndent(v, "", []string{"  ", "    ", "\t"}[layout])
+		return string(out) + "\n", true
+	case 3:
+		out, _ := json.Marshal(v)
+		return string(out), false
+	case 4:
+		out, _ := json.MarshalIndent(v, "", "  ")
+		return strings.ReplaceAll(string(out)+"\n", "\n", "\r\n"), false
+	}
+	out, _ := json.MarshalIndent(v, "", "   ")
+	return strings.ReplaceAll(string(out), `": `, `" : `) + "\n", false
+}
+
+// value: a JSON text as its tokens in order: its keys, their order and its
+// values, with no whitespace.
+func tokens(t *testing.T, text string) []string {
+	t.Helper()
+	dec := json.NewDecoder(strings.NewReader(text))
+	dec.UseNumber()
+	var out []string
+	for {
+		tok, err := dec.Token()
+		if errors.Is(err, io.EOF) {
+			return out
+		}
+		if err != nil {
+			t.Fatalf("%v in %q", err, text)
+		}
+		out = append(out, fmt.Sprintf("%T:%v", tok, tok))
+	}
+}
+
+// value: one place of a decoded tree, by the keys from its top.
+type spot struct {
+	at  []string
+	val any
+}
+
+func spots(v any, at []string, out *[]spot) {
+	*out = append(*out, spot{at: at, val: v})
+	if m, ok := v.(map[string]any); ok {
+		for _, k := range slices.Sorted(maps.Keys(m)) {
+			spots(m[k], append(slices.Clone(at), k), out)
+		}
+	}
+}
+
+func get(root any, at []string) (any, bool) {
+	for _, k := range at {
+		m, ok := root.(map[string]any)
+		if !ok {
+			return nil, false
+		}
+		if root, ok = m[k]; !ok {
+			return nil, false
+		}
+	}
+	return root, true
+}
+
+// value: what the owner did to the merged tree between an apply and what
+// follows it: put a value at a key, add an element to an array, or delete a key.
+type userEdit struct {
+	at   []string
+	put  any
+	into string
+}
+
+// value: a value of another shape than v, with the case's own mark in it, so
+// no value of Machines' is ever deep-equal to it.
+func otherShape(r *rand.Rand, v any, mark string) any {
+	switch v.(type) {
+	case map[string]any:
+		return []any{[]any{mark}, mark}[r.IntN(2)]
+	case []any:
+		return []any{map[string]any{"u": mark}, mark}[r.IntN(2)]
+	}
+	return []any{map[string]any{"u": mark}, []any{mark}, mark}[r.IntN(3)]
+}
+
+func edited(r *rand.Rand, root map[string]any, mark string) userEdit {
+	var all []spot
+	spots(root, nil, &all)
+	var members, objects, arrays []spot
+	for _, s := range all {
+		switch s.val.(type) {
+		case map[string]any:
+			objects = append(objects, s)
+		case []any:
+			arrays = append(arrays, s)
+		}
+		if len(s.at) > 0 {
+			members = append(members, s)
+		}
+	}
+	kind := r.IntN(4)
+	if (kind < 2 && len(members) == 0) || (kind == 3 && len(arrays) == 0) {
+		kind = 2
+	}
+	parent := func(at []string) map[string]any {
+		p, _ := get(root, at[:len(at)-1])
+		m, _ := p.(map[string]any)
+		return m
+	}
+	switch kind {
+	case 0:
+		s := members[r.IntN(len(members))]
+		put := otherShape(r, s.val, mark)
+		parent(s.at)[s.at[len(s.at)-1]] = put
+		return userEdit{at: s.at, put: put}
+	case 1:
+		s := members[r.IntN(len(members))]
+		delete(parent(s.at), s.at[len(s.at)-1])
+		return userEdit{at: s.at}
+	case 3:
+		s := arrays[r.IntN(len(arrays))]
+		items, _ := s.val.([]any)
+		parent(s.at)[s.at[len(s.at)-1]] = append(items, mark)
+		return userEdit{at: s.at, into: mark}
+	}
+	s := objects[r.IntN(len(objects))]
+	m, _ := s.val.(map[string]any)
+	m["zz"+mark] = mark
+	return userEdit{at: append(slices.Clone(s.at), "zz"+mark), put: mark}
+}
+
+// value: whether what the owner put or added is still there: as he wrote it
+// once off took Machines' values back, and with what an apply merges into it
+// otherwise.
+func (e userEdit) survives(tree any, exact bool) bool {
+	got, ok := get(tree, e.at)
+	switch {
+	case e.into != "":
+		items, isArray := got.([]any)
+		return ok && isArray && slices.Contains(items, any(e.into))
+	case e.put != nil && exact:
+		return ok && reflect.DeepEqual(got, e.put)
+	case e.put != nil:
+		return ok && keeps(got, e.put)
+	}
+	return true
+}
+
+func (b *bench) tree() any {
+	b.t.Helper()
+	var v any
+	if err := json.Unmarshal([]byte(b.read()), &v); err != nil {
+		b.t.Fatalf("%v: %q", err, b.read())
+	}
+	return v
+}
+
+func TestAnyMergeKeepsTheOwnersTreeIsWrittenOnceAndOffGivesBackHisFile(t *testing.T) {
 	r := rand.New(rand.NewPCG(5, 2026)) //nolint:gosec // value: a seeded generator, so a failing case is found again by its number.
 	for i := range 400 {
-		indent := []string{"  ", "    ", "\t"}[i%3]
-		mine, err := json.MarshalIndent(object(r), "", indent)
-		if err != nil {
-			t.Fatal(err)
-		}
+		mine := object(r)
+		original, stringify := laidOut(mine, i%6)
 		fragment, _ := json.Marshal(object(r))
-		original := string(mine) + "\n"
 		b := newBench(t, catalog.WriteMerge, string(fragment), ".x.json")
 		b.write(original, 0o600)
 		if _, err := b.applier.Apply(t.Context(), b.setting, nil); err != nil {
@@ -454,19 +645,56 @@ func TestAnyMergeKeepsTheOwnersTreeIsWrittenOnceAndOffGivesBackHisBytes(t *testi
 			t.Fatalf("case %d: Apply: %v", i, err)
 		}
 		merged := b.read()
-		var before, after any
+		var before any
 		_ = json.Unmarshal([]byte(original), &before)
-		if err := json.Unmarshal([]byte(merged), &after); err != nil || !keeps(after, before) {
-			t.Fatalf("case %d: the merge lost the owner's values (%v):\n%s\ninto\n%s", i, err, original, merged)
+		if !keeps(b.tree(), before) {
+			t.Fatalf("case %d: the merge lost the owner's values:\n%s\ninto\n%s", i, original, merged)
 		}
 		b.apply()
 		if again := b.read(); again != merged {
 			t.Fatalf("case %d: a second apply changed\n%s\ninto\n%s", i, merged, again)
 		}
 		b.off()
-		if got := b.read(); got != original {
+		switch got := b.read(); {
+		case stringify && got != original:
 			t.Fatalf("case %d: fragment %s: off left\n%s\nnot the owner's\n%s", i, fragment, got, original)
+		case !reflect.DeepEqual(tokens(t, got), tokens(t, original)):
+			t.Fatalf("case %d: fragment %s: off left\n%q\nnot the owner's keys, order and values\n%q", i, fragment, got, original)
 		}
+		b.userEdits(i, string(fragment))
+	}
+}
+
+// value: an apply, then one edit of the owner's, then off, and from the same
+// edit an apply then off: what he put or added is his after each.
+func (b *bench) userEdits(i int, fragment string) {
+	t := b.t
+	t.Helper()
+	b.apply()
+	var tree map[string]any
+	_ = json.Unmarshal([]byte(b.read()), &tree)
+	r := rand.New(rand.NewPCG(uint64(i), 11)) //nolint:gosec // value: seeded by the case, so a failing edit is found again.
+	e := edited(r, tree, "u"+strconv.Itoa(i))
+	text, _ := json.MarshalIndent(tree, "", "  ")
+	b.write(string(text)+"\n", 0o600)
+	record, unread := os.ReadFile(b.record)
+	b.off()
+	if !e.survives(b.tree(), true) {
+		t.Fatalf("case %d: fragment %s: off after the owner's edit %+v left\n%s\nfrom\n%s", i, fragment, e, b.read(), text)
+	}
+	b.write(string(text)+"\n", 0o600)
+	if unread == nil {
+		if err := os.WriteFile(b.record, record, 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	b.apply()
+	if !e.survives(b.tree(), false) {
+		t.Fatalf("case %d: fragment %s: an apply after the owner's edit %+v left\n%s\nfrom\n%s", i, fragment, e, b.read(), text)
+	}
+	b.off()
+	if !e.survives(b.tree(), true) {
+		t.Fatalf("case %d: fragment %s: off after an apply after the owner's edit %+v left\n%s\nfrom\n%s", i, fragment, e, b.read(), text)
 	}
 }
 

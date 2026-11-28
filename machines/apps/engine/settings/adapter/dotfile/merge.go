@@ -112,8 +112,8 @@ func (w *merging) made(frag *node, at string) *node {
 // invariant: taking back removes only what the entries name and the file
 // still holds exactly: a value whose digest is the one written, the first
 // element deep-equal to the one added, then each object or array Machines
-// made, deepest first, once it is empty. A value changed since is left,
-// and its pointer said.
+// made, deepest first, once it is empty and still of the shape it made. A
+// value changed since, or of another shape, is left, and its pointer said.
 func takeBack(root *node, entries []entry) (kept []string) {
 	entries = slices.Clone(entries)
 	slices.SortStableFunc(entries, func(a, b entry) int {
@@ -121,14 +121,11 @@ func takeBack(root *node, entries []entry) (kept []string) {
 	})
 	for _, e := range entries {
 		n, parent, i := root.at(e.Pointer)
-		if n == nil {
+		if n == nil || parent == nil {
 			continue
 		}
 		switch e.Kind {
 		case kindValue:
-			if parent == nil {
-				continue
-			}
 			if n.digest() != e.Digest {
 				kept = append(kept, e.Pointer)
 				continue
@@ -136,19 +133,30 @@ func takeBack(root *node, entries []entry) (kept []string) {
 			parent.keys = slices.Delete(parent.keys, i, i+1)
 		case kindElement:
 			if n.shape != array {
+				kept = append(kept, e.Pointer)
 				continue
 			}
 			if j := slices.IndexFunc(n.items, func(it *node) bool { return it.digest() == e.Digest }); j >= 0 {
 				n.items = slices.Delete(n.items, j, j+1)
 			}
 		case kindObject, kindArray:
-			if (n.shape == object) != (e.Kind == kindObject) || len(n.keys)+len(n.items) > 0 || parent == nil {
-				continue
+			switch {
+			case n.shape != e.Kind.shape():
+				kept = append(kept, e.Pointer)
+			case len(n.keys)+len(n.items) == 0:
+				parent.keys = slices.Delete(parent.keys, i, i+1)
 			}
-			parent.keys = slices.Delete(parent.keys, i, i+1)
 		}
 	}
 	return kept
+}
+
+// value: the shape of the container an entry says Machines made.
+func (k kind) shape() shape {
+	if k == kindObject {
+		return object
+	}
+	return array
 }
 
 // value: values and elements first, then the containers, deepest first.
