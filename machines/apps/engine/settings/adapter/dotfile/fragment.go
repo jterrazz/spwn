@@ -52,8 +52,13 @@ func (a *Applier) fragment(c catalog.Copy) (*node, error) {
 // read whole as strict JSON, or past the bound, is refused and never
 // rewritten.
 func parseTarget(to string, data []byte) (*node, error) {
-	if len(data) > maxTarget {
+	switch {
+	case len(data) > maxTarget:
 		return nil, fmt.Errorf("%s is past 1 MiB: Machines merges into no file that large", to)
+	case len(bytes.TrimSpace(data)) == 0:
+		return nil, fmt.Errorf("%s is empty: Machines merges only into a JSON object; write {} in it, or delete it, and apply again", to)
+	case bytes.HasPrefix(data, []byte{0xEF, 0xBB, 0xBF}):
+		return nil, fmt.Errorf("%s starts with a byte order mark, which strict JSON has not: Machines writes nothing into it", to)
 	}
 	if _, err := layoutOf(to, data); err != nil {
 		return nil, err

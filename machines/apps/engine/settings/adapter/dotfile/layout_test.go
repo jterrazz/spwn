@@ -1,6 +1,7 @@
 package dotfile_test
 
 import (
+	"os"
 	"strings"
 	"testing"
 
@@ -31,6 +32,29 @@ func TestAFileThatMixesLineEndsIsRefusedAndLeft(t *testing.T) {
 	}
 	if got := b.read(); got != original {
 		t.Errorf("the file holds %q; want it untouched", got)
+	}
+}
+
+func TestAFileIsRefusedForWhatItIsWhenItHoldsNoObject(t *testing.T) {
+	for name, c := range map[string]struct{ text, want string }{
+		"an empty file":         {"", "~/.x.json is empty: Machines merges only into a JSON object"},
+		"a file of blank lines": {"\n\n", "~/.x.json is empty: Machines merges only into a JSON object"},
+		"a byte order mark":     {string([]byte{0xEF, 0xBB, 0xBF}) + "{}\n", "~/.x.json starts with a byte order mark, which strict JSON has not"},
+		"no regular file":       {"", "~/.x.json is no regular file"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			b := newBench(t, catalog.WriteMerge, `{"a": 1}`, ".x.json")
+			if name == "no regular file" {
+				if err := os.MkdirAll(b.file, 0o750); err != nil {
+					t.Fatal(err)
+				}
+			} else {
+				b.write(c.text, 0o600)
+			}
+			if _, err := b.applier.Apply(t.Context(), b.setting, nil); err == nil || !strings.HasPrefix(err.Error(), c.want) {
+				t.Errorf("Apply: %v; want %q", err, c.want)
+			}
+		})
 	}
 }
 
