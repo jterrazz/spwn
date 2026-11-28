@@ -2926,7 +2926,7 @@ func builtinCatalog() (Catalog, error) {
 				Kind:        "app",
 				AppKind:     "app",
 				Description: "Convert files to Markdown for LLMs",
-				Agent:       "Read a PDF, Word, Excel, PowerPoint or HTML file as Markdown: markitdown <file> > <file>.md",
+				Agent:       "Read a PDF, Word, Excel, PowerPoint or HTML file as Markdown: markitdown <file> -o <file>.md",
 				Category:    "AI Tooling",
 				Installs: []LivesOn{
 					{
@@ -7591,7 +7591,7 @@ func builtinCatalog() (Catalog, error) {
 					Kind:        "app",
 					Name:        "markitdown",
 					Description: "Convert files to Markdown for LLMs",
-					Agent:       "Read a PDF, Word, Excel, PowerPoint or HTML file as Markdown: markitdown <file> > <file>.md",
+					Agent:       "Read a PDF, Word, Excel, PowerPoint or HTML file as Markdown: markitdown <file> -o <file>.md",
 					Provides: []string{
 						"markitdown"},
 					Requires: []string{

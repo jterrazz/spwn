@@ -10,6 +10,10 @@ import (
 // its READMEs' words, and each command as it is used, written by `make
 // generate` from the command tree
 // (specs/architecture/drive_test.go).
+// invariant: an embedded constant, the same bytes in every binary of one
+// tree: no package, Machinefile or machine text reaches it, so the skill
+// writes it as it is, and it holds no line that would open a rule or a
+// second front matter (machinefile's skill_bound_test.go).
 
 //go:embed spwn/drive.txt
 var SpwnDrive string

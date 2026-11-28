@@ -27,7 +27,7 @@ runs:
           - Mac: `macbook-pro`, the Mac this VM runs on
           - System: Ubuntu 24.04, arm64
           - `vm.mounts`: ~/Developer/notes at ~/notes read-only
-          - `jq`: Read or reshape JSON: jq '.key' <file>, or <command> | jq -r '.items[].name'
+          - `jq`: Read or reshape JSON: jq '.key' ‹file›, or ‹command› | jq -r '.items[].name'
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.spwn_skill'' world.json'
       exit: 0
       stdout: |

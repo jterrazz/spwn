@@ -15,7 +15,7 @@ runs:
       exit: 0
       stdout: |
           - `eza`: Modern ls replacement
-          - `fd`: Find files by name, .gitignore respected: fd <pattern> [path]; fd -e <extension> by extension
+          - `fd`: Find files by name, .gitignore respected: fd ‹pattern› [path]; fd -e ‹extension› by extension
     - command: 'world edit macbook-pro machinefiles/macbook-pro.machine.yaml'
       stdin: |
           machinefile: station.machinefile/v1
@@ -28,4 +28,4 @@ runs:
     - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].stores.spwn_skill'' world.json | /usr/bin/grep -e "^- .fd.:" -e "^- .eza.:"'
       exit: 0
       stdout: |
-          - `fd`: Find files by name, .gitignore respected: fd <pattern> [path]; fd -e <extension> by extension
+          - `fd`: Find files by name, .gitignore respected: fd ‹pattern› [path]; fd -e ‹extension› by extension

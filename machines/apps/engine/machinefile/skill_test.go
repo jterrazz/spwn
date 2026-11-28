@@ -108,7 +108,7 @@ func TestATooLongListNamesTheAppsWithNoAgentLineFirst(t *testing.T) {
 	}
 	many[0].Agent = "kept whole: app-aa <file>"
 	got := string(machinefile.Skill(fixtureWhere(), many, "drive"))
-	if !strings.Contains(got, "- `app-aa`: kept whole: app-aa <file>\n") || strings.Contains(got, strings.Repeat("d", 120)) {
+	if !strings.Contains(got, "- `app-aa`: kept whole: app-aa ‹file›\n") || strings.Contains(got, strings.Repeat("d", 120)) {
 		t.Errorf("past the bound the agent lines stay and the descriptions go:\n%s", got)
 	}
 }
