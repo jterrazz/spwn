@@ -168,26 +168,37 @@ var Apply = call.Call[Deps, ApplyIn, machinefile.Applied]{
 	},
 }
 
-// invariant: each file's lines of a phase run in the chain's order, and
-// the first that ends broken ends the phase: the files' after it are not
-// run, each said absent after the file that failed. A run interrupted
-// before a file's turn runs none of the rest and says nothing of them.
+// invariant: each file's lines of a phase run in the chain's order, all of
+// them within one catalog.RunBound from the first's start, each given the
+// time left; one whose turn comes with none left is not run, said absent,
+// and the first that ends broken ends the phase: the files' after it are
+// not run, each said absent after the file that failed. An interrupt is
+// no failure: a run interrupted before a file's turn, or during it, runs
+// none of the rest and says nothing of them.
 func runAll(ctx context.Context, d Deps, scripts []machinefile.Script, p call.Progress) []machinefile.Ran {
 	var out []machinefile.Ran
-	failed := ""
+	failed, until := "", d.Now().Add(catalog.RunBound)
 	for _, s := range scripts {
-		if failed != "" {
-			out = append(out, machinefile.Ran{Script: s, State: catalog.StateAbsent, Detail: "after " + failed + "'s lines, which failed"})
-			continue
-		}
 		if ctx.Err() != nil {
 			break
 		}
-		r := ran(ctx, d, s, p)
+		left := until.Sub(d.Now())
+		switch {
+		case failed != "":
+			out = append(out, machinefile.Ran{Script: s, State: catalog.StateAbsent, Detail: "after " + failed + "'s lines, which failed"})
+			continue
+		case left <= 0:
+			out = append(out, machinefile.Ran{Script: s, State: catalog.StateAbsent, Detail: "the phase's lines had run their " + strconv.Itoa(int(catalog.RunBound.Minutes())) + " minutes already"})
+			continue
+		}
+		r := ran(ctx, d, s, left, p)
+		out = append(out, *r)
+		if ctx.Err() != nil {
+			break
+		}
 		if r.State == catalog.StateBroken {
 			failed = s.Origin.Name
 		}
-		out = append(out, *r)
 	}
 	return out
 }
@@ -196,7 +207,7 @@ func runAll(ctx context.Context, d Deps, scripts []machinefile.Script, p call.Pr
 // out, as this machine's user from its home, and stop at the first line
 // that fails: their run ends broken, with the last words they said
 // (saidLines), and what was applied stays applied.
-func ran(ctx context.Context, d Deps, s machinefile.Script, p call.Progress) *machinefile.Ran {
+func ran(ctx context.Context, d Deps, s machinefile.Script, within time.Duration, p call.Progress) *machinefile.Ran {
 	task := "run." + string(s.Phase)
 	journal.Mark(ctx, d.Now(), task)
 	p.Step(task, secret.Kept(strings.Join(machinefile.ScriptLines(s.Lines), "\n")))
@@ -206,7 +217,7 @@ func ran(ctx context.Context, d Deps, s machinefile.Script, p call.Progress) *ma
 		p.Done(task, errors.New(out.Detail))
 		return out
 	}
-	got, err := d.Shell.Run(ctx, s.Lines)
+	got, err := d.Shell.Run(ctx, s.Lines, within)
 	switch {
 	case err != nil:
 		out.State, out.Detail = catalog.StateBroken, err.Error()

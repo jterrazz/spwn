@@ -111,7 +111,8 @@ type RunSpec struct {
 
 // value: the bounds of a phase run inside a VM (image, boot): its packages
 // carried out within their own share, then its owner's lines within
-// theirs, so the bound of the whole is the sum, and lines that run long
+// theirs, every file's of the chain within that one share together, so
+// the bound of the whole is the sum, and lines that run long
 // end as a broken run step, never as the phase cut short.
 const (
 	PackagesBound = 15 * time.Minute

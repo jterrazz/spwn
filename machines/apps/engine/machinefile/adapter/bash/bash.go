@@ -2,8 +2,8 @@ package bash
 
 import (
 	"context"
+	"time"
 
-	"github.com/jterrazz/studio-station/apps/engine/catalog"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
 )
@@ -53,9 +53,9 @@ var _ contract.Shell = (*Bash)(nil)
 
 func New(run local.Runner, home string) *Bash { return &Bash{run: run, home: home} }
 
-func (b *Bash) Run(ctx context.Context, lines string) (contract.ShellRun, error) {
+func (b *Bash) Run(ctx context.Context, lines string, within time.Duration) (contract.ShellRun, error) {
 	c := local.Command("bash", "-e", "-c", driver, "station", lines)
-	c.Dir, c.Timeout = b.home, catalog.RunBound
+	c.Dir, c.Timeout = b.home, within
 	out, err := b.run.Output(ctx, c)
 	if err != nil {
 		return contract.ShellRun{}, err

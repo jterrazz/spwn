@@ -104,7 +104,7 @@ The chain is the same walk: `extends`, in order and depth first, a file read onc
 A Mac bound to a Machinefile of the fleet takes the fleet's newest commit every night at 03:00, unattended, and runs what changed there: a package's `script` method, a `run.upgrade` line. So **whoever can push to the fleet's default branch runs code on every bound Mac**, as its owner, with nobody present.
 
 - The fleet's default branch takes the owner's pushes alone, through a protected branch, and never a force-push (the source moves forward only already, and refuses a rewritten branch).
-- **No computer's chain carries `run.upgrade`**: the reader refuses it in `host.machine.yaml` and in any kit a computer's chain reads, so a night on a Mac runs only what the catalog's packages say. A VM's chain may carry it: a VM never upgrades by itself, and its `run.upgrade` runs at the owner's own `station machinefile update`. _The owner's to overturn._
+- **No computer's chain carries `run.upgrade`**: the reader refuses it in `host.machine.yaml` and in any kit a computer's chain reads, so a night on a Mac runs only what the catalog's packages say. A VM's chain may carry it: a VM never upgrades by itself, and its `run.upgrade` runs at the owner's own `station machinefile update`. _The owner's to overturn._ This guard is the reader lot's and is not built yet: until it lands, nothing refuses `run.upgrade` in a computer's chain, and since `run` concatenates (§4) a bound Mac's night runs every file's `run.upgrade` of its chain, a kit's included.
 - A computer is bound to its fleet file on the owner's word alone: until he says go, the MacBook is read by `plan`, never applied.
 
 ## Consequences

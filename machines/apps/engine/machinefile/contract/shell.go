@@ -1,6 +1,9 @@
 package contract
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 // value: how the owner's lines of a phase ended: the shell's exit code and
 // what they said, stdout then stderr.
@@ -18,6 +21,6 @@ type Shell interface {
 	// construct), the left of an `&&` and a pipe included, ends the run
 	// with that status, and the last line on stderr names it
 	// (`station: exit <n> at: <its first line>`); an error is a shell that
-	// could not run at all.
-	Run(ctx context.Context, lines string) (ShellRun, error)
+	// could not run at all. They run within the time given, stopped there.
+	Run(ctx context.Context, lines string, within time.Duration) (ShellRun, error)
 }
