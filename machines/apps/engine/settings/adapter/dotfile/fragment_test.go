@@ -640,6 +640,19 @@ func TestOffTakesBackNoBlockWithoutItsRecord(t *testing.T) {
 	}
 }
 
+func TestABlockAlreadyAsMachinesWritesItWithNoRecordStaysTheOwners(t *testing.T) {
+	b := newBench(t, catalog.WriteBlock, "set -g mouse on\n", ".tmux.conf")
+	his := "# >>> station setting:fmt >>>\nset -g mouse on\n# <<< station setting:fmt <<<\n"
+	b.write(his, 0o600)
+	b.apply()
+	if got := b.off(); !reflect.DeepEqual(got, []string{"~/.tmux.conf [station setting:fmt]: no record of a block Machines wrote: left as it is"}) {
+		t.Errorf("off said %q", got)
+	}
+	if b.read() != his {
+		t.Errorf("off took a block Machines never wrote: %q", b.read())
+	}
+}
+
 func TestADamagedBlockIsRefused(t *testing.T) {
 	b := newBench(t, catalog.WriteBlock, "set -g mouse on\n", ".tmux.conf")
 	b.write("# >>> station setting:fmt >>>\nset -g mouse on\n", 0o600)

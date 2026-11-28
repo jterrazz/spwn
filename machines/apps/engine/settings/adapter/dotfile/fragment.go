@@ -315,9 +315,15 @@ func (a *Applier) applyBlock(r *record, setting string, c catalog.Copy) ([]setti
 		return nil, fmt.Errorf("%s holds the block %s damaged (a start with no end, or the id twice): left as it is; delete it and apply again", c.To, id)
 	}
 	label := c.To + " [" + id + "]"
-	w, _ := r.of(setting, c.To)
+	w, held := r.of(setting, c.To)
 	after, changed := settings.UpsertPackageBlock(text, id, body)
 	step := settings.ChangeStep{Label: label, State: catalog.StateOK, Detail: "as Machines wrote it: nothing written"}
+	// invariant: a block already as Machines writes it, with no record,
+	// is the owner's: apply records nothing, as a merge never adopts an
+	// equal value, so off leaves it.
+	if !changed && held < 0 {
+		return []settings.ChangeStep{step}, nil
+	}
 	w.Block = textDigest(body)
 	if err := a.fits(r, w); err != nil {
 		return nil, err
