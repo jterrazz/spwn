@@ -48,6 +48,10 @@ type Deps struct {
 	// value: the machine's `spwn` skill, written at the end of each apply
 	// and update; nil where none is kept.
 	Skill contract.Skill
+	// value: the name of the Mac this VM runs on, read when the skill is
+	// written; nil or empty where none is known.
+	// invariant: display text only: it reaches the skill and nothing else.
+	RunsOn func() string
 	// value: this machine's own calls: apps and settings read and act
 	// through them, never through their adapters.
 	Calls call.Router

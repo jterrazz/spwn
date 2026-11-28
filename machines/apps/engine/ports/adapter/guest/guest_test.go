@@ -51,6 +51,26 @@ func until(answers *bufio.Scanner, word string) {
 	}
 }
 
+func TestEachHelloRewritesTheMacTheGuestRunsOn(t *testing.T) {
+	top := t.TempDir()
+	home := filepath.Join(top, "ci")
+	agent := guest.New(local.New([]string{"HOME=" + home}, nil, nil, nil), guest.Options{State: filepath.Join(top, "state")})
+	if got := agent.Placement().Mac; got != "" {
+		t.Fatalf("before any hello the guest runs on %q, want none", got)
+	}
+	for _, mac := range []string{"macbook-pro", "studio-laptop"} {
+		ctx, cancel := context.WithCancel(context.Background())
+		answers, done := run(ctx, t, top, home, `{"v":1,"type":"hello","host":"`+mac+`","vm":"web"}`)
+		until(answers, `"ready"`)
+		cancel()
+		until(answers, "")
+		<-done
+		if got := agent.Placement(); got.Mac != mac || got.VM != "web" {
+			t.Errorf("after a hello from %s the guest says %+v", mac, got)
+		}
+	}
+}
+
 func TestAHolderOfTheSSHFolderKeepsTheGuestOutOfAuthorizedKeys(t *testing.T) {
 	top := t.TempDir()
 	home := filepath.Join(top, "ci")

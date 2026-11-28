@@ -1,4 +1,4 @@
-description: 'create --from writes the spwn skill inside the VM: its system, its mounts, its apps'
+description: 'create --from writes the spwn skill inside the VM: its Mac, its system, its mounts, its apps'
 fixture: ../../__fixtures__/build/
 env: two-macs
 runs:
@@ -20,10 +20,11 @@ runs:
       exit: 0
     - command: 'machines create --memory 4G web --from studio-linux >/dev/null'
       exit: 0
-    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["web"].stores.spwn_skill'' world.json | /usr/bin/grep -e "^- Machine: " -e "^- System: " -e "^- Runs on " -e "^- .vm.mounts.:" -e "^- .jq.:"'
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["web"].stores.spwn_skill'' world.json | /usr/bin/grep -e "^- Machine: " -e "^- System: " -e "^- Mac: " -e "^- .vm.mounts.:" -e "^- .jq.:"'
       exit: 0
       stdout: |
           - Machine: `web`, a workspace (a VM set up by Machines for you)
+          - Mac: `macbook-pro`, the Mac this VM runs on
           - System: Ubuntu 24.04, arm64
           - `vm.mounts`: ~/Developer/notes at ~/notes read-only
           - `jq`: Read or reshape JSON: jq '.key' <file>, or <command> | jq -r '.items[].name'

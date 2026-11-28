@@ -22,6 +22,10 @@ runs:
           - `fd`: Find files by name, .gitignore respected: fd <pattern> [path]; fd -e <extension> by extension
           - `jq`: Read or reshape JSON: jq '.key' <file>, or <command> | jq -r '.items[].name'
           ## How to drive spwn
+    - command: '--version >/dev/null; /usr/bin/jq -r ''.macs["macbook-pro"].stores.spwn_skill'' world.json | /usr/bin/grep -c -e "^- Mac: "'
+      exit: 1
+      stdout: |
+          0
     - command: 'machinefile apply >/dev/null'
       exit: 0
     - command: '--version >/dev/null; /usr/bin/jq -c ''.macs["macbook-pro"].stores.spwn_skill_writes'' world.json'

@@ -49,6 +49,9 @@ func spwnSkill(ctx context.Context, d Deps, name string) (failed string) {
 		}
 	}
 	where := machinefile.Where{Name: d.Name, Kind: r.Kind, System: r.System, Values: r.Values}
+	if d.RunsOn != nil {
+		where.Mac = d.RunsOn()
+	}
 	if _, err := d.Skill.Write(ctx, machinefile.Skill(where, present, catalog.SpwnDrive)); err != nil {
 		return why(err)
 	}

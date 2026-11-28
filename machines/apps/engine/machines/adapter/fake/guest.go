@@ -1,6 +1,7 @@
 package fake
 
 import (
+	"bufio"
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
@@ -196,13 +197,17 @@ type guest struct {
 
 // invariant: station's session in the fake guest says it is ready, reports
 // what listens in its VM of the world, as the guest's first scan does, takes
-// whatever the engine writes, and lasts until the connection closes.
+// whatever the engine writes, keeping the last hello line in its VM of the
+// world as the guest keeps its placement, and lasts until the connection
+// closes.
 func (c *guest) serve(ctx context.Context, cmd contract.GuestCommand) (contract.GuestResult, error) {
 	if cmd.Stdin != nil {
 		go func() {
-			buf := make([]byte, 4096)
+			lines := bufio.NewReader(cmd.Stdin)
 			for {
-				if _, err := cmd.Stdin.Read(buf); err != nil {
+				line, err := lines.ReadBytes('\n')
+				c.hello(line)
+				if err != nil {
 					return
 				}
 			}
@@ -218,6 +223,20 @@ func (c *guest) serve(ctx context.Context, cmd contract.GuestCommand) (contract.
 	case <-c.done:
 	}
 	return contract.GuestResult{}, nil
+}
+
+func (c *guest) hello(line []byte) {
+	var m struct {
+		Type string `json:"type"`
+	}
+	if json.Unmarshal(line, &m) != nil || m.Type != "hello" {
+		return
+	}
+	c.w.Lock()
+	defer c.w.Unlock()
+	if mac := c.w.Holder(c.name); mac != "" {
+		c.w.Macs[mac].VMs[c.name].Hello = json.RawMessage(strings.TrimSpace(string(line)))
+	}
 }
 
 // invariant: a guest reports a port once: a container's published port is

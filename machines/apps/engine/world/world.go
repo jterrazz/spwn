@@ -520,6 +520,9 @@ type VM struct {
 	// of the Machinefile it was made from (SC-06: nothing else).
 	Booted  *Boot  `json:"booted,omitempty"`
 	Address string `json:"address,omitempty"`
+	// value: the last hello line its guest was written, as its Mac's engine
+	// wrote it; none before any hello.
+	Hello json.RawMessage `json:"hello,omitempty"`
 	// value: the lines its runs wrote on its console, the oldest first.
 	Console []string `json:"console,omitempty"`
 	// value: the lines its hypervisor's own output wrote, the oldest first,

@@ -84,6 +84,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/ports"
 	portsfake "github.com/jterrazz/studio-station/apps/engine/ports/adapter/fake"
 	"github.com/jterrazz/studio-station/apps/engine/ports/adapter/funnel"
+	portsguest "github.com/jterrazz/studio-station/apps/engine/ports/adapter/guest"
 	portscontract "github.com/jterrazz/studio-station/apps/engine/ports/contract"
 	projectfake "github.com/jterrazz/studio-station/apps/engine/project/adapter/fake"
 	projectcontract "github.com/jterrazz/studio-station/apps/engine/project/contract"
@@ -535,6 +536,19 @@ func (m *worldMac) locks() machinefilecontract.Locks { return machinefilefake.Lo
 // since a VM a create made runs its calls on its Mac's files.
 func (m *worldMac) spwnSkill(machine string) machinefilecontract.Skill {
 	return machinefilefake.SkillOf(m.run.w, machine)
+}
+
+// value: a VM of the world's Mac name, read from its guest's last hello as
+// the guest reads it; empty for a Mac, and before any hello.
+func (m *worldMac) helloMac() string {
+	w := m.run.w
+	w.Lock()
+	defer w.Unlock()
+	var said portsguest.Hello
+	if mac := w.Holder(m.name); mac != "" && json.Unmarshal(w.Macs[mac].VMs[m.name].Hello, &said) == nil {
+		return said.Mac
+	}
+	return ""
 }
 func (m *worldMac) turn() machinefilecontract.Turn { return machinefilefake.TurnOf(m.run.w, m.name) }
 func (m *worldMac) password() machinefilecontract.Password {

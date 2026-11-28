@@ -37,6 +37,12 @@ type Where struct {
 	Name   string
 	Kind   catalog.MachineRole
 	System catalog.System
+	// value: the name of the Mac a VM runs on, as its Mac last said it;
+	// empty for a Mac, or when no Mac said it.
+	// invariant: display text only: the skill says it, and no rule,
+	// route, right or lookup reads it, so a guest that writes another name
+	// misleads its own agents and nothing else.
+	Mac string
 	// value: the machine's mounts and port rights as its resolution words
 	// them (`vm.mounts`, `ports.*`), in the resolution's order.
 	Values []Value
@@ -233,6 +239,9 @@ func appLine(a catalog.App) string {
 
 func whereLines(w Where) []string {
 	out := []string{"Machine: `" + oneLine(w.Name, nameMax) + "`, " + kindWords(w.Kind)}
+	if mac := oneLine(w.Mac, nameMax); mac != "" && w.Kind != catalog.RoleComputer {
+		out = append(out, "Mac: `"+mac+"`, the Mac this VM runs on")
+	}
 	if sys := systemWords(w.System); sys != "" {
 		out = append(out, "System: "+sys)
 	}

@@ -25,7 +25,7 @@ func manyApps(n, nameBytes int) []catalog.App {
 // line for each of 500 port audiences beside 500 mounts.
 func worstWhere() machinefile.Where {
 	w := machinefile.Where{
-		Name: strings.Repeat("n", 4<<10), Kind: catalog.RoleWorkspace,
+		Name: strings.Repeat("n", 4<<10), Mac: strings.Repeat("m", 4<<10), Kind: catalog.RoleWorkspace,
 		System: catalog.System{OS: catalog.OSUbuntu, Version: strings.Repeat("9", 4<<10), Arch: catalog.Arch(strings.Repeat("a", 4<<10))},
 	}
 	mounts := make([]string, 0, 500)
@@ -87,6 +87,22 @@ func TestTheWorstMachineAndAppsHoldWithinTheBound(t *testing.T) {
 		if strings.Contains(string(got), strings.Repeat("n", 65)) {
 			t.Error("the machine's name is said past its bound")
 		}
+	}
+}
+
+func TestAVMsSkillNamesItsMacAndAComputersNone(t *testing.T) {
+	w := fixtureWhere()
+	w.Mac = "macbook-pro\n# x`"
+	if got := string(machinefile.Skill(w, nil, "drive")); !strings.Contains(got, "- Machine: `dev-1`, a workspace (a VM set up by Machines for you)\n- Mac: `macbook-pro # x`, the Mac this VM runs on\n") {
+		t.Errorf("a workspace's skill does not name its Mac on one line under its name:\n%s", got)
+	}
+	w.Kind = catalog.RoleComputer
+	if got := string(machinefile.Skill(w, nil, "drive")); strings.Contains(got, "- Mac: ") {
+		t.Errorf("a computer's skill names a Mac:\n%s", got)
+	}
+	w.Kind, w.Mac = catalog.RoleServer, "\n\t"
+	if got := string(machinefile.Skill(w, nil, "drive")); strings.Contains(got, "- Mac: ") {
+		t.Errorf("a Mac name of blanks only is said:\n%s", got)
 	}
 }
 
@@ -169,7 +185,7 @@ func FuzzTheSkillHoldsWithinItsBoundWhateverItIsHanded(f *testing.F) {
 			}
 			apps = append(apps, a)
 		}
-		w := machinefile.Where{Name: name, Kind: catalog.RoleServer, System: catalog.System{OS: catalog.OSUbuntu, Version: port},
+		w := machinefile.Where{Name: name, Mac: cmd, Kind: catalog.RoleServer, System: catalog.System{OS: catalog.OSUbuntu, Version: port},
 			Values: []machinefile.Value{{Key: "vm.mounts", Text: mount}, {Key: "ports.open", Text: port}}}
 		got := machinefile.Skill(w, apps, catalog.SpwnDrive)
 		if len(got) > machinefile.SkillMax || !utf8.Valid(got) {

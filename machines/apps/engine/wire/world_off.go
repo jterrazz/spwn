@@ -111,6 +111,7 @@ func (*worldMac) userSource() machinefilecontract.Source     { return nil }
 func (*worldMac) owned() machinefilecontract.Owned           { return nil }
 func (*worldMac) locks() machinefilecontract.Locks           { return nil }
 func (*worldMac) spwnSkill(string) machinefilecontract.Skill { return nil }
+func (*worldMac) helloMac() string                           { return "" }
 func (*worldMac) password() machinefilecontract.Password     { return nil }
 func (*worldMac) turn() machinefilecontract.Turn             { return nil }
 func (*worldMac) phaseShell() machinefilecontract.Shell      { return nil }

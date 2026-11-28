@@ -21,6 +21,7 @@ import (
 	"github.com/jterrazz/studio-station/apps/engine/output"
 	overviewcalls "github.com/jterrazz/studio-station/apps/engine/overview/calls"
 	"github.com/jterrazz/studio-station/apps/engine/platform/local"
+	"github.com/jterrazz/studio-station/apps/engine/ports/adapter/guest"
 	"github.com/jterrazz/studio-station/apps/engine/remote/each"
 	"github.com/jterrazz/studio-station/apps/engine/surface/cli/kit"
 	machinefilecmd "github.com/jterrazz/studio-station/apps/engine/surface/cli/machinefile"
@@ -217,8 +218,24 @@ func (m machine) machinefileDeps(calls call.Router) machinefilecalls.Deps {
 		Sources: m.machinefileSources, Machine: machineOf(m.profile), Name: m.profile.Ref.Name, Kind: m.profile.Kind,
 		Prefs: machinefilecontract.NewSourcePrefs(m.stores.prefs), Ledger: m.stores.ledger, Locks: m.locks(), Owned: m.owned(), Vault: m.vault(),
 		Password: m.password(), Turn: m.turn(), Shell: m.phaseShell(), Now: m.sys.Clock.Now, Calls: calls, Far: farRouter{m}, MacOf: m.macOf, AllMachines: settingsAllMachines{m}.Machines, Judge: judgeEach, Zshrc: m.zshrc(), Home: m.sys.Env.Home(),
-		Skill: m.spwnSkill(),
+		Skill: m.spwnSkill(), RunsOn: m.runsOn,
 	}
+}
+
+// value: the name of the Mac this VM runs on, as the hello of that Mac's
+// engine wrote it in the guest's guest.json at its last connection; in a
+// world, as the world's guest was last told it; empty on a Mac, and before
+// any hello.
+// invariant: display text only: the `spwn` skill says it, and nothing
+// routes, judges or grants by it; ports read their placement on their own.
+func (m machine) runsOn() string {
+	switch {
+	case m.kind == catalog.Mac:
+		return ""
+	case m.world != nil:
+		return m.world.helloMac()
+	}
+	return guest.New(m.sys, guest.Options{State: m.paths.State}).Placement().Mac
 }
 
 // value: the machine's `spwn` skill, in each agent skill folder of its
