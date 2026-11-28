@@ -1,0 +1,20 @@
+package: station.package/v1
+kind: app
+name: desktop-session
+description: A virtual screen, a window manager and the accessibility bus, so an ssh shell of a Linux VM can drive a graphical app
+methods:
+    # outside: agent-desktop 1.3.1 on Ubuntu 24.04 arm64: without a window manager its window list fails with `native_window_unproven`; the AT-SPI registry starts by itself on first use, and a session bus is all it needs.
+    - family: debian
+      machine: [workspace, server]
+      needs: [sudo]
+      apt: { packages: [xvfb, at-spi2-core, dbus-user-session, matchbox-window-manager] }
+      shell:
+          - id: station:desktop-session
+            zsh: |
+                export DISPLAY=:99
+                export DBUS_SESSION_BUS_ADDRESS=unix:path=${XDG_RUNTIME_DIR:-/run/user/$UID}/bus
+                if ! pgrep -u $UID -x Xvfb >/dev/null; then
+                  setsid -f Xvfb :99 -screen 0 1280x800x24 >/dev/null 2>&1
+                  for _ in {1..25}; do [[ -S /tmp/.X11-unix/X99 ]] && break; sleep 0.2; done
+                fi
+                pgrep -u $UID -x matchbox-window >/dev/null || setsid -f matchbox-window-manager >/dev/null 2>&1

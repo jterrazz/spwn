@@ -6,6 +6,7 @@ ansible ansible
 bat batcat
 browser-use browser-use
 codex codex
+desktop-session
 difftastic difft
 dust dust
 eza eza

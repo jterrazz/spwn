@@ -2937,6 +2937,22 @@ func builtinCatalog() (Catalog, error) {
 				Requires: []string{
 					"uv"}},
 			{
+				Name:        "desktop-session",
+				Kind:        "app",
+				AppKind:     "app",
+				Description: "A virtual screen, a window manager and the accessibility bus, so an ssh shell of a Linux VM can drive a graphical app",
+				Category:    "AI Tooling",
+				Installs: []LivesOn{
+					{
+						Kinds: []MachineKind{
+							"linux"},
+						Install: AptInstall{
+							Packages: []string{
+								"xvfb",
+								"at-spi2-core",
+								"dbus-user-session",
+								"matchbox-window-manager"}}}}},
+			{
 				Name:        "inferrs",
 				Kind:        "app",
 				AppKind:     "app",
@@ -7698,6 +7714,34 @@ func builtinCatalog() (Catalog, error) {
 								Undo:  "uv tool uninstall browser-use"}}}},
 				Folder: "ai-tooling",
 				File:   "packages/ai-tooling/browser-use.yaml",
+				Origin: "built-in"},
+			{
+				Package: Package{
+					Package:     "station.package/v1",
+					Kind:        "app",
+					Name:        "desktop-session",
+					Description: "A virtual screen, a window manager and the accessibility bus, so an ssh shell of a Linux VM can drive a graphical app",
+					Methods: []MethodSpec{
+						{
+							Selector: Selector{
+								Family: "debian",
+								Machine: Roles{
+									"workspace",
+									"server"}},
+							Needs: []Need{
+								"sudo"},
+							Apt: &AptMethod{
+								Packages: []string{
+									"xvfb",
+									"at-spi2-core",
+									"dbus-user-session",
+									"matchbox-window-manager"}},
+							Shell: []ShellBlock{
+								{
+									ID:  "station:desktop-session",
+									Zsh: "export DISPLAY=:99\nexport DBUS_SESSION_BUS_ADDRESS=unix:path=${XDG_RUNTIME_DIR:-/run/user/$UID}/bus\nif ! pgrep -u $UID -x Xvfb >/dev/null; then\n  setsid -f Xvfb :99 -screen 0 1280x800x24 >/dev/null 2>&1\n  for _ in {1..25}; do [[ -S /tmp/.X11-unix/X99 ]] && break; sleep 0.2; done\nfi\npgrep -u $UID -x matchbox-window >/dev/null || setsid -f matchbox-window-manager >/dev/null 2>&1\n"}}}}},
+				Folder: "ai-tooling",
+				File:   "packages/ai-tooling/desktop-session.yaml",
 				Origin: "built-in"},
 			{
 				Package: Package{
