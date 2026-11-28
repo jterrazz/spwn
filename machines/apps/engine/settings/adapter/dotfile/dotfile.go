@@ -103,6 +103,9 @@ func within(p, root string) bool {
 
 type seen struct {
 	there, same bool
+	// value: the file and pointer of each value of the owner's the
+	// fragment sets otherwise, kept.
+	kept        []string
 	material    []byte
 	diff        string
 }
@@ -128,6 +131,7 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 	sum := sha256.New()
 	present, differ := 0, false
 	var diffs strings.Builder
+	var kept []string
 	for _, c := range d.Files {
 		s, err := a.see(it.Name, d.Mode, c, r)
 		if err != nil {
@@ -139,11 +143,14 @@ func (a *Applier) Observe(_ context.Context, it catalog.Setting) (settings.Obser
 		}
 		differ = differ || !s.same
 		diffs.WriteString(s.diff)
+		kept = append(kept, s.kept...)
 	}
 	o.Digest, o.Diff, o.Loose = "sha256:"+hex.EncodeToString(sum.Sum(nil)), diffs.String(), d.Fragment()
 	switch {
 	case present == len(d.Files) && differ:
 		o.State, o.Detail = catalog.StateDegraded, "differs from Machines': station settings apply "+it.Name
+	case len(kept) > 0:
+		o.State, o.Detail = catalog.StateDegraded, "kept: "+strings.Join(kept, ", ")+" still yours, not this setting's value, so it does not hold"
 	case present == len(d.Files):
 		o.State, o.Detail = catalog.StateOK, d.Files[0].To
 	case present == 0:

@@ -1,0 +1,27 @@
+description: rtk's hook is not installed where the owner's hooks is no object, and the setting says so, never applied
+fixture: ../__fixtures__/rtk/
+env: two-macs
+runs:
+    - command: '--version >/dev/null; /bin/mkdir -p .claude; printf ''{\n  "hooks": "x"\n}\n'' > .claude/settings.json'
+      exit: 0
+    - command: 'settings apply rtk-claude-hook'
+      exit: 0
+      stdout: |
+          ●	rtk-claude-hook
+          ●	~/.claude/settings.json	as Machines wrote it: nothing written
+          ◐	~/.claude/settings.json /hooks	kept: still yours, not this setting's value, so it does not hold
+    - command: 'settings rtk-claude-hook'
+      exit: 0
+      stdout: |
+          ○	rtk-claude-hook	not applied	station settings apply rtk-claude-hook
+          # Detail
+          group	Set by Machines
+          does	Claude Code's Bash commands go through rtk, by the hook rtk's own init writes
+          lives on	Macs, Linux VMs, macOS VMs
+          where	~/.claude/settings.json
+    - command: '--version >/dev/null; /bin/cat .claude/settings.json'
+      exit: 0
+      stdout: |
+          {
+            "hooks": "x"
+          }

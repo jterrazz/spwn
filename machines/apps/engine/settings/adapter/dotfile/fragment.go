@@ -109,13 +109,18 @@ func (a *Applier) seeMerge(c catalog.Copy, old []entry) (seen, error) {
 	if err != nil {
 		return seen{}, err
 	}
-	after, _, _, err := mergeInto(c.To, data, there, frag, old)
+	after, m, _, err := mergeInto(c.To, data, there, frag, old)
 	if err != nil {
 		return seen{}, err
 	}
 	// invariant: the file is as Machines writes it when apply would write
-	// nothing: a value of the owner's a merge keeps is his, not a drift.
+	// nothing: a value of the owner's a merge keeps is his, not a drift;
+	// one the fragment sets otherwise is kept, and said, never read as
+	// applied.
 	s := seen{same: there && bytes.Equal(after, data)}
+	for _, p := range m.kept {
+		s.kept = append(s.kept, c.To+" "+p)
+	}
 	if !s.same {
 		s.diff = settings.UnifiedDiff(string(after), string(data), "Machines' "+c.To, c.To)
 	}
@@ -178,8 +183,23 @@ func (a *Applier) applyMerge(r *record, setting string, c catalog.Copy) ([]setti
 	} else {
 		r.drop(setting, c.To)
 	}
-	return append([]settings.ChangeStep{step}, keptSteps(c.To, kept)...), nil
+	steps := []settings.ChangeStep{step}
+	for i, p := range kept {
+		if slices.Contains(kept[:i], p) {
+			continue
+		}
+		if slices.Contains(m.kept, p) {
+			steps = append(steps, settings.ChangeStep{Label: c.To + " " + p, State: catalog.StateDegraded, Detail: unapplied})
+			continue
+		}
+		steps = append(steps, keptSteps(c.To, []string{p})...)
+	}
+	return steps, nil
 }
+
+// value: what a value of the owner's the fragment sets otherwise leaves
+// true: his, and the setting not in effect there.
+const unapplied = "kept: still yours, not this setting's value, so it does not hold"
 
 func (a *Applier) undoMerge(r *record, setting string, c catalog.Copy) ([]settings.ChangeStep, error) {
 	at, data, there, err := a.target(c.To, catalog.WriteMerge)

@@ -210,6 +210,14 @@ func (c configurer) Configure(ctx context.Context, pkg string, interactive bool)
 	if err != nil {
 		return apps.Step{}, err
 	}
+	// invariant: a step that did not take (a value of the owner's kept where
+	// the setting sets another) is the row's, its state and its words, so
+	// an install never reads a setting it did not apply as applied.
+	for _, s := range change.Steps {
+		if s.State != catalog.StateOK {
+			return apps.Step{Package: pkg, Result: s.State, Detail: s.Label + ": " + s.Detail}, nil
+		}
+	}
 	detail := ""
 	switch n := len(change.Steps); {
 	case n == 1:

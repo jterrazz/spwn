@@ -9,8 +9,17 @@ runs:
       stdout: |
           ●	caveman-telemetry-off
           ●	~/.caveman/cloud.json	as Machines wrote it: nothing written
-          ◐	~/.caveman/cloud.json /telemetry/enabled	yours, kept
-          ◐	~/.caveman/cloud.json /telemetry/decidedAt	yours, kept
+          ◐	~/.caveman/cloud.json /telemetry/enabled	kept: still yours, not this setting's value, so it does not hold
+          ◐	~/.caveman/cloud.json /telemetry/decidedAt	kept: still yours, not this setting's value, so it does not hold
+    - command: 'settings caveman-telemetry-off'
+      exit: 0
+      stdout: |
+          ○	caveman-telemetry-off	not applied	station settings apply caveman-telemetry-off
+          # Detail
+          group	Set by Machines
+          does	caveman sends no usage telemetry, its choice recorded off before its first run
+          lives on	Macs, Linux VMs, macOS VMs
+          where	~/.caveman/cloud.json
     - command: '--version >/dev/null; /bin/cat .caveman/cloud.json'
       exit: 0
       stdout: |
