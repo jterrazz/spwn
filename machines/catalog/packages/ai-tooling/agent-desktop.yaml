@@ -1,8 +1,29 @@
 package: station.package/v1
 kind: app
 name: agent-desktop
-description: Desktop automation CLI for AI agents, which needs the macOS Accessibility approval that Machines names and never grants
+description: Desktop automation CLI for AI agents; on macOS it needs the Accessibility approval that Machines names and never grants, on a Linux VM nothing, since it brings the desktop session it drives
 provides: [agent-desktop]
 methods:
     - os: macos
       brew: agent-desktop
+    # outside: v1.3.1's Linux archives hold `agent-desktop` and its clipboard helper at their root, vouched for by the release's checksums.txt; `agent-desktop-ffi-*` is another product.
+    - family: debian
+      machine: [workspace, server]
+      arch: arm64
+      provides: [agent-desktop, agent-desktop-linux-clipboard-owner]
+      requires: [desktop-session]
+      github-release:
+          {
+              repo: vercel-labs/agent-desktop,
+              asset: 'agent-desktop-v*-aarch64-unknown-linux-gnu.tar.gz',
+          }
+    - family: debian
+      machine: [workspace, server]
+      arch: amd64
+      provides: [agent-desktop, agent-desktop-linux-clipboard-owner]
+      requires: [desktop-session]
+      github-release:
+          {
+              repo: vercel-labs/agent-desktop,
+              asset: 'agent-desktop-v*-x86_64-unknown-linux-gnu.tar.gz',
+          }

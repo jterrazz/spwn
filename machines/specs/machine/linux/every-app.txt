@@ -2,6 +2,7 @@
 # throwaway workspace of its own: each installed through the engine, then each command it
 # provides found on the PATH of the guest's shell, as the catalogue names it (apt's bat is `batcat`,
 # fd-find's is `fdfind`). An app with no command lists none and is read by its state.
+agent-desktop agent-desktop agent-desktop-linux-clipboard-owner
 ansible ansible
 bat batcat
 browser-use browser-use

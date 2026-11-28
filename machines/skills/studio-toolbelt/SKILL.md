@@ -130,7 +130,7 @@ Modern replacements are on every machine; prefer them over the defaults:
 ### AI Tooling
 
 - **agent-browser**: Browser automation CLI for AI agents
-- **agent-desktop**: Desktop automation CLI for AI agents, which needs the macOS Accessibility approval that Machines names and never grants
+- **agent-desktop**: Desktop automation CLI for AI agents; on macOS it needs the Accessibility approval that Machines names and never grants, on a Linux VM nothing, since it brings the desktop session it drives
 - **browser-use**: AI agent library for browser automation
 - **desktop-session**: A virtual screen and its window manager kept running for the user of a Linux VM, from its start and with no login, so every process of that user, a non-interactive ssh command included, finds the display and the session bus
 - **desktop-session-deps**: The virtual screen, the window manager and the session and accessibility buses a desktop session runs on Linux, installed and not started

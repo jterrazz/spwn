@@ -2891,7 +2891,7 @@ func builtinCatalog() (Catalog, error) {
 				Name:        "agent-desktop",
 				Kind:        "app",
 				AppKind:     "app",
-				Description: "Desktop automation CLI for AI agents, which needs the macOS Accessibility approval that Machines names and never grants",
+				Description: "Desktop automation CLI for AI agents; on macOS it needs the Accessibility approval that Machines names and never grants, on a Linux VM nothing, since it brings the desktop session it drives",
 				Category:    "AI Tooling",
 				Installs: []LivesOn{
 					{
@@ -2899,6 +2899,15 @@ func builtinCatalog() (Catalog, error) {
 							"mac"},
 						Install: BrewInstall{
 							Formula: "agent-desktop"}},
+					{
+						Kinds: []MachineKind{
+							"linux"},
+						Install: GitHubReleaseInstall{
+							Repo:  "vercel-labs/agent-desktop",
+							Asset: "agent-desktop-v*-aarch64-unknown-linux-gnu.tar.gz",
+							Commands: []string{
+								"agent-desktop",
+								"agent-desktop-linux-clipboard-owner"}}},
 					{
 						Kinds: []MachineKind{
 							"macos"},
@@ -7693,14 +7702,44 @@ func builtinCatalog() (Catalog, error) {
 					Package:     "station.package/v1",
 					Kind:        "app",
 					Name:        "agent-desktop",
-					Description: "Desktop automation CLI for AI agents, which needs the macOS Accessibility approval that Machines names and never grants",
+					Description: "Desktop automation CLI for AI agents; on macOS it needs the Accessibility approval that Machines names and never grants, on a Linux VM nothing, since it brings the desktop session it drives",
 					Provides: []string{
 						"agent-desktop"},
 					Methods: []MethodSpec{
 						{
 							Selector: Selector{
 								OS: "macos"},
-							Brew: "agent-desktop"}}},
+							Brew: "agent-desktop"},
+						{
+							Selector: Selector{
+								Family: "debian",
+								Arch:   "arm64",
+								Machine: Roles{
+									"workspace",
+									"server"}},
+							Provides: []string{
+								"agent-desktop",
+								"agent-desktop-linux-clipboard-owner"},
+							Requires: []string{
+								"desktop-session"},
+							GitHubRelease: &GitHubReleaseMethod{
+								Repo:  "vercel-labs/agent-desktop",
+								Asset: "agent-desktop-v*-aarch64-unknown-linux-gnu.tar.gz"}},
+						{
+							Selector: Selector{
+								Family: "debian",
+								Arch:   "amd64",
+								Machine: Roles{
+									"workspace",
+									"server"}},
+							Provides: []string{
+								"agent-desktop",
+								"agent-desktop-linux-clipboard-owner"},
+							Requires: []string{
+								"desktop-session"},
+							GitHubRelease: &GitHubReleaseMethod{
+								Repo:  "vercel-labs/agent-desktop",
+								Asset: "agent-desktop-v*-x86_64-unknown-linux-gnu.tar.gz"}}}},
 				Folder: "ai-tooling",
 				File:   "packages/ai-tooling/agent-desktop.yaml",
 				Origin: "built-in"},
