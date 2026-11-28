@@ -1,0 +1,29 @@
+description: a package whose file climbs out of the home is refused, naming it, and nothing is written
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro catalog/terminal/esc.yaml'
+      stdin: |
+          package: station.package/v1
+          kind: setting
+          name: esc
+          description: 'A file out of the home'
+          reversible: true
+          methods:
+              - os: any
+                file:
+                    copy:
+                        - from: zed/.oxfmtrc.json
+                          to: ~/../escaped.json
+                    mode: merge
+      exit: 0
+    - command: 'settings apply esc'
+      exit: 2
+      stderr: |
+          Error: ~/.config/station/catalog/terminal/esc.yaml:6: method 1: file ~/../escaped.json has an empty, `.` or `..` segment: a setting writes only a plain path under your home
+          Hint: fix that line: Machines never rewrites a package file
+    - command: '--version >/dev/null; if [ -e ../escaped.json ]; then echo written; else echo absent; fi'
+      exit: 0
+      stdout: |
+          absent
+      stderr: |
+          ~/.config/station/catalog/terminal/esc.yaml:6: method 1: file ~/../escaped.json has an empty, `.` or `..` segment: a setting writes only a plain path under your home · this run reads the built-in packages

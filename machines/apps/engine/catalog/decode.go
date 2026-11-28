@@ -765,10 +765,16 @@ func references(v reflect.Value, options []Option) string {
 	return ""
 }
 
-// invariant: a fragment's file is the owner's: its mode stays his, one
-// file takes one fragment of a package, a merge goes into JSON alone and
-// a block, whose markers open with `#`, never into JSON.
+// invariant: every file a setting writes is confined (Confined); a
+// fragment's file is the owner's: its mode stays his, one file takes one
+// fragment of a package, a merge goes into JSON alone and a block, whose
+// markers open with `#`, never into JSON.
 func (f FileMethod) check() string {
+	for _, c := range f.Copy {
+		if problem := Confined(c.To, f.Mode); problem != "" {
+			return problem
+		}
+	}
 	if f.Mode != WriteBlock && f.Mode != WriteMerge {
 		return ""
 	}

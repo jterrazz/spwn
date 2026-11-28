@@ -77,7 +77,7 @@ func TestAnAnchorAnAliasOrAMergeKeyIsRefused(t *testing.T) {
 func TestAYAML11ScalarIsRefusedForItsTwoReadings(t *testing.T) {
 	setting := "package: station.package/v1\nkind: setting\nname: gh\ndescription: d\nreversible: yes\nmethods:\n    - os: any\n      builtin: dns\n"
 	refusedFor(t, setting, `"yes" reads differently in YAML 1.1`)
-	copied := "package: station.package/v1\nkind: setting\nname: gh\ndescription: d\nmethods:\n    - os: any\n      file:\n        copy:\n            - {from: a, to: b, permissions: 0755}\n"
+	copied := "package: station.package/v1\nkind: setting\nname: gh\ndescription: d\nmethods:\n    - os: any\n      file:\n        copy:\n            - {from: a, to: ~/b, permissions: 0755}\n"
 	refusedFor(t, copied, `"0755" reads differently in YAML 1.1`)
 	if err := decoded(t, strings.Replace(copied, "0755", "0o755", 1)); err != nil {
 		t.Errorf("a YAML 1.2 octal is refused: %v", err)
@@ -119,6 +119,41 @@ func TestAFragmentGoesIntoAFileOfItsKindAndLeavesItsModeAlone(t *testing.T) {
 		"{copy: [{from: a/b.json, to: ~/.b.json}, {from: a/c.json, to: ~/.b.json}], mode: merge}": "is named twice",
 	} {
 		refusedFor(t, setting(file), want)
+	}
+}
+
+func TestAFileASettingWritesStaysInTheHomeAndOutOfStationsOwn(t *testing.T) {
+	setting := func(mode, to string) string {
+		return "package: station.package/v1\nkind: setting\nname: gh\ndescription: d\nmethods:\n    - os: any\n      file: {copy: [{from: a/b.json, to: '" + to + "'}], mode: " + mode + "}\n"
+	}
+	for _, mode := range []string{"file", "merge"} {
+		for to, want := range map[string]string{
+			"/etc/x.json":                         "is not under your home",
+			"~other/x.json":                       "is not under your home",
+			"~":                                   "is not under your home",
+			"~/../../etc/x.json":                  "an empty, `.` or `..` segment",
+			"~/.config/../../x.json":              "an empty, `.` or `..` segment",
+			"~/./x.json":                          "an empty, `.` or `..` segment",
+			"~/.config//x.json":                   "an empty, `.` or `..` segment",
+			"~/.config/station/x.json":            "station's own",
+			"~/.Config/Station/x.json":            "station's own",
+			"~/.local/state/station/merged.json":  "station's own",
+			"~/.local/state/station/vm/disk.json": "station's own",
+		} {
+			refusedFor(t, setting(mode, to), want)
+		}
+	}
+	for mode, to := range map[string]string{"merge": "~/.ssh/x.json", "block": "~/.zshrc"} {
+		refusedFor(t, setting(mode, to), "another part of Machines writes it")
+	}
+	if err := decoded(t, setting("block", "~/.ssh/config.conf")); err == nil || !strings.Contains(err.Error(), "another part of Machines writes it") {
+		t.Errorf("a block into ~/.ssh: %v", err)
+	}
+	if err := decoded(t, setting("file", "~/.zshrc")); err != nil {
+		t.Errorf("a whole file at ~/.zshrc: %v", err)
+	}
+	if err := decoded(t, setting("merge", "~/.config/stationery/x.json")); err != nil {
+		t.Errorf("a file beside station's folder: %v", err)
 	}
 }
 

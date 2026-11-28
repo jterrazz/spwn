@@ -64,6 +64,14 @@ func of(it catalog.Setting) (catalog.Dotfiles, error) {
 	if !ok || len(d.Files) == 0 {
 		return catalog.Dotfiles{}, errors.New(it.Name + " is not files Machines writes")
 	}
+	// invariant: decode confines every file, and so does each call here
+	// again, so a setting built past decode still writes nothing out of
+	// the home or into station's own.
+	for _, c := range d.Files {
+		if problem := catalog.Confined(c.To, d.Mode); problem != "" {
+			return catalog.Dotfiles{}, errors.New(it.Name + ": " + problem)
+		}
+	}
 	return d, nil
 }
 

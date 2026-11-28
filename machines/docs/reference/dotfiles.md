@@ -67,6 +67,10 @@ An app's blocks are written by `station machinefile apply` once the app is there
 
 A setting's [`file`](catalog.md#methods) method writes a whole file by default; with `mode: block` or `mode: merge` it writes only a fragment into a file that stays yours, and `station settings off` takes back only that fragment. The package is refused at decode when it names `permissions` (the file's mode stays yours), one file twice, a merge from or into a file that is not `.json`, or a block into a `.json` file.
 
+### Where a setting writes
+
+Every `to` of a `file` method, whole or fragment, is a plain path under your home: it starts with `~/` and has no empty, `.` or `..` segment, so `/etc/x`, `~other/x` and `~/../x` are refused. It is never in station's own folders, `~/.local/state/station` and `~/.config/station`. A fragment (`mode: block` or `mode: merge`) goes into no file another part of Machines writes: `~/.zshrc` (the main block and the packages' shell blocks) and anything under `~/.ssh` (the authorized keys). Names are compared without case, as a macOS volume opens them. The package is refused at decode, naming it, and the apply refuses such a setting again, naming the setting.
+
 ### What is written
 
 - **A block** (`mode: block`) is the text of the embedded file between the two marker lines `# >>> station setting:<setting> >>>` and `# <<< station setting:<setting> <<<`, placed as a [package block](#package-blocks) is: after the last station block, else at the end. Its namespace, `station setting:`, is its own, so a package block `station:<package>` of the same name in the same file is never touched by it, nor it by that one. The markers open with `#`, so a block goes into a file whose comments do; a fragment holding a marker line of its own is refused.

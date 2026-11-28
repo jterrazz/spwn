@@ -338,6 +338,31 @@ func TestAFragmentThatChangesAKeysShapeLeavesWhatTheOwnerPutInIt(t *testing.T) {
 	}
 }
 
+func TestAFileOutsideTheHomeOrStationsOwnIsRefusedAtApplyToo(t *testing.T) {
+	for mode, tos := range map[catalog.WriteMode][]string{
+		catalog.WriteMerge: {"../escape.json", ".config/station/x.json", ".ssh/x.json"},
+		catalog.WriteBlock: {"../escape.conf", ".zshrc", ".local/state/station/x.conf"},
+		catalog.WriteFile:  {"../escape.json", ".config/station/x.json"},
+	} {
+		for _, to := range tos {
+			b := newBench(t, mode, `{"a": 1}`, to)
+			_, err := b.applier.Apply(t.Context(), b.setting, nil)
+			if err == nil || !strings.HasPrefix(err.Error(), "fmt: file ~/"+to+" ") {
+				t.Errorf("%s %s: Apply: %v; want a refusal naming the setting and the file", mode, to, err)
+			}
+			if _, err := b.applier.Undo(t.Context(), b.setting); err == nil {
+				t.Errorf("%s %s: Undo took nothing to refuse", mode, to)
+			}
+			if _, err := b.applier.Observe(t.Context(), b.setting); err == nil {
+				t.Errorf("%s %s: Observe took nothing to refuse", mode, to)
+			}
+			if _, err := b.files.Stat(b.file); !errors.Is(err, fs.ErrNotExist) {
+				t.Errorf("%s %s: written: %v", mode, to, err)
+			}
+		}
+	}
+}
+
 func TestAFileThatIsNotStrictJSONIsRefusedAndLeftAsItIs(t *testing.T) {
 	for name, text := range map[string]string{
 		"a comment":        "{\n  // mine\n  \"a\": 1\n}\n",
