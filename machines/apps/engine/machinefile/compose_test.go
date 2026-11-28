@@ -56,9 +56,41 @@ func TestEachFilesRunLinesAreAStepOfTheirOwnInTheChainsOrder(t *testing.T) {
 			"a":   kit("a", "apps: [fd]\n"),
 			"top": top + "extends: [a]\nrun: { upgrade: echo up }\n",
 		}, []scriptSaid{{"upgrade", "top", "echo up"}}},
+		{"the top file's empty phase clears every file's lines of it", map[string]string{
+			"a":   kit("a", "run: { boot: echo a, upgrade: apt-get upgrade -y }\n"),
+			"b":   kit("b", "run: { upgrade: echo b }\n"),
+			"top": top + "extends: [a, b]\nrun: { upgrade: \"\" }\n",
+		}, []scriptSaid{{"boot", "a", "echo a"}}},
+		{"a kit's empty phase clears every file's before it, a sibling's included", map[string]string{
+			"d":   kit("d", "run: { boot: echo d }\n"),
+			"b":   kit("b", "extends: [d]\nrun: { boot: \"\" }\n"),
+			"c":   kit("c", "run: { boot: echo c }\n"),
+			"top": top + "extends: [c, b]\n",
+		}, nil},
+		{"a kit's empty phase leaves a sibling after it", map[string]string{
+			"d":   kit("d", "run: { boot: echo d }\n"),
+			"b":   kit("b", "extends: [d]\nrun: { boot: \"\" }\n"),
+			"c":   kit("c", "run: { boot: echo c }\n"),
+			"top": top + "extends: [b, c]\n",
+		}, []scriptSaid{{"boot", "c", "echo c"}}},
+		{"a file after the clearing gives its own lines", map[string]string{
+			"d":   kit("d", "run: { boot: echo d }\n"),
+			"b":   kit("b", "extends: [d]\nrun: { boot: \"\" }\n"),
+			"top": top + "extends: [b]\nrun: { boot: echo top }\n",
+		}, []scriptSaid{{"boot", "top", "echo top"}}},
+		{"the top file's overlay clears every file's lines of a phase", map[string]string{
+			"a":         kit("a", "run: { boot: echo a }\n"),
+			"top":       top + "extends: [a]\nrun: { boot: echo top }\n",
+			"top.local": "machinefile: station.machinefile/v1\noverrides: top\nrun: { boot: \"\" }\n",
+		}, nil},
 	} {
 		t.Run(tc.how, func(t *testing.T) {
-			r, err := machinefile.Resolve(library(t, files(tc.files), nil), "top", machinefile.Machine{}, machinefile.Lock{})
+			user := files(tc.files)
+			if o, ok := tc.files["top.local"]; ok {
+				delete(user, "machinefiles/top.local.machine.yaml")
+				user["machinefiles/top.local.yaml"] = o
+			}
+			r, err := machinefile.Resolve(library(t, user, nil), "top", machinefile.Machine{}, machinefile.Lock{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -445,5 +477,32 @@ func TestEachFilesRunLinesAreAValueOfTheirOwnInExplain(t *testing.T) {
 	}
 	if want := []scriptSaid{{"run.boot", "a", "echo a"}, {"run.boot", "top", "echo top"}}; !slices.Equal(got, want) {
 		t.Errorf("run.boot values %+v, want %+v", got, want)
+	}
+}
+
+func TestAClearedPhaseIsSaidInExplainAndAnOverlayGivesNoLines(t *testing.T) {
+	user := files(map[string]string{
+		"a":   kit("a", "run: { upgrade: apt-get upgrade -y }\n"),
+		"top": machine("top", "{ os: ubuntu }", "[]") + "extends: [a]\nrun: { boot: echo top }\n",
+	})
+	user["machinefiles/top.local.yaml"] = "machinefile: station.machinefile/v1\noverrides: top\nrun: { upgrade: \"\" }\n"
+	r, err := machinefile.Resolve(library(t, user, nil), "top", machinefile.Machine{}, machinefile.Lock{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []scriptSaid
+	for _, v := range r.Values {
+		if strings.HasPrefix(v.Key, "run.") {
+			got = append(got, scriptSaid{v.Key, v.Origin.Name, v.Text})
+		}
+	}
+	if want := []scriptSaid{{"run.boot", "top", "echo top"}, {"run.upgrade", "top", "cleared by top"}}; !slices.Equal(got, want) || len(r.Scripts) != 1 {
+		t.Errorf("run values %+v and %d scripts, want %+v and top's boot alone to run", got, len(r.Scripts), want)
+	}
+	if _, err := catalog.DecodeMachinefile("top.local.yaml", []byte("machinefile: station.machinefile/v1\noverrides: top\nrun: { boot: echo mine }\n")); err == nil || !strings.Contains(err.Error(), "an overlay clears a phase's lines") {
+		t.Errorf("an overlay giving run lines: %v, want it refused", err)
+	}
+	if _, err := catalog.DecodeMachinefile("a.machine.yaml", []byte(kit("a", "run: {}\n"))); err == nil || !strings.Contains(err.Error(), "run names the lines of a phase") {
+		t.Errorf("a run naming no phase: %v, want it refused", err)
 	}
 }

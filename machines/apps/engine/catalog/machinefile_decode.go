@@ -91,10 +91,13 @@ func checkMachinefile(file string, doc *yaml.Node, mf Machinefile) error {
 		for _, k := range []struct {
 			key string
 			set bool
-		}{{"machine", mf.Machine != nil}, {"vm", mf.VM != nil}, {"extends", len(mf.Extends) > 0}, {"prefer", len(mf.Prefer) > 0}, {"run", mf.Run != nil}} {
+		}{{"machine", mf.Machine != nil}, {"vm", mf.VM != nil}, {"extends", len(mf.Extends) > 0}, {"prefer", len(mf.Prefer) > 0}} {
 			if k.set {
 				return refused(file, doc, k.key, "an overlay changes apps, settings, accounts and ports: `"+k.key+"` is its Machinefile's")
 			}
+		}
+		if r := mf.Run; r != nil && r.GivesLines() {
+			return refused(file, doc, "run", "an overlay clears a phase's lines (`boot: \"\"`) and gives none: its lines are its Machinefile's")
 		}
 	}
 	if m := mf.Machine; m != nil {
@@ -138,7 +141,7 @@ func checkMachinefile(file string, doc *yaml.Node, mf Machinefile) error {
 			return refused(file, doc, "ports", problem)
 		}
 	}
-	if r := mf.Run; r != nil && strings.TrimSpace(r.Image+r.Boot+r.Upgrade) == "" {
+	if r := mf.Run; r != nil && len(r.Phases()) == 0 {
 		return refused(file, doc, "run", "run names the lines of a phase: image, boot or upgrade")
 	}
 	return nil

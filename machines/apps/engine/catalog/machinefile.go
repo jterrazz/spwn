@@ -3,6 +3,7 @@ package catalog
 import (
 	"maps"
 	"slices"
+	"strings"
 	"time"
 )
 
@@ -101,12 +102,39 @@ type Mount struct {
 // value: the owner's own shell lines, one block per phase, run as the
 // machine's user once its packages are carried out: image, as the image is
 // built; boot, at a VM's first start; upgrade, at each upgrade, after its
-// apps. The plan shows them before they run.
+// apps. The plan shows them before they run. A phase said empty (`boot:
+// ""`) is no lines of its own: it clears those the files before it in the
+// chain gave that phase, where a phase not said (nil) leaves them.
 
 type RunSpec struct {
-	Image   string `yaml:"image,omitempty"`
-	Boot    string `yaml:"boot,omitempty"`
-	Upgrade string `yaml:"upgrade,omitempty"`
+	Image   *string `yaml:"image,omitempty"`
+	Boot    *string `yaml:"boot,omitempty"`
+	Upgrade *string `yaml:"upgrade,omitempty"`
+}
+
+func (r RunSpec) Phases() [][2]string {
+	// value: each phase the file says, its lines as written, a phase said
+	// empty included, in the order image, boot, upgrade.
+	var out [][2]string
+	for _, p := range []struct {
+		name  string
+		lines *string
+	}{{"image", r.Image}, {"boot", r.Boot}, {"upgrade", r.Upgrade}} {
+		if p.lines != nil {
+			out = append(out, [2]string{p.name, *p.lines})
+		}
+	}
+	return out
+}
+
+func (r RunSpec) GivesLines() bool {
+	// value: whether a phase it says carries lines, not only its clearing.
+	for _, p := range r.Phases() {
+		if strings.TrimSpace(p[1]) != "" {
+			return true
+		}
+	}
+	return false
 }
 
 // value: the bounds of a phase run inside a VM (image, boot): its packages

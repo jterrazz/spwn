@@ -642,29 +642,44 @@ func mergeRefused(p Placed, key, problem string) error {
 
 // invariant: each file's lines of a phase are a Script of their own, after
 // those of the files before it in the chain: no file's lines replace
-// another's.
+// another's. A phase a file says empty (`boot: ""`), which an overlay may
+// say too, clears what every file before it in the chain gave that phase,
+// a sibling's before it included, as an empty accounts list does. The
+// clearing stays in the merge as a Script with no lines, which explain
+// says (`cleared by <file>`) and no run runs.
 func mergeRun(m *merged, r catalog.RunSpec, o Origin) {
-	for _, s := range []Script{{Phase: RunImage, Lines: r.Image}, {Phase: RunBoot, Lines: r.Boot}, {Phase: RunUpgrade, Lines: r.Upgrade}} {
-		if strings.TrimSpace(s.Lines) == "" {
+	for _, p := range r.Phases() {
+		phase := map[string]RunPhase{"image": RunImage, "boot": RunBoot, "upgrade": RunUpgrade}[p[0]]
+		if strings.TrimSpace(p[1]) != "" {
+			m.scripts = append(m.scripts, Script{Phase: phase, Lines: p[1], Origin: o})
 			continue
 		}
-		s.Origin = o
-		m.scripts = append(m.scripts, s)
+		m.scripts = append(slices.DeleteFunc(m.scripts, func(s Script) bool { return s.Phase == phase }), Script{Phase: phase, Origin: o})
 	}
 }
 
 // value: the scripts in the order they run: the image's, the boot's, the
-// upgrade's, each phase's in the chain's order.
+// upgrade's, each phase's in the chain's order, a clearing none.
 func (m merged) phased() []Script {
+	return slices.DeleteFunc(m.inOrder(), func(s Script) bool { return s.Lines == "" })
+}
+
+// value: the scripts in that order, the clearings among them.
+func (m merged) inOrder() []Script {
 	return slices.Concat(ScriptsOf(m.scripts, RunImage), ScriptsOf(m.scripts, RunBoot), ScriptsOf(m.scripts, RunUpgrade))
 }
 
 // value: the values of the owner's lines, one per Script, each its lines
-// joined, said by its file.
+// joined, said by its file; a phase a file cleared reads `cleared by
+// <file>`.
 func (m merged) runValues() []Value {
-	scripts := m.phased()
+	scripts := m.inOrder()
 	out := make([]Value, 0, len(scripts))
 	for _, s := range scripts {
+		if s.Lines == "" {
+			out = append(out, Value{Key: "run." + string(s.Phase), Text: "cleared by " + s.Origin.Name, Origin: s.Origin})
+			continue
+		}
 		text, withheld := secret.Screen(strings.Join(ScriptLines(s.Lines), "; "))
 		out = append(out, Value{Key: "run." + string(s.Phase), Text: text, Origin: s.Origin, Withheld: withheld})
 	}
