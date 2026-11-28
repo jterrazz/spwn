@@ -1,0 +1,27 @@
+#!/bin/sh
+# git config --global over a file of the run's own: key=value lines, each call recorded.
+printf 'git %s\n' "$*" >> "$HOME/.calls"
+store="$HOME/.stub-gitconfig"
+/usr/bin/touch "$store"
+[ "$1" = config ] && [ "$2" = --global ] || {
+    echo "stub git: unexpected invocation: $*" >&2
+    exit 97
+}
+case "$#" in
+    3)
+        value=$(/usr/bin/sed -n "s/^$3=//p" "$store")
+        [ -n "$value" ] || exit 1
+        printf '%s\n' "$value"
+        ;;
+    4)
+        key=$4
+        [ "$3" = --unset ] || key=$3
+        /usr/bin/grep -v "^$key=" "$store" > "$store.next"
+        [ "$3" = --unset ] || printf '%s=%s\n' "$3" "$4" >> "$store.next"
+        /bin/mv "$store.next" "$store"
+        ;;
+    *)
+        echo "stub git: unexpected invocation: $*" >&2
+        exit 97
+        ;;
+esac

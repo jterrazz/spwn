@@ -1,0 +1,28 @@
+description: 'git-identity sets git''s name and email and writes nothing the second time'
+fixture:
+    - ../../__fixtures__/terminal/
+    - ./__fixtures__/settings-git-identity/
+env: terminal
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out[0].Steps'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["git-identity"],"Values":{"git-identity":{"name":"Jane Doe","email":"jane@example.com"}}}}
+      exit: 0
+      stdout: |
+          [{"Label":"git","State":"ok","Detail":"commits as Jane Doe <jane@example.com>"}]
+    - command: '--version >/dev/null; /bin/cat .stub-gitconfig | /usr/bin/cut -d= -f1'
+      exit: 0
+      stdout: |
+          user.name
+          user.email
+          station.identity
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out[0].Steps'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["git-identity"],"Values":{"git-identity":{"name":"Jane Doe","email":"jane@example.com"}}}}
+      exit: 0
+      stdout: |
+          [{"Label":"git","State":"ok","Detail":"already Jane Doe <jane@example.com>"}]
+    - command: '--version >/dev/null; /usr/bin/grep -c "^git config --global user.name Jane Doe$" .calls'
+      exit: 0
+      stdout: |
+          1

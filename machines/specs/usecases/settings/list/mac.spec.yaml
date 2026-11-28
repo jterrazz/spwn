@@ -4,7 +4,7 @@ runs:
     - command: 'settings'
       exit: 0
       stdout: |
-          # Set by Machines	17 ○
+          # Set by Machines	18 ○
           ○	docker-shortcuts	not applied	station settings apply docker-shortcuts
           ○	git-shortcuts	not applied	station settings apply git-shortcuts
           ○	ghostty-dotfiles	not applied · needs ghostty	station apps install ghostty
@@ -12,6 +12,7 @@ runs:
           ○	starship-dotfiles	not applied · needs starship	station apps install starship
           ○	tmux-dotfiles	not applied · needs tmux	station apps install tmux
           ○	dns	not applied	station settings apply dns
+          ○	git-identity	not applied · needs git	station apps install git
           ○	git-signing	not applied · needs gpg	station apps install gpg
           ○	github-login	not applied · needs gh	station apps install gh
           ○	spotlight-exclude	not applied	station settings apply spotlight-exclude

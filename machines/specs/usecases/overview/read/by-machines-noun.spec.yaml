@@ -11,7 +11,7 @@ runs:
           ✗	wrangler sign-in fails: Refused at the provider	station accounts login wrangler --on linux-1
           	Activity	memory 1.1 of 4 GB · 12.4 GB free
           	Apps	● 2 ok · ○ 78 not installed
-          	Settings	set by Machines · ○ 0 of 7
+          	Settings	set by Machines · ○ 0 of 8
           	Disk	● 12.4 GB free · 1.5 GB can rebuild
           	Ports	Public 0 · Private 2
           	Accounts	● 2 · ✗ wrangler

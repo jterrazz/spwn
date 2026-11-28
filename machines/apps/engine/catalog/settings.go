@@ -86,6 +86,7 @@ type Procedure string
 
 const (
 	ProcGitSigning           Procedure = "git-signing"
+	ProcGitIdentity          Procedure = "git-identity"
 	ProcSSHKey               Procedure = "ssh-key"
 	ProcGitHubLogin          Procedure = "github-login"
 	ProcSpotlight            Procedure = "spotlight-exclude"
@@ -116,7 +117,7 @@ func Procedures() []string {
 	// names and this list lacks decodes, and its apply is refused with
 	// `update station`.
 	return []string{
-		string(ProcGitSigning), string(ProcSSHKey), string(ProcGitHubLogin), string(ProcSpotlight), string(ProcDNS),
+		string(ProcGitSigning), string(ProcGitIdentity), string(ProcSSHKey), string(ProcGitHubLogin), string(ProcSpotlight), string(ProcDNS),
 		string(ProcDockReset), string(ProcDockSpacer), string(ProcAutologin), string(ProcRestartAfterPowerCut),
 		string(ProcNeverSleeps), string(ProcLockAfterLogin), string(ProcSshd),
 		string(ProcBackupExclusions), string(ProcTailscaleCLI),

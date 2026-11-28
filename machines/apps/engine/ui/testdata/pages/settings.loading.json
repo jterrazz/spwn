@@ -36,7 +36,7 @@
                 "items": [
                   {
                     "kind": "text",
-                    "text": "18 set by Machines here"
+                    "text": "19 set by Machines here"
                   },
                   {
                     "kind": "text",
@@ -153,6 +153,16 @@
         },
         {
           "row": {
+            "id": "git-identity",
+            "mark": "pending",
+            "label": "git-identity",
+            "detail": {
+              "kind": "pending"
+            }
+          }
+        },
+        {
+          "row": {
             "id": "git-signing",
             "mark": "pending",
             "label": "git-signing",
@@ -255,7 +265,7 @@
       "counts": [
         {
           "mark": "pending",
-          "n": 18
+          "n": 19
         }
       ],
       "pipe_counts": true

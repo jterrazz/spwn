@@ -4515,6 +4515,38 @@ func builtinCatalog() (Catalog, error) {
 						Key:   "encrypted DNS",
 						Value: "Quad9 DoH"}}},
 			{
+				Name:        "git-identity",
+				Description: "The name and email every commit carries, for the whole user",
+				Category:    "Security",
+				Kinds: []MachineKind{
+					"mac",
+					"linux",
+					"macos"},
+				Requires: "git",
+				Inputs: []Input{
+					{
+						Name:     "name",
+						Label:    "Name on commits",
+						Required: true},
+					{
+						Name:     "email",
+						Label:    "Email on commits",
+						Required: true}},
+				Effect:     Procedure("git-identity"),
+				Reversible: true,
+				Writes: []Stored{
+					{
+						Path:  "~/.gitconfig",
+						Level: "settings",
+						Note:  "`git config --global` user.name and user.email, and station.identity, the digest of what Machines wrote, which off checks before it takes the identity back"}},
+				Sets: []Value{
+					{
+						Key:   "user.name",
+						Value: "the name option"},
+					{
+						Key:   "user.email",
+						Value: "the email option"}}},
+			{
 				Name:        "git-signing",
 				Description: "Sign every commit with a GPG key",
 				Category:    "Security",
@@ -9294,6 +9326,46 @@ func builtinCatalog() (Catalog, error) {
 							Note:  "installed as the profile `com.jterrazz.dns.quad9`"}}},
 				Folder: "security",
 				File:   "packages/security/dns.yaml",
+				Origin: "built-in"},
+			{
+				Package: Package{
+					Package:     "station.package/v1",
+					Kind:        "setting",
+					Name:        "git-identity",
+					Description: "The name and email every commit carries, for the whole user",
+					Requires: []string{
+						"git"},
+					Reversible: true,
+					Options: []Option{
+						{
+							Name:     "name",
+							Label:    "Name on commits",
+							Type:     "string",
+							Required: true},
+						{
+							Name:     "email",
+							Label:    "Email on commits",
+							Type:     "string",
+							Required: true}},
+					Sets: []Value{
+						{
+							Key:   "user.name",
+							Value: "the name option"},
+						{
+							Key:   "user.email",
+							Value: "the email option"}},
+					Methods: []MethodSpec{
+						{
+							Selector: Selector{
+								OS: "any"},
+							Builtin: "git-identity"}},
+					Writes: []Stored{
+						{
+							Path:  "~/.gitconfig",
+							Level: "settings",
+							Note:  "`git config --global` user.name and user.email, and station.identity, the digest of what Machines wrote, which off checks before it takes the identity back"}}},
+				Folder: "security",
+				File:   "packages/security/git-identity.yaml",
 				Origin: "built-in"},
 			{
 				Package: Package{

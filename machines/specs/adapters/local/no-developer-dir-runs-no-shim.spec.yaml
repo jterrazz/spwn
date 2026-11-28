@@ -12,6 +12,7 @@ runs:
       exit: 0
       stdout: |
           ○	git-shortcuts	not applied	station settings apply git-shortcuts
+          ○	git-identity	not applied · needs git	station apps install git
           ○	git-signing	not applied · needs gpg	station apps install gpg
           ○	github-login	not applied · needs gh	station apps install gh
     - command: '--version >/dev/null; PATH="$PATH:$HOME/root/usr/bin" "$STATION" overview --all >/dev/null; /bin/cat shims.log 2>/dev/null; echo none ran'

@@ -29,7 +29,7 @@
           "row": {
             "id": "summary/settings",
             "mark": "pending",
-            "label": "32 settings on 4 machines",
+            "label": "33 settings on 4 machines",
             "cells": [
               {
                 "kind": "pending"
@@ -104,7 +104,7 @@
         },
         {
           "row": {
-            "id": "macbook-pro/ssh-key",
+            "id": "macbook-pro/spotlight-exclude",
             "mark": "pending",
             "label": "macbook-pro",
             "short": "This Mac",
@@ -123,7 +123,7 @@
         },
         {
           "row": {
-            "id": "macbook-pro/tart-launcher",
+            "id": "macbook-pro/dock-spacer",
             "mark": "pending",
             "label": "macbook-pro",
             "short": "This Mac",
@@ -218,7 +218,7 @@
         },
         {
           "row": {
-            "id": "mac-mini/ssh-key",
+            "id": "mac-mini/spotlight-exclude",
             "mark": "pending",
             "label": "mac-mini",
             "short": "mac-mini",
@@ -237,7 +237,7 @@
         },
         {
           "row": {
-            "id": "mac-mini/tart-launcher",
+            "id": "mac-mini/dock-spacer",
             "mark": "pending",
             "label": "mac-mini",
             "short": "mac-mini",
@@ -332,7 +332,7 @@
         },
         {
           "row": {
-            "id": "linux-1/ssh-key",
+            "id": "linux-1/spotlight-exclude",
             "mark": "pending",
             "label": "linux-1",
             "short": "linux-1",
@@ -351,7 +351,7 @@
         },
         {
           "row": {
-            "id": "linux-1/tart-launcher",
+            "id": "linux-1/dock-spacer",
             "mark": "pending",
             "label": "linux-1",
             "short": "linux-1",
@@ -408,7 +408,7 @@
         },
         {
           "row": {
-            "id": "api/ssh-key",
+            "id": "api/spotlight-exclude",
             "mark": "pending",
             "label": "api",
             "short": "api",
@@ -427,7 +427,7 @@
         },
         {
           "row": {
-            "id": "api/tart-launcher",
+            "id": "api/dock-spacer",
             "mark": "pending",
             "label": "api",
             "short": "api",
@@ -674,9 +674,9 @@
         },
         {
           "row": {
-            "id": "ssh-key",
+            "id": "spotlight-exclude",
             "mark": "pending",
-            "label": "ssh-key",
+            "label": "spotlight-exclude",
             "cells": [
               {
                 "kind": "pending"
@@ -701,9 +701,9 @@
         },
         {
           "row": {
-            "id": "tart-launcher",
+            "id": "dock-spacer",
             "mark": "pending",
-            "label": "tart-launcher",
+            "label": "dock-spacer",
             "cells": [
               {
                 "kind": "pending"
@@ -730,7 +730,7 @@
           "row": {
             "id": "folded",
             "mark": "pending",
-            "label": "14 more",
+            "label": "15 more",
             "cells": [
               {
                 "kind": "pending"
@@ -991,6 +991,7 @@
         "tmux-dotfiles",
         "authorized-key",
         "dns",
+        "git-identity",
         "git-signing",
         "github-login",
         "spotlight-exclude",
@@ -1023,6 +1024,7 @@
         "tmux-dotfiles",
         "authorized-key",
         "dns",
+        "git-identity",
         "git-signing",
         "github-login",
         "spotlight-exclude",

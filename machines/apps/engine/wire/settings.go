@@ -109,6 +109,7 @@ func settingAppliers(m machine) []settingscontract.Applier {
 	appliers = append(appliers, settingsdefaults.NewDock(m.sys.Run)...)
 	return append(appliers,
 		git.NewSigning(m.sys.Run, m.stores.identity()),
+		git.NewIdentity(m.sys.Run),
 		git.NewLogin(m.sys.Run, m.sharedRead()),
 		settingstailscale.New(m.sys.FS, settingstailscale.Options{
 			Bin: m.paths.Bin, Shown: m.expander().Display(filepath.Join(m.paths.Bin, catalog.TailnetCLI)),

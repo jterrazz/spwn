@@ -1,0 +1,25 @@
+package: station.package/v1
+kind: setting
+name: git-identity
+description: The name and email every commit carries, for the whole user
+requires: [git]
+reversible: true
+options:
+    - name: name
+      label: Name on commits
+      type: string
+      required: true
+    - name: email
+      label: Email on commits
+      type: string
+      required: true
+sets:
+    - { key: user.name, value: the name option }
+    - { key: user.email, value: the email option }
+methods:
+    - os: any
+      builtin: git-identity
+writes:
+    - path: ~/.gitconfig
+      level: settings
+      note: '`git config --global` user.name and user.email, and station.identity, the digest of what Machines wrote, which off checks before it takes the identity back'

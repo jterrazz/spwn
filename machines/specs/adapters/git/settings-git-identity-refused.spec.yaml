@@ -1,0 +1,22 @@
+description: 'git-identity refuses an empty value and a control character, and writes nothing'
+fixture:
+    - ../../__fixtures__/terminal/
+    - ./__fixtures__/settings-git-identity/
+env: terminal
+runs:
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out[0].Steps'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["git-identity"],"Values":{"git-identity":{"name":"Jane Doe","email":"  "}}}}
+      exit: 0
+      stdout: |
+          [{"Label":"failed","State":"broken","Detail":"email is empty: git needs one"}]
+    - command: '--version >/dev/null; "$STATION" guest serve --stdio | /usr/bin/jq -c ''select(.out or .error) | .out[0].Steps'''
+      stdin: |
+          {"v":2,"id":"1","call":"settings.apply","in":{"Names":["git-identity"],"Values":{"git-identity":{"name":"Jane\nDoe","email":"jane@example.com"}}}}
+      exit: 0
+      stdout: |
+          [{"Label":"failed","State":"broken","Detail":"name holds a control character"}]
+    - command: '--version >/dev/null; /usr/bin/grep -c "config --global user.name " .calls; /bin/cat .stub-gitconfig'
+      exit: 0
+      stdout: |
+          0
