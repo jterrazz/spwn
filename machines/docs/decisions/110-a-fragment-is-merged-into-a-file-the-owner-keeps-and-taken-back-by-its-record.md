@@ -34,5 +34,6 @@ No new key: the package's existing `requires` is the guard. A setting in either 
 - Deleting `merged.json` makes off take back nothing: Machines' values stay as the owner's.
 - An element of an array the owner edited cannot be told from one he deleted, so off leaves it without a word.
 - A block goes only into a file known to read a `#` line as a comment, by an allow-list of extensions and names held in the catalog's code; a format outside it (Vim's, Lua's) takes no block until the list names it.
+- A file a fragment makes lands by a hard link, so a fragment makes a file only on a volume that takes hard links; on one that refuses them (EPERM, ENOTSUP) the apply is refused in those words, nothing written.
 - The guard checks the app is installed, not that the hook's command is on the PATH of the app that runs it.
 - The next lot, which reads a source's own `files/`, must guarantee: `from` confined inside the source root with no link out (`os.Root`), bounds on mode `file`, the real-path and `othersOwn` checks extended to mode `file`, and consent or a deny-list for code-execution targets.

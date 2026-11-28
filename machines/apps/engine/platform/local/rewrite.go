@@ -41,8 +41,12 @@ func Rewrite(files FS, at string, edit func(old []byte) (data []byte, write bool
 
 // value: how a replace pushes a file, then its folder, to the disk itself:
 // (*os.File).Sync, which is fcntl(F_FULLFSYNC) on darwin (Go's
-// internal/poll, fsync where the volume refuses it) and fsync(2) elsewhere.
-type durable struct{ sync func(*os.File) error }
+// internal/poll, fsync where the volume refuses it) and fsync(2) elsewhere;
+// and how a swap lands a file seen not there, os.Link.
+type durable struct {
+	sync func(*os.File) error
+	link func(oldname, newname string) error
+}
 
 // invariant: a replace lands at once and survives a power cut: the data is
 // written to a file of its own in the target's folder, given the target's
@@ -110,8 +114,11 @@ func (d durable) swap(path string, seen Seen, data []byte, perm fs.FileMode) err
 			err = os.Rename(tmp.Name(), path)
 		}
 	default:
-		if err = os.Link(tmp.Name(), path); errors.Is(err, fs.ErrExist) {
+		switch err = d.link(tmp.Name(), path); {
+		case errors.Is(err, fs.ErrExist):
 			err = ErrChanged
+		case err != nil:
+			err = fmt.Errorf("%s: this volume refuses hard links: Machines makes a file only where it can: %w", path, err)
 		}
 	}
 	if err != nil {

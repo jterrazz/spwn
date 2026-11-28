@@ -148,3 +148,24 @@ func TestASwapInAFolderStationMayNotWriteInRefusesAndNeverOverwrites(t *testing.
 		t.Errorf("the file holds %q, want it untouched", data)
 	}
 }
+
+func TestASwapOfANewFileOnAVolumeWithoutHardLinksIsRefusedInItsOwnWords(t *testing.T) {
+	for name, refusal := range map[string]error{"EPERM": syscall.EPERM, "ENOTSUP": syscall.ENOTSUP} {
+		t.Run(name, func(t *testing.T) {
+			dir, at := oldFile(t)
+			if err := os.Remove(at); err != nil {
+				t.Fatal(err)
+			}
+			d := durable{sync: (*os.File).Sync, link: func(from, to string) error {
+				return &os.LinkError{Op: "link", Old: from, New: to, Err: refusal}
+			}}
+			err := d.swap(at, Seen{}, []byte("new\n"), 0o600)
+			if err == nil || !strings.Contains(err.Error(), "this volume refuses hard links: Machines makes a file only where it can") || !errors.Is(err, refusal) {
+				t.Errorf("swap = %v; want the volume's refusal said", err)
+			}
+			if left := names(t, dir); len(left) != 0 {
+				t.Errorf("left %v; want nothing written", left)
+			}
+		})
+	}
+}
