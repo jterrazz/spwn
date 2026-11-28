@@ -15,18 +15,18 @@ import (
 	"path/filepath"
 	"strings"
 
-	"spwn.sh/packages/transpile"
 	"spwn.sh/packages/container/backend"
 	"spwn.sh/packages/platform"
+	"spwn.sh/packages/transpile"
 )
 
 // MaterialiseTree splits a compiled tree by top-level prefix and
 // delivers each half to its destination:
 //
 //   - world/*:  written to the host-side worldStateDir (surfaced
-//                 into the container via a /world/ bind mount).
+//     into the container via a /world/ bind mount).
 //   - agents/*: docker-cp'd into the already-running container at
-//                 /agents/<rest>.
+//     /agents/<rest>.
 //
 // Any other prefix is an error; the caller must namespace every
 // tree entry under one of the two.

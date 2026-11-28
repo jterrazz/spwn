@@ -92,7 +92,7 @@ func TestAProjectOfTheOldLayoutIsRefusedWithTheSentenceThatMovesIt(t *testing.T)
 		{"a broken spwn.yaml", map[string]string{"spwn.yaml": "folders: [\n", "spwn/agents/neo/agent.yaml": "x\n"}, movedSentence},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			root := projectOf(t,tc.files)
+			root := projectOf(t, tc.files)
 			_, err := LayoutAt(root)
 			var old *OldLayoutError
 			if !errors.As(err, &old) || old.Message() != tc.said {
@@ -120,12 +120,12 @@ func TestAProjectOfTheOldLayoutIsRefusedWithTheSentenceThatMovesIt(t *testing.T)
 
 func TestASpwnAtTheRootThatIsALinkIsRefusedUnfollowed(t *testing.T) {
 	for name, target := range map[string]func(t *testing.T) string{
-		"to a folder of the old layout": func(t *testing.T) string { return projectOf(t,map[string]string{"agents/neo/agent.yaml": "x\n"}) },
+		"to a folder of the old layout": func(t *testing.T) string { return projectOf(t, map[string]string{"agents/neo/agent.yaml": "x\n"}) },
 		"to an empty folder":            func(t *testing.T) string { return t.TempDir() },
 		"to nothing":                    func(t *testing.T) string { return filepath.Join(t.TempDir(), "gone") },
 	} {
 		t.Run(name, func(t *testing.T) {
-			root := projectOf(t,map[string]string{"spwn.yaml": "version: 1\n"})
+			root := projectOf(t, map[string]string{"spwn.yaml": "version: 1\n"})
 			if err := os.Symlink(target(t), filepath.Join(root, "spwn")); err != nil {
 				t.Fatal(err)
 			}
@@ -146,7 +146,7 @@ func TestASpwnThatHoldsNoneOfTheOldLayoutIsNotIt(t *testing.T) {
 		"no spwn.yaml yet, no folders": {"README.md": "r\n"},
 	} {
 		t.Run(name, func(t *testing.T) {
-			l, err := LayoutAt(projectOf(t,files))
+			l, err := LayoutAt(projectOf(t, files))
 			if err != nil || !reflect.DeepEqual(l.Folders(), DefaultLayout().Folders()) {
 				t.Errorf("LayoutAt = %v, %v; want the default layout", l.Folders(), err)
 			}
@@ -155,12 +155,12 @@ func TestASpwnThatHoldsNoneOfTheOldLayoutIsNotIt(t *testing.T) {
 }
 
 func TestAProjectReadsTheFoldersItsSpwnYamlRenames(t *testing.T) {
-	root := projectOf(t,map[string]string{
-		"spwn.yaml":                    "version: 1\nfolders:\n  agents: crew\nworlds:\n  w:\n    agents: [neo]\n",
-		"crew/neo/agent.yaml":          "name: neo\n",
-		"crew/neo/AGENTS.md":           "neo\n",
-		"agents/stray/agent.yaml":      "name: stray\n",
-		"skills/focus.md":              "f\n",
+	root := projectOf(t, map[string]string{
+		"spwn.yaml":               "version: 1\nfolders:\n  agents: crew\nworlds:\n  w:\n    agents: [neo]\n",
+		"crew/neo/agent.yaml":     "name: neo\n",
+		"crew/neo/AGENTS.md":      "neo\n",
+		"agents/stray/agent.yaml": "name: stray\n",
+		"skills/focus.md":         "f\n",
 	})
 	l, err := LayoutAt(root)
 	if err != nil || l.Folder(KindAgents) != "crew" {
@@ -173,7 +173,7 @@ func TestAProjectReadsTheFoldersItsSpwnYamlRenames(t *testing.T) {
 	if len(p.Agents) != 1 || p.Agents[0].Name != "neo" || !p.Agents[0].Exists || p.Agents[0].Path != filepath.Join(root, "crew", "neo") {
 		t.Errorf("Agents = %+v; want neo, read from crew/neo", p.Agents)
 	}
-	if _, err := LayoutAt(projectOf(t,map[string]string{"spwn.yaml": "folders:\n  agents: ../away\n"})); err == nil {
+	if _, err := LayoutAt(projectOf(t, map[string]string{"spwn.yaml": "folders:\n  agents: ../away\n"})); err == nil {
 		t.Error("LayoutAt of folders.agents: ../away = nil; want it refused")
 	}
 }
