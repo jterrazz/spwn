@@ -2,6 +2,7 @@ package machinefile_test
 
 import (
 	"slices"
+	"strings"
 	"testing"
 
 	"github.com/jterrazz/studio-station/apps/engine/machinefile"
@@ -60,6 +61,68 @@ func TestEachFilesRunLinesAreAStepOfTheirOwnInTheChainsOrder(t *testing.T) {
 			}
 			if got := scriptsOf(r); !slices.Equal(got, tc.want) {
 				t.Errorf("scripts %+v, want %+v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestTheChainsAccountsAreTheUnionOfItsFiles(t *testing.T) {
+	top := machine("top", "{ os: ubuntu }", "[]")
+	for _, tc := range []struct {
+		how      string
+		files    map[string]string
+		overlay  string
+		signins  []string
+		grants   []string
+		refusing string
+	}{
+		{"two kits each sign in to their own", map[string]string{
+			"a":   kit("a", "accounts: { signins: [gh] }\n"),
+			"b":   kit("b", "accounts: { signins: [wrangler, gh] }\n"),
+			"top": top + "extends: [a, b]\naccounts: { grants: [claude] }\n",
+		}, "", []string{"gh=a", "wrangler=b"}, []string{"claude=top"}, ""},
+		{"a diamond's kit counts once", map[string]string{
+			"d":   kit("d", "accounts: { signins: [gh] }\n"),
+			"b":   kit("b", "extends: [d]\n"),
+			"c":   kit("c", "extends: [d]\naccounts: { signins: [wrangler] }\n"),
+			"top": top + "extends: [b, c]\n",
+		}, "", []string{"gh=d", "wrangler=c"}, nil, ""},
+		{"an overlay takes a program back", map[string]string{
+			"a":   kit("a", "accounts: { signins: [gh, wrangler] }\n"),
+			"top": top + "extends: [a]\n",
+		}, "overrides: top\naccounts: { signins: [wrangler] }\n", []string{"wrangler=top"}, nil, ""},
+		{"a union both signing in to and granting one program", map[string]string{
+			"a":   kit("a", "accounts: { signins: [claude] }\n"),
+			"b":   kit("b", "accounts: { grants: [claude] }\n"),
+			"top": top + "extends: [a, b]\n",
+		}, "", nil, nil, "b.machine.yaml: its accounts with those of the files before it in the chain: claude is both signed in and granted"},
+	} {
+		t.Run(tc.how, func(t *testing.T) {
+			user := files(tc.files)
+			if tc.overlay != "" {
+				user["machinefiles/top.local.yaml"] = "machinefile: station.machinefile/v1\n" + tc.overlay
+			}
+			r, err := machinefile.Resolve(library(t, user, nil), "top", machinefile.Machine{}, machinefile.Lock{})
+			if tc.refusing != "" {
+				if err == nil || !strings.Contains(err.Error(), tc.refusing) {
+					t.Fatalf("resolve: %v, want refused with %q", err, tc.refusing)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			var signins, grants []string
+			for _, v := range r.Values {
+				if n, ok := strings.CutPrefix(v.Key, "accounts.signins."); ok {
+					signins = append(signins, n+"="+v.Origin.Name)
+				}
+				if n, ok := strings.CutPrefix(v.Key, "accounts.grants."); ok {
+					grants = append(grants, n+"="+v.Origin.Name)
+				}
+			}
+			if !slices.Equal(signins, tc.signins) || !slices.Equal(grants, tc.grants) {
+				t.Errorf("signins %v and grants %v, want %v and %v", signins, grants, tc.signins, tc.grants)
 			}
 		})
 	}

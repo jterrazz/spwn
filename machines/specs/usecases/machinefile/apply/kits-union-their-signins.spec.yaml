@@ -1,0 +1,44 @@
+description: 'two mixins that each say accounts join them: a first start handles every program of either once'
+fixture: ../../__fixtures__/build/
+env: two-macs
+runs:
+    - command: 'world edit macbook-pro machinefiles/ai-kit.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: ai-kit
+          accounts: { signins: [claude], grants: [npm] }
+      exit: 0
+    - command: 'world edit macbook-pro machinefiles/cloud-kit.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: cloud-kit
+          accounts: { signins: [gh, claude], grants: [wrangler] }
+      exit: 0
+    - command: 'world edit macbook-pro machinefiles/studio-linux.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: studio-linux
+          machine: { kind: workspace, system: { os: ubuntu, version: '24.04' } }
+          extends: [base-ubuntu, ai-kit, cloud-kit]
+          vm: { resources: { memory: 4G } }
+      exit: 0
+    - command: 'machinefile explain accounts --machinefile studio-linux'
+      exit: 0
+      stdout: |
+          # studio-linux
+          	accounts.signins.claude	signs in	user	ai-kit
+          	accounts.grants.npm	granted	user	ai-kit
+          	accounts.signins.gh	signs in	user	cloud-kit
+          	accounts.grants.wrangler	granted	user	cloud-kit
+    - command: 'images build studio-linux --binary $HOME/station-linux >/dev/null'
+      exit: 0
+    - command: '--version >/dev/null; /usr/bin/jq ''.macs["web"] = .macs["linux-1"]'' world.json > w.json && /bin/mv w.json world.json'
+      exit: 0
+    - command: 'machines create --memory 4G web --from studio-linux | /usr/bin/grep -E "Boot|claude|gh|npm|wrangler|Created"'
+      exit: 0
+      stdout: |
+          ●	Boot phase	studio-linux	7 apps installed · 2 settings set
+          ●	npm	granted
+          ◐	wrangler	not granted: no password for wrangler in this Mac's vault
+          ◐	gh	not signed in: station accounts login gh --on web
+          ●	web	Created	Ephemeral · 4 CPU · 4 GB · 20 GB

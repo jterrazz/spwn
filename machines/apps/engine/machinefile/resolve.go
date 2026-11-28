@@ -292,29 +292,36 @@ func merge(files []Placed) merged {
 	return m
 }
 
-// invariant: a Machinefile's accounts replace those of the files it
-// extends whole; an overlay's change them key by key (AccountsSpec.Over),
-// and a merge that cannot be read is refused at the overlay.
+// invariant: a Machinefile's accounts join those of the files before it
+// in the chain (AccountsSpec.With), each program said by the file that
+// first lists it; an overlay's change them key by key (AccountsSpec.Over),
+// the one way to take a program back; a merge that cannot be read is
+// refused at the file that made it so.
 func mergeAccounts(m *merged, a catalog.AccountsSpec, p Placed) {
 	o := originOf(p)
 	said := a
-	if p.Kind == Overlay && m.accounts != nil {
+	switch {
+	case m.accounts == nil:
+	case p.Kind == Overlay:
 		said = m.accounts.Over(a)
+	default:
+		said = m.accounts.With(a)
 	}
 	m.accounts = &said
-	if p.Kind != Overlay || a.SignIns != nil {
-		m.drop("accounts.signins")
-		for _, n := range a.SignIns {
-			m.put(signInKey+string(n), "signs in", o)
+	for _, list := range []struct {
+		key, text string
+		names     []catalog.ProgramName
+	}{{signInKey, "signs in", a.SignIns}, {grantKey, "granted", a.Grants}} {
+		if p.Kind == Overlay && list.names != nil {
+			m.drop(strings.TrimSuffix(list.key, "."))
+		}
+		for _, n := range list.names {
+			if _, held := m.values[list.key+string(n)]; !held {
+				m.put(list.key+string(n), list.text, o)
+			}
 		}
 	}
-	if p.Kind != Overlay || a.Grants != nil {
-		m.drop("accounts.grants")
-		for _, n := range a.Grants {
-			m.put(grantKey+string(n), "granted", o)
-		}
-	}
-	if problem := said.Problem(); p.Kind == Overlay && problem != "" && m.refused == nil {
+	if problem := said.Problem(); problem != "" && m.refused == nil {
 		m.refused = mergeRefused(p, "accounts", problem)
 	}
 }
@@ -360,7 +367,11 @@ func mergePorts(m *merged, ports catalog.PortRights, p Placed) {
 }
 
 func mergeRefused(p Placed, key, problem string) error {
-	return refusedFile("machinefile", &catalog.FileError{File: p.Path, Problem: "its " + key + " with those of " + p.File.Overrides + "'s chain: " + problem})
+	before := p.File.Overrides + "'s chain"
+	if p.Kind != Overlay {
+		before = "the files before it in the chain"
+	}
+	return refusedFile("machinefile", &catalog.FileError{File: p.Path, Problem: "its " + key + " with those of " + before + ": " + problem})
 }
 
 // invariant: each file's lines of a phase are a Script of their own, after

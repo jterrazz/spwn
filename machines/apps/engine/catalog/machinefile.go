@@ -313,6 +313,22 @@ func (a AccountsSpec) Over(o AccountsSpec) AccountsSpec {
 	return out
 }
 
+func (a AccountsSpec) With(o AccountsSpec) AccountsSpec {
+	// value: these accounts and another file's of the chain together: each
+	// program of signins and of grants once, in the order first listed.
+	return AccountsSpec{SignIns: unionOf(a.SignIns, o.SignIns), Grants: unionOf(a.Grants, o.Grants)}
+}
+
+func unionOf(have, more []ProgramName) []ProgramName {
+	out := slices.Clone(have)
+	for _, n := range more {
+		if !slices.Contains(out, n) {
+			out = append(out, n)
+		}
+	}
+	return out
+}
+
 func (p PortRights) Audienced() []int {
 	// value: the ports audiences names, lowest first.
 	return slices.Sorted(maps.Keys(p.Audiences))
