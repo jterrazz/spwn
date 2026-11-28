@@ -521,6 +521,12 @@
           },
           "type": "array"
         },
+        "requires": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "script": {
           "$ref": "#/$defs/ScriptMethod"
         },

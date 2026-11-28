@@ -33,12 +33,15 @@ func (c Catalog) Links(it Package, method string, sys System) []Link {
 	// the resolution, which brings a package in and orders it, by what keeps
 	// an extra another one there still needs, and, through InstallLinks,
 	// by apps.install; a package never leans on itself.
-	return c.links(it.Name, it.Requires, it.RequiresOneOf, providerOf(it, method, sys), method)
+	m := chosen(it, method, sys)
+	return c.links(it.Name, slices.Concat(it.Requires, m.Requires), it.RequiresOneOf, m.ProvidedBy, method)
 }
 
-func (c Catalog) InstallLinks(t App, in Install) []Link {
-	// value: Links for an app by the install this machine carries: its
-	// provider is that install's, its manager that of the install's method.
+func (c Catalog) InstallLinks(t App, in Install, k MachineKind) []Link {
+	// value: Links for an app by the install this kind of machine carries:
+	// its provider is that install's, its manager that of the install's
+	// method, and its method's requires those of the package's method
+	// that install is on that kind.
 	var by string
 	if p, ok := in.(ProvidedByInstall); ok {
 		by = p.Package
@@ -47,13 +50,17 @@ func (c Catalog) InstallLinks(t App, in Install) []Link {
 	if in != nil {
 		method = string(in.Method())
 	}
-	return c.links(t.Name, t.Requires, nil, by, method)
+	return c.links(t.Name, slices.Concat(t.Requires, c.placedMethod(t.Name, method, k).Requires), nil, by, method)
 }
 
 func (c Catalog) links(name string, requires, oneOf []string, by, method string) []Link {
 	var out []Link
+	var said []string
 	for _, r := range requires {
-		out = append(out, Link{Kind: LinkRequires, Packages: []string{r}})
+		if r != name && !slices.Contains(said, r) {
+			said = append(said, r)
+			out = append(out, Link{Kind: LinkRequires, Packages: []string{r}})
+		}
 	}
 	if len(oneOf) > 0 {
 		out = append(out, Link{Kind: LinkRequiresOneOf, Packages: slices.Clone(oneOf)})
@@ -89,20 +96,46 @@ func (c Catalog) Manager(method string) (string, bool) {
 	return "", false
 }
 
-// invariant: the provider is the one of the package's method by that key
-// for this system, else of its first method by that key.
-func providerOf(it Package, method string, sys System) string {
-	by := ""
-	for _, m := range it.Methods {
-		if m.ProvidedBy == "" || m.Method() != method {
+// invariant: the method a package is carried by is its method by that key
+// for this system, else its first method by that key; its provider and
+// its own requires are that method's.
+func chosen(it Package, method string, sys System) MethodSpec {
+	var first *MethodSpec
+	for i, m := range it.Methods {
+		if m.Method() != method {
 			continue
 		}
 		if m.Matches(sys) {
-			return m.ProvidedBy
+			return m
 		}
-		if by == "" {
-			by = m.ProvidedBy
+		if first == nil {
+			first = &it.Methods[i]
 		}
 	}
-	return by
+	if first == nil {
+		return MethodSpec{}
+	}
+	return *first
+}
+
+// invariant: the method an install of the app stands for on a kind of
+// machine is the first by its key in the order that kind places the
+// package's methods by, the order its installs there come from.
+func (c Catalog) placedMethod(name, method string, k MachineKind) MethodSpec {
+	p, ok := c.Package(name)
+	if !ok {
+		return MethodSpec{}
+	}
+	var on []MethodSpec
+	for _, m := range p.Package.Methods {
+		if slices.Contains(m.kinds(), k) {
+			on = append(on, m)
+		}
+	}
+	for _, m := range c.Ordered(on, k.os(), nil) {
+		if m.Method() == method {
+			return m
+		}
+	}
+	return MethodSpec{}
 }

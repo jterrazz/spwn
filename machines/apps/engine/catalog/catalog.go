@@ -303,9 +303,14 @@ func judged(it Package, owner owners, renamed map[string]string) string {
 			return fmt.Sprintf("%s proposes %q, which is no setting", it.Name, then)
 		}
 	}
-	for _, m := range it.Methods {
+	for i, m := range it.Methods {
 		if m.ProvidedBy != "" && owner[m.ProvidedBy] != "app" {
 			return fmt.Sprintf("%s is provided by %q, which is no app", it.Name, m.ProvidedBy)
+		}
+		for _, r := range m.Requires {
+			if owner[r] != "app" {
+				return fmt.Sprintf("%s's method %d requires %q, which is no app", it.Name, i+1, r)
+			}
 		}
 	}
 	return ""

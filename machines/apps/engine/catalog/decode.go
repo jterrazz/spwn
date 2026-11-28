@@ -437,6 +437,8 @@ func (m MethodSpec) checkOverrides(kind Kind) string {
 		return "`package` is for a bun install"
 	case kind == KindSetting && (len(m.Path) > 0 || len(m.Provides) > 0 || m.Upgrade != "" || m.Pin != ""):
 		return "`path`, `provides`, `upgrade` and `pin` are for an app's method"
+	case kind == KindSetting && len(m.Requires) > 0:
+		return "a setting's method requires nothing: its package's `requires` does"
 	case m.Pin != "" && !known(m.Pin):
 		return fmt.Sprintf("pin %q is none of %s", m.Pin, strings.Join(m.Pin.Enum(), ", "))
 	}

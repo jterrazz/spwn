@@ -37,7 +37,7 @@ The lists stand by category, in the categories' order (`Package Managers`, `Runt
 | `kind`            | all          | `manager` (installs other packages), `app` (run or used), `setting` (a state of the system)                                                                                                                                         |
 | `name`            | all          | the package's name, its file's                                                                                                                                                                                                      |
 | `description`     | all          | one line, the owner's words                                                                                                                                                                                                         |
-| `requires`        | all          | packages installed before it, for it; a setting requires one app                                                                                                                                                                    |
+| `requires`        | all          | packages installed before it, for it, whichever method carries it; a setting requires one app; what one method alone needs is that method's `requires`                                                                              |
 | `after`           | all          | packages applied before it when both are, never installed for it                                                                                                                                                                    |
 | `phase`           | all          | `image` (baked into a VM image by every Machinefile that lists it, whatever its bake list, and left by every other apply: `linux-kernel`), `boot` (a VM's first start), `apply` (the default)                                       |
 | `needs`           | all          | what every method asks of the owner: `sudo`, `terminal`, `license`, `app-store-login`                                                                                                                                               |
@@ -132,6 +132,7 @@ Every manager type has its own check, upgrade and undo; an override is written o
 | Override   | On                   | Value                                                                              |
 | ---------- | -------------------- | ---------------------------------------------------------------------------------- |
 | `needs`    | any method           | what this method alone asks of the owner (apt's `sudo`, mas's `app-store-login`)   |
+| `requires` | an app's             | apps installed before it where this method is the one chosen, beside the package's |
 | `provides` | an app's             | the commands this method lands when they differ from the package's (`fdfind`)      |
 | `package`  | a bun's              | the source bun fetches when it differs from the name (`github:tobi/qmd`)           |
 | `upgrade`  | an app's             | the shell line that upgrades what it installed                                     |
@@ -139,6 +140,23 @@ Every manager type has its own check, upgrade and undo; an override is written o
 | `path`     | an app's             | absolute folders it lands commands in, which station's search adds at once         |
 | `trusted`  | a brew's or a cask's | a formula or a cask from a third-party tap the owner trusts                        |
 | `shell`    | an app's             | the blocks of `~/.zshrc` this method writes once the app is there                  |
+
+A method's `requires` holds where that method is the one the machine's system, family and kind choose, and nowhere else: an app whose Ubuntu method requires a package and whose macOS method does not plans none of it on a Mac, and on Ubuntu installs it first, `required by` the app in the plan and in `explain`. Each name is an app of the catalog, refused at decode otherwise, and a cycle through it is refused by the plan as one through the package's `requires`; a setting's method requires nothing, its package's `requires` does.
+
+```yaml
+# what one method alone needs: on Linux, a virtual screen for the release to drive
+methods:
+    - os: macos
+      brew: agent-desktop
+    - family: linux
+      arch: arm64
+      requires: [desktop-session]
+      github-release:
+          {
+              repo: vercel-labs/agent-desktop,
+              asset: 'agent-desktop-v*-aarch64-unknown-linux-gnu.tar.gz',
+          }
+```
 
 A `script` with neither `run` nor `url` is installed by the owner, as its `hint` says; a `run` line takes no `args`, `env` nor `upgrade`. An `env` value that opens with `~/` is given under the home (`HELM_INSTALL_DIR=~/.local/bin`), since an installer reads its variables as they are. A `script`'s `check` is the shell line whose exit 0 says the package is there, run with `~/.local/bin`, the folder a script lands its commands in, as its whole PATH, so it answers for the copy Machines installed and never for one ahead of it on yours (a mise shim); without one, its `provides` are looked up. The check's output is read for a version by the package's `version-read` `pattern` (`pattern: 'Terraform v(\d+\.\d+\.\d+)'` with `check: CHECKPOINT_DISABLE=1 terraform version`), unless the package reads its version by a command of its own (`version-read` `args`). Its `undo` is the shell line that takes the app back: `station apps remove` and `station machinefile apply --remove` run it, and without one station cannot remove the app (`remove it by hand`). Machines runs both as it runs a `run` line, `bash -c <line>` from the home, with no value interpolated into it; a `url` script's `undo` runs with its `env`, and a `check` line still running at its 5 seconds is stopped with everything it started. A `run` line or a `url` installer is also its own update: `station apps update <app>` runs it again. So a `run` line never leaves less than was there: what it unpacks (`tar -x`, `unzip`, `ditto -x`) lands in a folder it made with `mktemp` and is moved in only once it reads, and it removes nothing before it fetched the replacement; a line that does either is refused at decode. Tart's line is the model: it unpacks the release beside the copy it has, reads the new binary's version, keeps the copy it has when the version is the same, and else swaps the folder by one rename. It writes nothing into the bundle it has, so a protection macOS puts on a signed app's files never meets it.
 

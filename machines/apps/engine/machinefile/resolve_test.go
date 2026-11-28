@@ -451,6 +451,48 @@ func TestAMixinsOwnValuesLeaveWithAnyTokenWithheld(t *testing.T) {
 	}
 }
 
+func TestAMethodsRequiresComeInWhereThatMethodIsChosenAlone(t *testing.T) {
+	driver := "package: station.package/v1\nkind: app\nname: driver\ndescription: d\nmethods:\n    - { os: macos, cask: driver }\n    - { os: ubuntu, requires: [session], script: { run: 'true' } }\n"
+	session := "package: station.package/v1\nkind: app\nname: session\ndescription: d\nmethods:\n    - { family: debian, script: { run: 'true' } }\n"
+	lib := library(t, map[string]string{
+		"machinefiles/vm.machine.yaml":  machine("vm", "{ os: ubuntu, version: '24.04' }", "[driver]"),
+		"machinefiles/mac.machine.yaml": machine("mac", "{ os: macos, version: '26' }", "[driver]"),
+	}, map[string]string{"catalog/command-line/driver.yaml": driver, "catalog/command-line/session.yaml": session})
+	r, err := machinefile.Resolve(lib, "vm", machinefile.Machine{}, machinefile.Lock{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	order := make([]string, 0, len(r.Steps))
+	for _, s := range r.Steps {
+		order = append(order, s.Package)
+		if s.Package == "session" && s.Why != "required by driver" {
+			t.Errorf("session is in the Ubuntu plan %q, want required by driver", s.Why)
+		}
+	}
+	if !slices.Equal(order, []string{"session", "driver"}) {
+		t.Errorf("the Ubuntu plan runs %v, want the session its method requires first", order)
+	}
+	r, err = machinefile.Resolve(lib, "mac", machinefile.Machine{}, machinefile.Lock{})
+	if err != nil {
+		t.Fatalf("the macOS plan is refused: %v, want driver by its cask alone", err)
+	}
+	if slices.ContainsFunc(r.Steps, func(s machinefile.Step) bool { return s.Package == "session" }) {
+		t.Errorf("the macOS plan holds the session %+v, which only driver's Ubuntu method requires", r.Steps)
+	}
+}
+
+func TestACycleThroughAMethodsRequiresIsRefused(t *testing.T) {
+	up := "package: station.package/v1\nkind: app\nname: up\ndescription: d\nmethods:\n    - { os: ubuntu, requires: [down], script: { run: 'true' } }\n"
+	down := "package: station.package/v1\nkind: app\nname: down\ndescription: d\nrequires: [up]\nmethods:\n    - { os: any, script: { run: 'true' } }\n"
+	lib := library(t, map[string]string{"machinefiles/a.machine.yaml": machine("a", "{ os: ubuntu }", "[up]")},
+		map[string]string{"catalog/command-line/up.yaml": up, "catalog/command-line/down.yaml": down})
+	_, err := machinefile.Resolve(lib, "a", machinefile.Machine{}, machinefile.Lock{})
+	var cycle *machinefile.CycleError
+	if !errors.As(err, &cycle) || cycle.Said() != "up needs down needs up" {
+		t.Errorf("resolved with %v, want the cycle up needs down needs up", err)
+	}
+}
+
 func TestAMachinefileInstallsWhatItListsAndWhatThatRequires(t *testing.T) {
 	serve := `package: station.package/v1
 kind: app

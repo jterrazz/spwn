@@ -161,6 +161,7 @@ func TestAPackageIsJudgedAlone(t *testing.T) {
 	}
 	refusedFor(t, strings.Replace(setting, "bundle: GH", "requires: [gh]\nrequires-one-of: [gh, hub]", 1), "requires and requires-one-of, one of them")
 	refusedFor(t, strings.Replace(setting, "bundle: GH", "needs: [root]", 1), `need "root" is none of`)
+	refusedFor(t, strings.Replace(strings.Replace(setting, "bundle: GH\n", "", 1), "builtin: dns", "requires: [gh]\n      builtin: dns", 1), "a setting's method requires nothing: its package's `requires` does")
 	if err := decoded(t, strings.Replace(strings.Replace(setting, "bundle: GH\n", "", 1), "builtin: dns", "builtin: nope", 1)); err != nil {
 		t.Errorf("a builtin a newer station carries is refused at decode: %v", err)
 	}
@@ -257,6 +258,7 @@ methods:
       upgrade: gh extension upgrade --all
       pin: version
       needs: [sudo]
+      requires: [git]
       apt: {packages: [gh]}
     - family: linux
       arch: arm64
@@ -268,7 +270,7 @@ methods:
 	if err != nil {
 		t.Fatal(err)
 	}
-	if it.Methods[1].Machine[1] != catalog.RoleServer || it.Methods[0].Machine[0] != catalog.RoleComputer || it.Methods[2].GitHubRelease.Repo != "cli/cli" {
+	if it.Methods[1].Machine[1] != catalog.RoleServer || it.Methods[0].Machine[0] != catalog.RoleComputer || it.Methods[2].GitHubRelease.Repo != "cli/cli" || !slices.Equal(it.Methods[1].Requires, []string{"git"}) {
 		t.Errorf("decoded %+v", it.Methods)
 	}
 }
@@ -300,6 +302,7 @@ func TestThePackagesAreJudgedTogether(t *testing.T) {
 		{"package-managers/brew.yaml": manager("brew", "[brew, cask]", "1"), "package-managers/tap.yaml": manager("tap", "[cask]", "2")}: "brew and tap both manage cask",
 		{"package-managers/brew.yaml": manager("brew", "[brew]", "1"), "package-managers/mas.yaml": manager("mas", "[mas]", "1")}:        "brew and mas both stand at 1 on macos",
 		{"git/gh.yaml": strings.Replace(gh, "provides: [gh]", "deprecated: {why: gone, use: hub}", 1)}:                                   `gh says to use "hub", which is no package`,
+		{"git/gh.yaml": strings.Replace(gh, "brew: gh", "requires: [git]\n      brew: gh", 1)}:                                           `packages/git/gh.yaml: gh's method 1 requires "git", which is no app`,
 	} {
 		if _, err := catalogOf(*files); err == nil || !strings.Contains(err.Error(), want) {
 			t.Errorf("loaded with %v, want %q", err, want)

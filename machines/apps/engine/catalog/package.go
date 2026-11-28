@@ -321,6 +321,10 @@ type MethodSpec struct {
 	// Linux computer, mas's App Store login); the package's needs are every
 	// method's.
 	Needs []Need `yaml:"needs,omitempty"`
+	// value: the apps installed before this method alone, where it is the
+	// one chosen (agent-desktop's virtual screen on Linux); the package's
+	// requires are every method's.
+	Requires []string `json:",omitempty" yaml:"requires,omitempty"`
 	// value: a brew or cask from a third-party tap the owner trusts.
 	Trusted        bool                 `yaml:"trusted,omitempty"`
 	Brew           string               `yaml:"brew,omitempty"`

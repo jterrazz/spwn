@@ -928,6 +928,7 @@ export type CatalogMethodSpec = {
     Pin: '' | 'none' | 'version';
     ProvidedBy: string;
     Provides: string[] | null;
+    Requires?: string[];
     Script: CatalogScriptMethod | null;
     Shell: CatalogShellBlock[] | null;
     Skill: CatalogSkillMethod | null;
