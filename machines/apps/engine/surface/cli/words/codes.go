@@ -280,7 +280,11 @@ func Codes() map[fail.Code]Wording {
 			return "a cycle in " + e.Detail["of"] + ": " + e.Subject, "break it: one of them must not need the other"
 		},
 		machinefilecalls.SiblingsDiffer: func(e *fail.Error) (string, string) {
-			return e.Detail["kind"] + " " + e.Subject + " is given two ways, by " + e.Detail["first"] + " (" + e.Detail["first_at"] + ") and " + e.Detail["second"] + " (" + e.Detail["second_at"] + "), neither extending the other", "say " + e.Subject + " in " + e.Detail["top"] + ", which extends both"
+			two := e.Detail["kind"] + " " + e.Subject + " is given two ways, by " + e.Detail["first"] + " (" + e.Detail["first_at"] + ") and " + e.Detail["second"] + " (" + e.Detail["second_at"] + "), neither extending the other"
+			if e.Detail["unjudged"] != "" {
+				return two + ", one naming its manager and the other leaving it to the default, which no system said judges", "say machine.system.os in " + e.Detail["top"] + ", or the manager in both"
+			}
+			return two, "say " + e.Subject + " in " + e.Detail["top"] + ", which extends both"
 		},
 		machinefilecalls.ChainTooLong: func(e *fail.Error) (string, string) {
 			return e.Subject + "'s chain " + e.Detail["said"], "a chain is at most " + strconv.Itoa(machinefile.ChainDepth) + " Machinefiles deep and " + strconv.Itoa(machinefile.ChainFiles) + " in all: extend fewer"

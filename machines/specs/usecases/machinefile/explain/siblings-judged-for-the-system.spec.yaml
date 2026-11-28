@@ -1,0 +1,49 @@
+description: 'a named manager beside a bare jq is judged for ubuntu, and refused where no system is said'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/apt-kit.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: apt-kit
+          apps: [{ name: jq, manager: apt }]
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/data-kit.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: data-kit
+          apps: [jq]
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/fleet-kit.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: fleet-kit
+          extends: [apt-kit, data-kit]
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          extends: [fleet-kit]
+          machine: { kind: workspace, system: { os: ubuntu } }
+      exit: 0
+    - command: 'machinefile explain apps.jq.method'
+      exit: 0
+      stdout: |
+          # linux-1
+          	apps.jq.method	apt	built-in	jq
+    - command: 'machinefile explain --machinefile fleet-kit'
+      exit: 2
+      stderr: |
+          Error: app jq is given two ways, by apt-kit (~/.config/station/machinefiles/apt-kit.machine.yaml:3) and data-kit (~/.config/station/machinefiles/data-kit.machine.yaml:3), neither extending the other, one naming its manager and the other leaving it to the default, which no system said judges
+          Hint: say machine.system.os in fleet-kit, or the manager in both
+    - command: 'world edit linux-1 machinefiles/apt-kit.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: apt-kit
+          apps: [{ name: jq, manager: brew }]
+      exit: 0
+    - command: 'machinefile explain apps.jq.method'
+      exit: 2
+      stderr: |
+          Error: app jq is given two ways, by apt-kit (~/.config/station/machinefiles/apt-kit.machine.yaml:3) and data-kit (~/.config/station/machinefiles/data-kit.machine.yaml:3), neither extending the other
+          Hint: say jq in linux-1, which extends both

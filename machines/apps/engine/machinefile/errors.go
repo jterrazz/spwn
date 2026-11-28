@@ -72,16 +72,23 @@ func (s Said) At() string {
 
 // value: two files of one chain, neither extending the other, that give
 // one app or setting two ways; Top is the Machinefile resolved, which
-// extends both.
+// extends both. Unjudged: they differ only in that one names the app's
+// manager and the other leaves it to the default, and no system is known
+// to say which manager that default is.
 
 type SiblingConflictError struct {
 	Kind, Name    string
 	First, Second Said
 	Top           string
+	Unjudged      bool
 }
 
 func (e *SiblingConflictError) Error() string {
-	return e.Kind + " " + e.Name + " is given two ways, by " + e.First.Name + " (" + e.First.At() + ") and " + e.Second.Name + " (" + e.Second.At() + "), neither extending the other: say it in " + e.Top + ", which extends both"
+	two := e.Kind + " " + e.Name + " is given two ways, by " + e.First.Name + " (" + e.First.At() + ") and " + e.Second.Name + " (" + e.Second.At() + "), neither extending the other"
+	if e.Unjudged {
+		return two + ", one naming its manager and the other leaving it to the default, which no system said judges: say machine.system.os in " + e.Top + ", or the manager in both"
+	}
+	return two + ": say it in " + e.Top + ", which extends both"
 }
 
 type VMOnComputerError struct {

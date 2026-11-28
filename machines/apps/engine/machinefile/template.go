@@ -58,7 +58,7 @@ func TemplateOf(lib Library, name string, lock []byte) (Template, error) {
 		return Template{}, err
 	}
 	m := merge(files)
-	if refused := m.judged(lib.Catalog, m.said()); refused != nil {
+	if refused := m.judged(lib.Catalog, m.systemFor(name, Machine{})); refused != nil {
 		return Template{}, refused
 	}
 	kind := catalog.MachineRole(m.values["machine.kind"].Text)
@@ -147,7 +147,7 @@ func GivenOf(lib Library, name, machine string) (Given, error) {
 		return Given{}, err
 	}
 	m := merge(files)
-	if refused := m.judged(lib.Catalog, m.said()); refused != nil {
+	if refused := m.judged(lib.Catalog, m.systemFor(name, Machine{})); refused != nil {
 		return Given{}, refused
 	}
 	return Given{Ports: m.ports, SignIns: m.programs(signInKey), Grants: m.programs(grantKey), Server: catalog.MachineRole(m.values["machine.kind"].Text) == catalog.RoleServer}, nil

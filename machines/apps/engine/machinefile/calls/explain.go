@@ -281,7 +281,11 @@ func Worded(err error) error {
 	case errors.As(err, &cycle):
 		return refused(fail.Refused, Cycle, cycle.Said(), map[string]string{"of": cycle.Of})
 	case errors.As(err, &siblings):
-		return refused(fail.Refused, SiblingsDiffer, siblings.Name, map[string]string{"kind": siblings.Kind, "first": siblings.First.Name, "first_at": siblings.First.At(), "second": siblings.Second.Name, "second_at": siblings.Second.At(), "top": siblings.Top})
+		detail := map[string]string{"kind": siblings.Kind, "first": siblings.First.Name, "first_at": siblings.First.At(), "second": siblings.Second.Name, "second_at": siblings.Second.At(), "top": siblings.Top}
+		if siblings.Unjudged {
+			detail["unjudged"] = "manager"
+		}
+		return refused(fail.Refused, SiblingsDiffer, siblings.Name, detail)
 	case errors.As(err, &tooLong):
 		return refused(fail.Refused, ChainTooLong, tooLong.Path[0], map[string]string{"said": tooLong.Said()})
 	case errors.As(err, &none):

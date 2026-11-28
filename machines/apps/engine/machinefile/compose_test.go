@@ -351,6 +351,41 @@ func TestSiblingsAreComparedByWhatTheirEntriesMean(t *testing.T) {
 	}
 }
 
+func TestSiblingsAreJudgedForTheSystemTheChainIsFor(t *testing.T) {
+	lib := library(t, files(map[string]string{
+		"a":    kit("a", "apps: [{ name: fd, manager: skill }]\n"),
+		"b":    kit("b", "apps: [fd]\n"),
+		"both": kit("both", "extends: [a, b]\n"),
+		"top":  "machinefile: station.machinefile/v1\nname: top\nmachine: { kind: workspace }\nextends: [a, b]\nvm: { image: { from: base-ubuntu } }\n",
+	}), nil)
+	var conflict *machinefile.SiblingConflictError
+	if _, err := machinefile.Resolve(lib, "top", machinefile.Machine{System: catalog.SystemSpec{OS: catalog.OSMacOS, Version: "26"}}, machinefile.Lock{}); err != nil {
+		t.Errorf("on a macOS 26 machine, whose default manager for fd is skill: %v, want one entry", err)
+	}
+	if _, err := machinefile.Resolve(lib, "top", machinefile.Machine{System: catalog.SystemSpec{OS: catalog.OSUbuntu}}, machinefile.Lock{}); !errors.As(err, &conflict) || conflict.Unjudged {
+		t.Errorf("on an Ubuntu machine, where skill is not fd's default: %v, want the siblings refused", err)
+	}
+	for _, tc := range []struct {
+		surface string
+		err     error
+	}{
+		{"the template", func() error { _, err := machinefile.TemplateOf(lib, "top", nil); return err }()},
+		{"what it gives a VM", func() error { _, err := machinefile.GivenOf(lib, "top", ""); return err }()},
+		{"a mixin's own values", func() error { _, err := machinefile.Own(lib, "both"); return err }()},
+		{"a machine of no system", func() error {
+			_, err := machinefile.Resolve(lib, "top", machinefile.Machine{}, machinefile.Lock{})
+			return err
+		}()},
+	} {
+		if !errors.As(tc.err, &conflict) || !conflict.Unjudged || !strings.Contains(tc.err.Error(), "say machine.system.os in") {
+			t.Errorf("%s of a chain that says no system: %v, want refused as unjudged", tc.surface, tc.err)
+		}
+	}
+	if got := lib.Templates(); slices.Contains(got, "top") {
+		t.Errorf("templates %v, want top none", got)
+	}
+}
+
 func TestAChainIsAtMostEightDeepAndThirtyTwoFiles(t *testing.T) {
 	top := machine("top", "{ os: ubuntu }", "[]")
 	deep := func(n int) map[string]string {

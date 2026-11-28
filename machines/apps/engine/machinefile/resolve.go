@@ -414,6 +414,23 @@ func merge(files []Placed) merged {
 	return m
 }
 
+// invariant: the system a chain is judged and resolved for, one for every
+// surface that reads it: the chain's own word, and on a machine (this
+// named) what that machine is where the chain says nothing of it, put
+// among the values as this machine's, unless the chain says another OS.
+// A template's, a mixin's and a VM's to come are the chain's alone.
+func (m *merged) systemFor(name string, this Machine) catalog.System {
+	if said := m.values["machine.system.os"].Text; said == "" || said == string(this.System.OS) {
+		mine := Origin{Name: name, Kind: ThisMachine}
+		for _, kv := range [][2]string{{"os", string(this.System.OS)}, {"version", this.System.Version}, {"arch", string(this.System.Arch)}} {
+			if _, ok := m.values["machine.system."+kv[0]]; !ok && kv[1] != "" {
+				m.put("machine.system."+kv[0], kv[1], mine)
+			}
+		}
+	}
+	return m.said()
+}
+
 // value: the system the chain itself says, empty where it says none.
 func (m merged) said() catalog.System {
 	kind := catalog.MachineRole(m.values["machine.kind"].Text)
@@ -443,8 +460,10 @@ func claimed[T any](m merged, heads map[string][]claim[T], name string, c claim[
 // two files of which neither extends the other that give one app or
 // setting different entries, or one program's account under each key,
 // refused naming both and the name. Entries
-// compare by what they mean: a range by how far it lets the app move, a
-// manager the package takes by default there as none, and never by
+// compare by what they mean, for the system the chain is judged for
+// (merged.systemFor): a range by how far it lets the app move, a
+// manager the package takes by default there as none (with no system
+// known, a manager named beside none is refused as unjudged), and never by
 // optional: a name one of them requires is required. The same entry twice
 // is one, and a file that extends both settles it by saying it. The apps
 // are judged first, then the settings, then the accounts, each by name.
@@ -454,16 +473,23 @@ func (m *merged) judged(cat catalog.Catalog, sys catalog.System) error {
 	}
 	for _, name := range slices.Sorted(maps.Keys(m.appHeads)) {
 		heads := m.appHeads[name]
-		a, b, ok := differ(heads, func(x, y catalog.AppEntry) bool {
-			x, y = plainApp(cat, sys, m.prefer, x), plainApp(cat, sys, m.prefer, y)
-			if !x.Version.Same(y.Version) {
-				return false
+		same := func(bare bool) func(x, y catalog.AppEntry) bool {
+			return func(x, y catalog.AppEntry) bool {
+				x, y = plainApp(cat, sys, m.prefer, x), plainApp(cat, sys, m.prefer, y)
+				if !x.Version.Same(y.Version) {
+					return false
+				}
+				x.Version, y.Version = catalog.Range{}, catalog.Range{}
+				if bare && (x.Manager == "") != (y.Manager == "") {
+					x.Manager, y.Manager = "", ""
+				}
+				return reflect.DeepEqual(x, y)
 			}
-			x.Version, y.Version = catalog.Range{}, catalog.Range{}
-			return reflect.DeepEqual(x, y)
-		}, func(e catalog.AppEntry) int { return e.Line })
-		if ok {
-			return &SiblingConflictError{Kind: "app", Name: name, First: a, Second: b, Top: m.top}
+		}
+		line := func(e catalog.AppEntry) int { return e.Line }
+		if a, b, ok := differ(heads, same(false), line); ok {
+			_, _, beyond := differ(heads, same(true), line)
+			return &SiblingConflictError{Kind: "app", Name: name, First: a, Second: b, Top: m.top, Unjudged: sys.OS == "" && !beyond}
 		}
 		if i := slices.IndexFunc(m.apps, func(l listed[catalog.AppEntry]) bool { return l.name == name }); i >= 0 && requiredBy(heads, func(e catalog.AppEntry) bool { return e.Optional }) {
 			m.apps[i].entry.Optional = false
@@ -787,15 +813,7 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 		return Resolved{}, &MixinError{Name: name}
 	}
 	m := merge(files)
-	if said := m.values["machine.system.os"].Text; said == "" || said == string(this.System.OS) {
-		mine := Origin{Name: name, Kind: ThisMachine}
-		for _, kv := range [][2]string{{"os", string(this.System.OS)}, {"version", this.System.Version}, {"arch", string(this.System.Arch)}} {
-			if _, ok := m.values["machine.system."+kv[0]]; !ok && kv[1] != "" {
-				m.put("machine.system."+kv[0], kv[1], mine)
-			}
-		}
-	}
-	r := Resolved{Name: name, Lock: lock, Kind: catalog.MachineRole(m.values["machine.kind"].Text), System: m.said()}
+	r := Resolved{Name: name, Lock: lock, Kind: catalog.MachineRole(m.values["machine.kind"].Text), System: m.systemFor(name, this)}
 	if refused := m.judged(lib.Catalog, r.System); refused != nil {
 		return Resolved{}, refused
 	}
@@ -1344,7 +1362,7 @@ func Own(lib Library, name string) (Resolved, error) {
 		return Resolved{}, err
 	}
 	m := merge(files)
-	if refused := m.judged(lib.Catalog, m.said()); refused != nil {
+	if refused := m.judged(lib.Catalog, m.systemFor(name, Machine{})); refused != nil {
 		return Resolved{}, refused
 	}
 	r := Resolved{Name: name}
