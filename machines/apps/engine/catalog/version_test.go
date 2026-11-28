@@ -55,6 +55,29 @@ func TestAVersionIsReadIntoItsRange(t *testing.T) {
 	}
 }
 
+func TestTwoWordsForOneRangeAreTheSame(t *testing.T) {
+	read := func(text string) catalog.Range {
+		r, err := catalog.ParseRange(text)
+		if err != nil {
+			t.Fatalf("ParseRange(%q): %v", text, err)
+		}
+		return r
+	}
+	for _, c := range []struct {
+		a, b catalog.Range
+		same bool
+	}{
+		{read("2"), read("^2.0.0"), true},
+		{read("latest"), catalog.Range{}, true},
+		{read("2"), read("3"), false},
+		{read("2"), catalog.Range{}, false},
+	} {
+		if got := c.a.Same(c.b); got != c.same {
+			t.Errorf("%q same as %q = %v, want %v", c.a.Spec(), c.b.Spec(), got, c.same)
+		}
+	}
+}
+
 func TestAWordThatIsNoVersionIsRefusedNamingTheForms(t *testing.T) {
 	for _, text := range []string{"lts", "24.x", ">=24", "^", "24.11.3.1", "1 2", "=", "=lts"} {
 		if _, err := catalog.ParseRange(text); err == nil || err.Error() != `version "`+text+`" is no version: `+catalog.RangeForms {

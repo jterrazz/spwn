@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/machinefile/adapter/bash"
 	"github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
@@ -67,7 +68,7 @@ func TestBashStopsAtTheFirstLineThatFails(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			sh, home := onBash(t)
-			got, err := sh.Run(context.Background(), c.lines)
+			got, err := sh.Run(context.Background(), c.lines, time.Minute)
 			if err != nil || got.ExitCode != c.exit {
 				t.Fatalf("Run = %+v, %v; want exit %d", got, err, c.exit)
 			}
@@ -91,7 +92,7 @@ func TestBashHandsTheLinesAsAnArgumentFromTheHomeAndBounded(t *testing.T) {
 	// unbounded.
 	sh, home, r := recorded(t)
 	const lines = "echo '$(touch pwned)' > said\n"
-	if got, err := sh.Run(context.Background(), lines); err != nil || got.ExitCode != 0 {
+	if got, err := sh.Run(context.Background(), lines, 7*time.Minute); err != nil || got.ExitCode != 0 {
 		t.Fatalf("Run = %+v, %v; want exit 0", got, err)
 	}
 	if _, err := os.ReadFile(filepath.Join(home, "pwned")); err == nil {
@@ -104,7 +105,7 @@ func TestBashHandsTheLinesAsAnArgumentFromTheHomeAndBounded(t *testing.T) {
 	if c.Name != "bash" || len(c.Args) != 5 || c.Args[4] != lines || strings.Contains(c.Args[2], "pwned") {
 		t.Errorf("argv %q; want bash -e -c <driver> station <lines>", c.Args)
 	}
-	if c.Dir != home || c.Timeout <= 0 || c.Stdin != "" {
-		t.Errorf("call %+v; want it from the home, bounded, with nothing on its stdin", c)
+	if c.Dir != home || c.Timeout != 7*time.Minute || c.Stdin != "" {
+		t.Errorf("call %+v; want it from the home, bounded by the time left it, with nothing on its stdin", c)
 	}
 }

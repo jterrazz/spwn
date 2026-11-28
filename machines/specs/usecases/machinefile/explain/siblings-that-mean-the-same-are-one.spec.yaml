@@ -1,0 +1,28 @@
+description: 'a kit requiring git beside the built-in base that marks it optional is one entry: git is required'
+env: in-workspace
+runs:
+    - command: 'world edit linux-1 machinefiles/git-kit.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: git-kit
+          apps: [git]
+      exit: 0
+    - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
+      stdin: |
+          machinefile: station.machinefile/v1
+          name: linux-1
+          extends: [git-kit, base-ubuntu]
+          machine: { kind: workspace, system: { os: ubuntu } }
+      exit: 0
+    - command: 'machinefile explain apps.git'
+      exit: 0
+      stdout: |
+          # linux-1
+          	apps.git	listed	built-in	base-ubuntu
+          	apps.git.method	apt	built-in	git
+          	apps.git.because	its one method for ubuntu 24.04	built-in	git
+
+    - command: 'machinefile plan --json | /usr/bin/jq -c ''[.lines[] | select(.package == "git") | .optional]'''
+      exit: 0
+      stdout: |
+          [null]

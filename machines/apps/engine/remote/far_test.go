@@ -84,6 +84,15 @@ func TestAFarBinaryWithoutTheCallIsTooOldAndSaysItsVersion(t *testing.T) {
 	}
 }
 
+func TestAFarAnswerInAnotherShapeIsAnotherReleasesDocument(t *testing.T) {
+	r, _, _, _ := laptopReaching(t, "dev")
+	_, err := call.Invoke(t.Context(), r, machine.Ref{Name: mini}, call.Call[struct{}, contracttest.InstallIn, []string]{Name: farInstall.Name}, contracttest.InstallIn{App: "jq"}, nil)
+	var e *fail.Error
+	if !errors.As(err, &e) || e.Code != call.FarTooOld || e.Subject != mini || e.Detail["document"] != farInstall.Name {
+		t.Errorf("an answer this station cannot read: %v, want far-too-old naming the mini and the call's document", err)
+	}
+}
+
 func TestAFarMacOnAnotherReleaseIsRefusedAndTheSideBehindIsNamed(t *testing.T) {
 	for _, c := range []struct {
 		version string

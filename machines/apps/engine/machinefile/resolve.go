@@ -165,11 +165,12 @@ type merged struct {
 	prefer  []catalog.ManagerKey
 	// value: the ports of the strongest file that says them, whole, an
 	// overlay's changes made key by key on them.
-	ports    *catalog.PortRights
-	accounts *catalog.AccountsSpec
-	// value: ports or accounts merged into what cannot be read, by the file
-	// that made them so, or two files of which neither extends the other
-	// giving one app or setting two ways.
+	ports *catalog.PortRights
+	// value: what the files kept say of each program's account, the key
+	// each lists it under, in the chain's order.
+	accounts map[catalog.ProgramName][]account
+	// value: ports merged into what cannot be read, by the overlay that
+	// made them so.
 	refused error
 	apps    []listed[catalog.AppEntry]
 	set     map[string]listed[catalog.SettingEntry]
@@ -196,6 +197,11 @@ type claim[T any] struct {
 	removed bool
 }
 
+type account struct {
+	unit, key string
+	origin    Origin
+}
+
 type listed[T any] struct {
 	name   string
 	entry  T
@@ -219,13 +225,6 @@ func (m *merged) drop(prefix string) {
 	})
 }
 
-// invariant: a Machinefile is its extends, in order, then itself, each
-// file followed by its overlay; a later file's value replaces an earlier
-// one's (an app or a setting whole, by name; accounts and ports whole, an
-// overlay's key by key), a file is read once however many extend it, and
-// a cycle of extends is refused. The machine it is resolved for, when it
-// names none of them, adds its own changes last: its overlay that
-// overrides the Machinefile asked, which no other machine reads.
 // value: how far a chain may reach: 8 Machinefiles deep, itself counted,
 // and 32 in all, its overlays not counted.
 const (
@@ -233,47 +232,118 @@ const (
 	ChainFiles = 32
 )
 
+// invariant: a Machinefile is its extends, in order and depth first, then
+// itself, each file followed by its overlay, then, when the machine it is
+// resolved for names none of them, that machine's own changes: its
+// overlay that overrides the Machinefile asked, which no other machine
+// reads. How the files merge is merge's.
 func (l Library) chain(name, machine string) ([]Placed, error) {
 	var out []Placed
-	seen := map[string]bool{}
-	var walk func(name, by string, stack []string) error
-	walk = func(name, by string, stack []string) error {
+	files, err := walkChain(name, func(name string) ([]string, bool, error) {
+		p, ok := l.Machinefiles[name]
+		return p.File.Extends, ok, nil
+	})
+	for _, n := range files {
+		out = append(out, l.Machinefiles[n])
+		if o, ok := l.Overlays[n]; ok && o.File.Overrides == n {
+			out = append(out, o)
+		}
+	}
+	if err != nil {
+		return out, err
+	}
+	if o, ok := l.Overlays[machine]; ok && !slices.Contains(files, machine) && o.File.Overrides == name {
+		out = append(out, o)
+	}
+	return out, nil
+}
+
+// invariant: the files of a chain, each once, in the order they merge,
+// read by extends (whether the file is there, and what it extends). A
+// cycle of extends is refused first, printed around its loop whatever its
+// length; then a chain more than ChainDepth deep, printed along its
+// longest path, and one of more than ChainFiles files, naming the file
+// past the bound. A file is read once however many extend it, and its own
+// depth kept, so a file reached again deeper is judged at that depth: the
+// work is one visit per file and one per extends entry.
+func walkChain(top string, extends func(name string) ([]string, bool, error)) ([]string, error) {
+	type read struct {
+		extends []string
+		ok      bool
+		err     error
+	}
+	cache := map[string]read{}
+	look := func(name string) read {
+		r, ok := cache[name]
+		if !ok {
+			r.extends, r.ok, r.err = extends(name)
+			cache[name] = r
+		}
+		return r
+	}
+	done := map[string]bool{}
+	var acyclic func(name string, stack []string) error
+	acyclic = func(name string, stack []string) error {
 		if i := slices.Index(stack, name); i >= 0 {
 			return &CycleError{Path: append(slices.Clone(stack[i:]), name), Of: "extends"}
 		}
-		p, ok := l.Machinefiles[name]
-		if !ok {
+		r := look(name)
+		if r.err != nil {
+			return r.err
+		}
+		if !r.ok || done[name] {
+			return nil
+		}
+		stack = append(stack, name)
+		for _, e := range r.extends {
+			if err := acyclic(e, stack); err != nil {
+				return err
+			}
+		}
+		done[name] = true
+		return nil
+	}
+	if err := acyclic(top, nil); err != nil {
+		return nil, err
+	}
+	var out []string
+	below := map[string][]string{}
+	var walk func(name, by string, stack []string) error
+	walk = func(name, by string, stack []string) error {
+		if deepest, seen := below[name]; seen {
+			if len(stack)+len(deepest) > ChainDepth {
+				return &ChainTooLongError{Path: slices.Concat(stack, deepest), Deep: true}
+			}
+			return nil
+		}
+		r := look(name)
+		switch {
+		case r.err != nil:
+			return r.err
+		case !r.ok:
 			return &NotFoundError{Name: name, By: by}
 		}
 		stack = append(stack, name)
 		if len(stack) > ChainDepth {
 			return &ChainTooLongError{Path: slices.Clone(stack), Deep: true}
 		}
-		for _, e := range p.File.Extends {
+		deepest := []string{name}
+		for _, e := range r.extends {
 			if err := walk(e, name, stack); err != nil {
 				return err
 			}
+			if d := below[e]; len(d) >= len(deepest) {
+				deepest = append([]string{name}, d...)
+			}
 		}
-		if seen[name] {
-			return nil
+		if len(out) == ChainFiles {
+			return &ChainTooLongError{Path: []string{stack[0]}, Past: name}
 		}
-		if len(seen) == ChainFiles {
-			return &ChainTooLongError{Path: []string{stack[0]}}
-		}
-		seen[name] = true
-		out = append(out, p)
-		if o, ok := l.Overlays[name]; ok && o.File.Overrides == name {
-			out = append(out, o)
-		}
+		below[name] = deepest
+		out = append(out, name)
 		return nil
 	}
-	if err := walk(name, "", nil); err != nil {
-		return out, err
-	}
-	if o, ok := l.Overlays[machine]; ok && !seen[machine] && o.File.Overrides == name {
-		out = append(out, o)
-	}
-	return out, nil
+	return out, walk(top, "", nil)
 }
 
 func originOf(p Placed) Origin {
@@ -284,8 +354,16 @@ func originOf(p Placed) Origin {
 	return Origin{Name: name, Kind: p.Kind, File: p.Path}
 }
 
+// invariant: the files merge in the chain's order, a later file's value
+// replacing an earlier one's: `machine` and `vm` key by key, `vm.mounts`,
+// `vm.image.bake`, `prefer` and `ports` whole (an overlay's `ports` key by
+// key), whatever extends what; an app or a setting by name over what the
+// files it extends said, beside what a file it does not extend said
+// (claimed); accounts by program (mergeAccounts); each file's `run` a
+// Script of its own (mergeRun). What two files beside each other give is
+// judged once on the whole (merged.judged).
 func merge(files []Placed) merged {
-	m := merged{values: map[string]Value{}, set: map[string]listed[catalog.SettingEntry]{}, ancestors: map[string][]string{}, appHeads: map[string][]claim[catalog.AppEntry]{}, setHeads: map[string][]claim[catalog.SettingEntry]{}}
+	m := merged{values: map[string]Value{}, set: map[string]listed[catalog.SettingEntry]{}, ancestors: map[string][]string{}, appHeads: map[string][]claim[catalog.AppEntry]{}, setHeads: map[string][]claim[catalog.SettingEntry]{}, accounts: map[catalog.ProgramName][]account{}}
 	for _, p := range files {
 		o := originOf(p)
 		f := p.File
@@ -333,10 +411,13 @@ func merge(files []Placed) merged {
 			mergeRun(&m, *r, o)
 		}
 	}
-	if m.refused == nil {
-		m.refused = siblings(m)
-	}
 	return m
+}
+
+// value: the system the chain itself says, empty where it says none.
+func (m merged) said() catalog.System {
+	kind := catalog.MachineRole(m.values["machine.kind"].Text)
+	return catalog.System{OS: catalog.OS(m.values["machine.system.os"].Text), Version: m.values["machine.system.version"].Text, Arch: catalog.Arch(m.values["machine.system.arch"].Text), Machine: kind}
 }
 
 // value: the Machinefile a file belongs to: its own name, or for an
@@ -357,86 +438,158 @@ func claimed[T any](m merged, heads map[string][]claim[T], name string, c claim[
 	}), c)
 }
 
-// invariant: two files of which neither extends the other that give one
-// app or setting different entries are refused, naming both and the
-// name; the same entry twice is one, and a file that extends both settles
-// it by saying it. The apps are judged first, each kind by name.
-func siblings(m merged) error {
+// invariant: the merge judged once whole, against the catalog and the
+// system it resolves for: what it merged into that cannot be read, then
+// two files of which neither extends the other that give one app or
+// setting different entries, or one program's account under each key,
+// refused naming both and the name. Entries
+// compare by what they mean: a range by how far it lets the app move, a
+// manager the package takes by default there as none, and never by
+// optional: a name one of them requires is required. The same entry twice
+// is one, and a file that extends both settles it by saying it. The apps
+// are judged first, then the settings, then the accounts, each by name.
+func (m *merged) judged(cat catalog.Catalog, sys catalog.System) error {
+	if m.refused != nil {
+		return m.refused
+	}
 	for _, name := range slices.Sorted(maps.Keys(m.appHeads)) {
-		a, b, ok := differ(m.appHeads[name], func(e catalog.AppEntry) (catalog.AppEntry, int) {
-			line := e.Line
-			e.Line = 0
-			if len(e.Options) == 0 {
-				e.Options = nil
+		heads := m.appHeads[name]
+		a, b, ok := differ(heads, func(x, y catalog.AppEntry) bool {
+			x, y = plainApp(cat, sys, m.prefer, x), plainApp(cat, sys, m.prefer, y)
+			if !x.Version.Same(y.Version) {
+				return false
 			}
-			return e, line
-		})
+			x.Version, y.Version = catalog.Range{}, catalog.Range{}
+			return reflect.DeepEqual(x, y)
+		}, func(e catalog.AppEntry) int { return e.Line })
 		if ok {
 			return &SiblingConflictError{Kind: "app", Name: name, First: a, Second: b, Top: m.top}
 		}
+		if i := slices.IndexFunc(m.apps, func(l listed[catalog.AppEntry]) bool { return l.name == name }); i >= 0 && requiredBy(heads, func(e catalog.AppEntry) bool { return e.Optional }) {
+			m.apps[i].entry.Optional = false
+		}
 	}
 	for _, name := range slices.Sorted(maps.Keys(m.setHeads)) {
-		a, b, ok := differ(m.setHeads[name], func(e catalog.SettingEntry) (catalog.SettingEntry, int) {
-			line := e.Line
-			e.Line = 0
-			if len(e.Values) == 0 {
-				e.Values = nil
-			}
-			return e, line
-		})
+		heads := m.setHeads[name]
+		a, b, ok := differ(heads, func(x, y catalog.SettingEntry) bool {
+			return reflect.DeepEqual(plainSetting(x), plainSetting(y))
+		}, func(e catalog.SettingEntry) int { return e.Line })
 		if ok {
 			return &SiblingConflictError{Kind: "setting", Name: name, First: a, Second: b, Top: m.top}
 		}
+		if l, held := m.set[name]; held && requiredBy(heads, func(e catalog.SettingEntry) bool { return e.Optional }) {
+			l.entry.Optional = false
+			m.set[name] = l
+		}
 	}
-	return nil
+	return m.accountsJudged()
 }
 
-func differ[T any](heads []claim[T], plain func(T) (T, int)) (first, second Said, differs bool) {
+// value: an app entry as it compares: no line, no optional, options empty
+// as none, and the manager the package takes by default for this system as
+// none.
+func plainApp(cat catalog.Catalog, sys catalog.System, prefer []catalog.ManagerKey, e catalog.AppEntry) catalog.AppEntry {
+	e.Line, e.Optional = 0, false
+	if len(e.Options) == 0 {
+		e.Options = nil
+	}
+	if e.Manager != "" && sys.OS != "" {
+		if it, ok := cat.Package(e.Name); ok {
+			var matching []catalog.MethodSpec
+			for _, m := range it.Package.Methods {
+				if m.Matches(sys) {
+					matching = append(matching, m)
+				}
+			}
+			if len(matching) > 0 && cat.Ordered(matching, sys.OS, prefer)[0].Key() == string(e.Manager) {
+				e.Manager = ""
+			}
+		}
+	}
+	return e
+}
+
+func plainSetting(e catalog.SettingEntry) catalog.SettingEntry {
+	e.Line, e.Optional = 0, false
+	if len(e.Values) == 0 {
+		e.Values = nil
+	}
+	return e
+}
+
+// value: one of the claims kept lists the name and does not mark it
+// optional.
+func requiredBy[T any](heads []claim[T], optional func(T) bool) bool {
+	return slices.ContainsFunc(heads, func(h claim[T]) bool { return !h.removed && !optional(h.entry) })
+}
+
+func differ[T any](heads []claim[T], same func(T, T) bool, line func(T) int) (first, second Said, differs bool) {
 	if len(heads) < 2 {
 		return first, second, false
 	}
-	said, line := plain(heads[0].entry)
 	for _, h := range heads[1:] {
-		e, at := plain(h.entry)
-		if h.removed != heads[0].removed || !reflect.DeepEqual(e, said) {
-			return Said{Name: heads[0].origin.Name, File: heads[0].origin.File, Line: line}, Said{Name: h.origin.Name, File: h.origin.File, Line: at}, true
+		if h.removed != heads[0].removed || !h.removed && !same(h.entry, heads[0].entry) {
+			return Said{Name: heads[0].origin.Name, File: heads[0].origin.File, Line: line(heads[0].entry)}, Said{Name: h.origin.Name, File: h.origin.File, Line: line(h.entry)}, true
 		}
 	}
 	return first, second, false
 }
 
 // invariant: a Machinefile's accounts join those of the files before it
-// in the chain (AccountsSpec.With), each program said by the file that
-// first lists it; an overlay's change them key by key (AccountsSpec.Over),
-// the one way to take a program back; a merge that cannot be read is
-// refused at the file that made it so.
+// in the chain, each program said by the file that first lists it under
+// its key. A key a file gives as an empty list (`signins: []`), and every
+// key an overlay gives, clears what the files before it gave under that
+// key, an overlay's then giving its own. A program a file lists under the
+// other key than a file it extends, or itself, moves there: the most
+// specific file's word stands. What two files of which neither extends the
+// other give it under each key stands beside, judged once on the whole
+// merge (merged.judged).
 func mergeAccounts(m *merged, a catalog.AccountsSpec, p Placed) {
-	o := originOf(p)
-	said := a
-	switch {
-	case m.accounts == nil:
-	case p.Kind == Overlay:
-		said = m.accounts.Over(a)
-	default:
-		said = m.accounts.With(a)
-	}
-	m.accounts = &said
+	o, u := originOf(p), unitOf(p)
 	for _, list := range []struct {
-		key, text string
-		names     []catalog.ProgramName
-	}{{signInKey, "signs in", a.SignIns}, {grantKey, "granted", a.Grants}} {
-		if p.Kind == Overlay && list.names != nil {
-			m.drop(strings.TrimSuffix(list.key, "."))
+		key, other, text string
+		names            []catalog.ProgramName
+	}{{signInKey, grantKey, "signs in", a.SignIns}, {grantKey, signInKey, "granted", a.Grants}} {
+		if list.names == nil {
+			continue
 		}
-		for _, n := range list.names {
-			if _, held := m.values[list.key+string(n)]; !held {
-				m.put(list.key+string(n), list.text, o)
+		if p.Kind == Overlay || len(list.names) == 0 {
+			m.drop(strings.TrimSuffix(list.key, "."))
+			for n, heads := range m.accounts {
+				m.accounts[n] = slices.DeleteFunc(heads, func(h account) bool { return h.key == list.key })
 			}
 		}
+		for _, n := range list.names {
+			heads := slices.DeleteFunc(m.accounts[n], func(h account) bool {
+				return h.key == list.other && (h.unit == u || slices.Contains(m.ancestors[u], h.unit))
+			})
+			if !slices.ContainsFunc(heads, func(h account) bool { return h.key == list.other }) {
+				m.drop(list.other + string(n))
+			}
+			if !slices.ContainsFunc(heads, func(h account) bool { return h.key == list.key }) {
+				heads = append(heads, account{unit: u, key: list.key, origin: o})
+				m.put(list.key+string(n), list.text, o)
+			}
+			m.accounts[n] = heads
+		}
 	}
-	if problem := said.Problem(); problem != "" && m.refused == nil {
-		m.refused = mergeRefused(p, "accounts", problem)
+}
+
+// invariant: a program two files of which neither extends the other give
+// under each key, one signing in to it and the other granting it, is
+// refused naming both files; the file that extends both settles it by
+// listing it under one, or its overlay by either.
+func (m merged) accountsJudged() error {
+	for _, n := range slices.Sorted(maps.Keys(m.accounts)) {
+		heads := m.accounts[n]
+		if len(heads) == 0 {
+			continue
+		}
+		if i := slices.IndexFunc(heads, func(h account) bool { return h.key != heads[0].key }); i > 0 {
+			return &SiblingConflictError{Kind: "account", Name: string(n), First: Said{Name: heads[0].origin.Name, File: heads[0].origin.File}, Second: Said{Name: heads[i].origin.Name, File: heads[i].origin.File}, Top: m.top}
+		}
 	}
+	return nil
 }
 
 // invariant: a Machinefile's ports replace those of the files it extends
@@ -639,9 +792,6 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 		return Resolved{}, &MixinError{Name: name}
 	}
 	m := merge(files)
-	if m.refused != nil {
-		return Resolved{}, m.refused
-	}
 	kind := catalog.MachineRole(m.values["machine.kind"].Text)
 	if this.Kind == catalog.RoleComputer && kind != catalog.RoleComputer {
 		return Resolved{}, &OtherKindError{Name: name, This: this.Name, Kind: string(kind)}
@@ -657,10 +807,9 @@ func Resolve(lib Library, name string, this Machine, lock Lock) (Resolved, error
 			}
 		}
 	}
-	r := Resolved{Name: name, Lock: lock, Kind: catalog.MachineRole(m.values["machine.kind"].Text)}
-	r.System = catalog.System{
-		OS: catalog.OS(m.values["machine.system.os"].Text), Version: m.values["machine.system.version"].Text,
-		Arch: catalog.Arch(m.values["machine.system.arch"].Text), Machine: r.Kind,
+	r := Resolved{Name: name, Lock: lock, Kind: catalog.MachineRole(m.values["machine.kind"].Text), System: m.said()}
+	if refused := m.judged(lib.Catalog, r.System); refused != nil {
+		return Resolved{}, refused
 	}
 	for _, f := range files {
 		r.Files = append(r.Files, originOf(f))
@@ -1200,12 +1349,16 @@ func Own(lib Library, name string) (Resolved, error) {
 	// invariant: a mixin answers the values its chain says, in the
 	// Machinefile's reading order, each app and setting listed as the
 	// strongest file lists it; none is resolved against the catalog or a
-	// system, so a refusal of a plan is never raised here.
+	// system, so a refusal of a plan is never raised here, and a refusal of
+	// the merge is, as the resolution raises it.
 	files, err := lib.chain(name, "")
 	if err != nil {
 		return Resolved{}, err
 	}
 	m := merge(files)
+	if refused := m.judged(lib.Catalog, m.said()); refused != nil {
+		return Resolved{}, refused
+	}
 	r := Resolved{Name: name}
 	for _, f := range files {
 		r.Files = append(r.Files, originOf(f))

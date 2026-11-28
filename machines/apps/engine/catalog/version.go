@@ -376,6 +376,13 @@ func (r *Range) UnmarshalText(text []byte) error {
 
 func (r Range) IsZero() bool { return r.form == RangeAny && r.text == "" }
 
+func (r Range) Same(o Range) bool {
+	// value: the two ranges let an app move as far, whatever words wrote
+	// them: `latest` is no version said, `24` is `^24.0.0`.
+	r.text, o.text = "", ""
+	return r == o
+}
+
 func HoldOf(in Install) Hold {
 	// value: what an install carries of a range to its manager: a runtime of
 	// mise's by its prefix and a package of bun's by its specifier hold any

@@ -111,7 +111,8 @@ type RunSpec struct {
 
 // value: the bounds of a phase run inside a VM (image, boot): its packages
 // carried out within their own share, then its owner's lines within
-// theirs, so the bound of the whole is the sum, and lines that run long
+// theirs, every file's of the chain within that one share together, so
+// the bound of the whole is the sum, and lines that run long
 // end as a broken run step, never as the phase cut short.
 const (
 	PackagesBound = 15 * time.Minute
@@ -296,35 +297,6 @@ func (p PortRights) Over(o PortRights) PortRights {
 			out.Audiences = PortAudiences{}
 		}
 		maps.Copy(out.Audiences, o.Audiences)
-	}
-	return out
-}
-
-func (a AccountsSpec) Over(o AccountsSpec) AccountsSpec {
-	// value: these accounts with an overlay's changed key by key: signins
-	// and grants each replace that key alone.
-	out := a
-	if o.SignIns != nil {
-		out.SignIns = o.SignIns
-	}
-	if o.Grants != nil {
-		out.Grants = o.Grants
-	}
-	return out
-}
-
-func (a AccountsSpec) With(o AccountsSpec) AccountsSpec {
-	// value: these accounts and another file's of the chain together: each
-	// program of signins and of grants once, in the order first listed.
-	return AccountsSpec{SignIns: unionOf(a.SignIns, o.SignIns), Grants: unionOf(a.Grants, o.Grants)}
-}
-
-func unionOf(have, more []ProgramName) []ProgramName {
-	out := slices.Clone(have)
-	for _, n := range more {
-		if !slices.Contains(out, n) {
-			out = append(out, n)
-		}
 	}
 	return out
 }

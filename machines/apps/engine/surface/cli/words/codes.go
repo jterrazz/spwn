@@ -826,6 +826,9 @@ func Codes() map[fail.Code]Wording {
 			if lacked := e.Detail["call"]; lacked != "" {
 				return far + " runs station " + e.Detail["version"] + ", which has no " + lacked, repair
 			}
+			if doc := e.Detail["document"]; doc != "" {
+				return far + " answered " + doc + " in another release's document, which this station cannot read", repair
+			}
 			return far + " runs station " + e.Detail["version"] + ": this station speaks only to its own release", repair
 		},
 		call.CallerTooOld: func(e *fail.Error) (string, string) {

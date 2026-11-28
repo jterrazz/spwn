@@ -122,7 +122,7 @@ func (r *Router) Invoke(ctx context.Context, target machine.Ref, name string, in
 		return r.named(t, r.labeled(t.Mac(), err))
 	}
 	if decoded := call.Decode(answer, out); decoded != nil {
-		e := fail.New(fail.Failed, call.BadOutput, name, map[string]string{"out": name})
+		e := fail.New(fail.FarTooOld, call.FarTooOld, t.Name, map[string]string{"document": name})
 		e.Cause = decoded
 		return e
 	}

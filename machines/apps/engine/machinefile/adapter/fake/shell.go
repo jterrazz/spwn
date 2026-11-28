@@ -3,6 +3,7 @@ package fake
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/jterrazz/studio-station/apps/engine/machinefile/contract"
 	"github.com/jterrazz/studio-station/apps/engine/world"
@@ -20,7 +21,7 @@ var _ contract.Shell = (*Shell)(nil)
 
 func ShellOf(w *world.World) *Shell { return &Shell{w: w} }
 
-func (s *Shell) Run(_ context.Context, lines string) (contract.ShellRun, error) {
+func (s *Shell) Run(_ context.Context, lines string, _ time.Duration) (contract.ShellRun, error) {
 	s.w.Lock()
 	defer s.w.Unlock()
 	if s.w.Fails("Shell.Run") {

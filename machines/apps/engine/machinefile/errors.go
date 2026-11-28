@@ -36,12 +36,14 @@ func (e *MixinError) Error() string {
 }
 
 // value: a chain past one of its bounds: too deep, Path the files from the
-// one resolved to the first past ChainDepth; or too many, Path the one
-// resolved alone.
+// one resolved down its longest path past ChainDepth; or too many, Path
+// the one resolved alone and Past the file that would have been one more
+// than ChainFiles.
 
 type ChainTooLongError struct {
 	Path []string
 	Deep bool
+	Past string
 }
 
 func (e *ChainTooLongError) Error() string { return e.Path[0] + "'s chain " + e.Said() }
@@ -50,7 +52,7 @@ func (e *ChainTooLongError) Said() string {
 	if e.Deep {
 		return "is more than " + strconv.Itoa(ChainDepth) + " Machinefiles deep: " + strings.Join(e.Path, " extends ")
 	}
-	return "reads more than " + strconv.Itoa(ChainFiles) + " Machinefiles"
+	return "reads more than " + strconv.Itoa(ChainFiles) + " Machinefiles: " + e.Past + " is one past them"
 }
 
 // value: a Machinefile that says something, at its file and line (none

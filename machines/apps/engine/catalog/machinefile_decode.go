@@ -154,9 +154,12 @@ func checkMachinefile(file, name string, overlay bool, doc *yaml.Node, mf Machin
 			return refused(file, doc, "vm", problem)
 		}
 	}
-	for _, e := range mf.Extends {
-		if !machinefileName.MatchString(e) || e == name {
+	for i, e := range mf.Extends {
+		switch {
+		case !machinefileName.MatchString(e) || e == name:
 			return refused(file, doc, "extends", fmt.Sprintf("extends %q, which is no other Machinefile's name", e))
+		case slices.Contains(mf.Extends[:i], e):
+			return refused(file, doc, "extends", "extends "+e+" twice")
 		}
 	}
 	if problem := checkPrefer(mf.Prefer); problem != "" {

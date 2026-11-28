@@ -11,7 +11,7 @@ runs:
       stdin: |
           machinefile: station.machinefile/v1
           name: data-kit
-          apps: [{ name: jq, optional: true }]
+          apps: [{ name: jq, version: '1.7' }]
       exit: 0
     - command: 'world edit linux-1 machinefiles/linux-1.machine.yaml'
       stdin: |
