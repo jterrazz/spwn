@@ -60,6 +60,38 @@ func TestASwapReadsTheFileAgainJustBeforeItsRename(t *testing.T) {
 	}
 }
 
+func TestASwapOfAFileSeenNotThereLandsOnlyWhereNoNameIsThere(t *testing.T) {
+	dir, at := oldFile(t)
+	if err := os.Remove(at); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("gone", at); err != nil {
+		t.Fatal(err)
+	}
+	if err := (disk{}).Swap(at, Seen{}, []byte("new\n"), 0o600); !errors.Is(err, ErrChanged) {
+		t.Errorf("Swap = %v, want ErrChanged for a name made there since, which a read finds nothing behind", err)
+	}
+	if to, err := os.Readlink(at); err != nil || to != "gone" {
+		t.Errorf("the name there is now %q, %v; want the other writer's link", to, err)
+	}
+	if left := names(t, dir); !slices.Equal(left, []string{".zshrc"}) {
+		t.Errorf("left %v beside the file", left)
+	}
+	if err := os.Remove(at); err != nil {
+		t.Fatal(err)
+	}
+	if err := (disk{}).Swap(at, Seen{}, []byte("new\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	info, err := os.Lstat(at)
+	if data, _ := os.ReadFile(at); err != nil || string(data) != "new\n" || info.Mode().Perm() != 0o600 || !info.Mode().IsRegular() {
+		t.Errorf("made %q, %v, %v; want the new file, 0600", data, info, err)
+	}
+	if left := names(t, dir); !slices.Equal(left, []string{".zshrc"}) {
+		t.Errorf("left %v beside the file", left)
+	}
+}
+
 func TestASwapInAFolderStationMayNotWriteInRefusesAndNeverOverwrites(t *testing.T) {
 	if os.Geteuid() == 0 {
 		t.Skip("root writes in any folder")
