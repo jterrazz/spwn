@@ -194,7 +194,7 @@ func (a *Applier) undoMerge(r *record, setting string, c catalog.Copy) ([]settin
 	step := settings.ChangeStep{Label: c.To, State: catalog.StateOK, Detail: "taken back"}
 	switch out := encoded(tree, data, true); {
 	case w.Made && len(tree.keys) == 0 && a.direct(c.To):
-		if err := a.unmake(w, at); err != nil {
+		if err := a.unmake(w, at, data); err != nil {
 			return nil, err
 		}
 		step.Detail = "removed"
@@ -351,7 +351,7 @@ func (a *Applier) undoBlock(r *record, setting string, c catalog.Copy) ([]settin
 	after, _ := textblock.Remove(text, id)
 	step := settings.ChangeStep{Label: label, State: catalog.StateOK, Detail: "removed"}
 	if w.Made && after == "" && a.direct(c.To) {
-		err = a.unmake(w, at)
+		err = a.unmake(w, at, data)
 	} else {
 		err = a.files.Swap(at, seenAs(data, true), []byte(after), 0o600)
 	}

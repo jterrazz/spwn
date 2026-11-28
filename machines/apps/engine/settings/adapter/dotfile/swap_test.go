@@ -89,6 +89,46 @@ func TestAFileAnotherWriterKeepsChangingIsRefusedAfterThreeTries(t *testing.T) {
 	}
 }
 
+// value: the bench's disk with another writer that writes the file once,
+// right after Machines read it.
+type writerAfterRead struct {
+	disk
+	file, theirs string
+	wrote        *bool
+}
+
+func (w writerAfterRead) ReadFile(p string) ([]byte, error) {
+	data, err := w.disk.ReadFile(p)
+	if p == w.file && !*w.wrote {
+		*w.wrote = true
+		if werr := os.WriteFile(p, []byte(w.theirs), 0o600); werr != nil {
+			return nil, werr
+		}
+	}
+	return data, err
+}
+
+func TestOffNeverRemovesAFileItMadeThatAnotherWriterChangedAfterItsRead(t *testing.T) {
+	for _, mode := range []catalog.WriteMode{catalog.WriteMerge, catalog.WriteBlock} {
+		t.Run(string(mode), func(t *testing.T) {
+			frag, to, theirs, want := `{"a": 1}`, ".x.json", "{\n  \"a\": 1,\n  \"editor\": 1\n}\n", "{\n  \"editor\": 1\n}\n"
+			if mode == catalog.WriteBlock {
+				frag, to = "set a 1\n", ".x.conf"
+				theirs = "# >>> station setting:fmt >>>\nset a 1\n# <<< station setting:fmt <<<\nset editor 1\n"
+				want = "set editor 1\n"
+			}
+			b := newBench(t, mode, frag, to)
+			b.apply()
+			wrote := false
+			b.over(writerAfterRead{disk: b.files, file: b.file, theirs: theirs, wrote: &wrote}, b.ours)
+			b.off()
+			if got := b.read(); !wrote || got != want {
+				t.Errorf("off left %q; want the other writer's key, with nothing of Machines' left in it, %q", got, want)
+			}
+		})
+	}
+}
+
 // value: the bench's disk whose lock another run holds: each wait ends as
 // a wait that ran out, and says when it was to end.
 type heldLock struct {

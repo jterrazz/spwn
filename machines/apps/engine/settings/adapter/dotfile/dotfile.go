@@ -424,7 +424,7 @@ func (a *Applier) direct(to string) bool {
 
 // value: a file Machines made, and the folders it made for it, removed
 // once nothing of the owner's is in them.
-func (a *Applier) unmake(w written, at string) error {
+func (a *Applier) unmake(w written, at string, seen []byte) error {
 	// invariant: the record says which folders Machines made, and only one
 	// that holds the file, inside the real home and not the home itself, is
 	// taken at its word: any other the record names is left.
@@ -432,8 +432,20 @@ func (a *Applier) unmake(w written, at string) error {
 	if err != nil {
 		return err
 	}
-	if err := a.files.Remove(at); err != nil && !errors.Is(err, fs.ErrNotExist) {
+	// invariant: the file is read again just before it is removed, and one
+	// that no longer holds what the step read is left (local.ErrChanged), so
+	// swapped judges it again: off never removes another writer's change.
+	now, err := a.files.ReadFile(at)
+	switch {
+	case errors.Is(err, fs.ErrNotExist):
+	case err != nil:
 		return err
+	case !bytes.Equal(now, seen):
+		return local.ErrChanged
+	default:
+		if err := a.files.Remove(at); err != nil && !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
 	}
 	for _, dir := range w.Folders {
 		if !strings.HasPrefix(at, dir+"/") || !strings.HasPrefix(dir, home+"/") {
